@@ -327,7 +327,7 @@ var VERBA = (D.verba||[]).map(function(r){
           saldo:(r[2]||0)-(r[7]||0)};
 });
 var SUGF = (D.sugfornec||[]).map(function(r){
-  return {cod:r[0], nome:r[1], comp:r[2], giro:r[3], disp:r[4], sug:r[5], valor:r[6], valorPbi:r[7]};
+  return {cod:r[0], nome:r[1], comp:r[2], giro:r[3], disp:r[4], sug:r[5], valor:r[6]};
 });
 var EXC = (D.excesso||[]).map(function(r){
   return {codprod:r[0], desc:r[1], fornec:r[2], comp:r[3], giro:r[4], disp:r[5],
@@ -394,7 +394,20 @@ function lerCor(nome){
 var semMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var revealObs = (!semMovimento && "IntersectionObserver" in window) ? new IntersectionObserver(function(entradas){
   entradas.forEach(function(en){
-    if(en.isIntersecting){ en.target.classList.add("in-view"); revealObs.unobserve(en.target); }
+    if(!en.isIntersecting) return;
+    var t = en.target;
+    t.classList.add("in-view");
+    revealObs.unobserve(t);
+    /* assim que a entrada termina, tira as classes de revelacao — o
+       elemento volta a usar so a transicao de hover propria dele
+       (ex.: .kpi, .rank-row), sem a transicao mais longa do reveal
+       ficar competindo com o hover depois disso. */
+    t.addEventListener("transitionend", function limpar(ev){
+      if(ev.target!==t || ev.propertyName!=="opacity") return;
+      t.classList.remove("reveal","in-view");
+      t.style.transitionDelay = "";
+      t.removeEventListener("transitionend", limpar);
+    });
   });
 }, {threshold:.12, rootMargin:"0px 0px -40px 0px"}) : null;
 function revelar(elemento, atraso){
@@ -780,6 +793,13 @@ Tabela.prototype.desenhar = function(){
 
 /* barra de filtro por comprador, reutilizada nas paginas */
 function filtroComprador(destino, estado, aoMudar, extras){
+  /* a barra inteira e reconstruida a cada render() (inclusive a cada tecla
+     digitada na busca); sem isso o campo de busca perderia o foco e o
+     cursor a cada letra, porque o <input> antigo e destruido e um novo
+     e criado no lugar. */
+  var focoAtivo = destino.contains(document.activeElement) ? document.activeElement : null;
+  var focoSelIni = focoAtivo && "selectionStart" in focoAtivo ? focoAtivo.selectionStart : null;
+  var focoSelFim = focoAtivo && "selectionEnd" in focoAtivo ? focoAtivo.selectionEnd : null;
   destino.innerHTML = "";
   var g = el("div","filter-group");
   g.appendChild(el("span","filter-label","Comprador"));
@@ -801,6 +821,13 @@ function filtroComprador(destino, estado, aoMudar, extras){
   });
   destino.appendChild(g);
   (extras||[]).forEach(function(e){ destino.appendChild(e); });
+  if(focoAtivo && focoAtivo.tagName === "INPUT"){
+    var novoInput = destino.querySelector("input[type=text]");
+    if(novoInput){
+      novoInput.focus();
+      if(focoSelIni!=null){ try{ novoInput.setSelectionRange(focoSelIni, focoSelFim); }catch(e){} }
+    }
+  }
 }
 function grupoChips(rotulo, opcoes, atual, aoEscolher){
   var g = el("div","filter-group");
@@ -958,7 +985,7 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
         {label:"Total de itens", valor:fInt(total), cor:"ink", sub:"Produtos de revenda na carga atual."},
         {label:"Itens c/ ruptura", valor:fInt(rup), cor:"crit", sub:"Menos de 7 dias de venda em estoque."},
         {label:"Verba", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação por fornecedor principal.",
-         info:"Vem da consulta de saldo de verba (Consulta3/SALDOMOV), que é a fonte oficial do BI original."},
+         info:"Vem da consulta oficial de saldo de verba (Consulta3/SALDOMOV)."},
         {label:"Cobertura excesso", valor:fInt(exc), cor:"warn", sub:"Estoque acima de 56 dias de venda."},
         {label:"% excesso estoque", valor:fPct(total?exc/total:0), cor:"warn", sub:"Sobre os itens filtrados."},
         {label:"% ruptura", valor:fPct(total?rup/total:0), cor:"crit", sub:"Sobre os itens filtrados."}
@@ -1040,7 +1067,7 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
    PÁGINA 02 — SALDO VERBA X AVARIA
    ========================================================================= */
 pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria acumulada",
-  "Para cada fornecedor principal, a verba é o saldo de movimentação de crédito e a avaria é o valor do estoque indenizado. O saldo é a diferença: quando fica negativo, a avaria já consumiu toda a verba negociada com aquele fornecedor. <strong>A avaria aqui soma todas as filiais</strong>, diferente da página Compras — é o mesmo comportamento do Power BI original, onde o filtro de filial dessa consulta está comentado e nunca executa.",
+  "Para cada fornecedor principal, a verba é o saldo de movimentação de crédito e a avaria é o valor do estoque indenizado. O saldo é a diferença: quando fica negativo, a avaria já consumiu toda a verba negociada com aquele fornecedor. <strong>A avaria aqui soma todas as filiais</strong>, diferente da página Compras, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado.",
   function(raiz){
     var estado = {comps:todosComps(), situacao:"todos", busca:""};
     var barra = el("div","filters"); raiz.appendChild(barra);
@@ -1099,7 +1126,7 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
 
       montarKpis(kpis,[
         {label:"Verba total", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação de crédito com fornecedores."},
-        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Todas as filiais, como no BI original."},
+        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Considera todas as filiais."},
         {label:"Saldo líquido", valor:fR$(verba-avaria), cor:(verba-avaria)>=0?"good":"crit", sub:"Verba menos avaria."},
         {label:"Fornecedores no vermelho", valor:fInt(negativos.length), cor:"crit",
          sub:"Avaria já maior que a verba — "+fPct(lista.length?negativos.length/lista.length:0)+" do total."},
@@ -1248,13 +1275,13 @@ pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertur
    PÁGINA 04 — SUGESTÃO FORNECEDOR X PRODUTO
    ========================================================================= */
 pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por fornecedor e por produto",
-  "Sugestão de compra para 30 dias, a partir do giro cadastrado no WinThor contra o estoque disponível. <strong>O cálculo do Power BI está errado nesta consulta</strong>: ele multiplica a soma da sugestão de todos os produtos do fornecedor pelo preço do produto mais caro. O painel mostra as duas colunas lado a lado para você comparar antes de confiar no número.",
+  "Sugestão de compra para 30 dias, a partir do giro cadastrado no WinThor contra o estoque disponível. <strong>Cada produto é avaliado ao seu próprio preço de venda</strong>, e a sugestão do fornecedor soma o valor de cada item da sua carteira individualmente.",
   function(raiz){
     var estado = {comps:todosComps(), visao:"fornecedor", busca:""};
     var barra = el("div","filters"); raiz.appendChild(barra);
     var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
 
-    var cRank = cartao("Maiores sugestões","Pelo cálculo corrigido — cada produto avaliado ao seu próprio preço.");
+    var cRank = cartao("Maiores sugestões","Cada produto avaliado ao seu próprio preço de venda.");
     var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
 
     var cTab = cartao("Detalhe","");
@@ -1269,8 +1296,7 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,2); }},
         {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
         {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt},
-        {titulo:"Valor corrigido", campo:"valor", num:true, fmt:fR$},
-        {titulo:"Valor no Power BI", campo:"valorPbi", num:true, fmt:fR$, corTexto:function(){ return cor("muted"); }}
+        {titulo:"Valor sugerido", campo:"valor", num:true, fmt:fR$}
       ]
     });
     var tabProd = new Tabela(boxTab,{
@@ -1292,7 +1318,10 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
     function render(){
       var porFornec = SUGF.filter(function(f){
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(f.comp)) return false;
-        if(estado.busca && String(f.nome).toLowerCase().indexOf(estado.busca)===-1) return false;
+        if(estado.busca){
+          var h = (f.nome+" "+f.cod).toLowerCase();
+          if(h.indexOf(estado.busca)===-1) return false;
+        }
         return true;
       });
       var porProd = SUGP.filter(function(p){
@@ -1304,7 +1333,6 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         return true;
       });
       var vCorrigido = porFornec.reduce(function(s,f){ return s+(f.valor||0); },0);
-      var vPbi = porFornec.reduce(function(s,f){ return s+(f.valorPbi||0); },0);
       var vProd = porProd.reduce(function(s,p){ return s+(p.valor||0); },0);
 
       filtroComprador(barra, estado, function(){ render(); }, [
@@ -1317,13 +1345,8 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
       ]);
 
       montarKpis(kpis,[
-        {label:"Valor sugerido (correto)", valor:fCurto(vCorrigido), cor:"good",
+        {label:"Valor sugerido", valor:fCurto(vCorrigido), cor:"good",
          sub:"Cada produto avaliado ao seu próprio preço."},
-        {label:"Valor no Power BI", valor:fCurto(vPbi), cor:"crit",
-         sub:"Soma da sugestão × preço do produto mais caro.",
-         info:"Cálculo original do BI. Superestima porque aplica o preço do item mais caro do fornecedor a toda a sugestão."},
-        {label:"Diferença", valor:fCurto(vPbi-vCorrigido), cor:"warn",
-         sub:vCorrigido ? (fNum(vPbi/vCorrigido,1)+"x maior que o valor real") : "—"},
         {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias."},
         {label:"Produtos (30 dias)", valor:fInt(porProd.length), cor:"ink", sub:"Filiais 1, 7 e 12."},
         {label:"Valor por produto", valor:fCurto(vProd), cor:"blue",
@@ -1432,7 +1455,7 @@ pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro 
    PÁGINA 06 — PERFORMANCE COMPRAS
    ========================================================================= */
 pagina("performance","06","Performance compras","Resultado de venda por comprador e fornecedor",
-  "Venda (sell-out) desde janeiro de 2021, aberta por comprador, fornecedor, departamento e supervisor. Venda é quantidade × (preço − ST) nos pedidos de venda normal; a margem é o lucro sobre a venda. <strong>A margem foi corrigida em relação ao Power BI</strong>, que protegia a divisão comparando a venda com 100 em vez de zero.",
+  "Venda (sell-out) desde janeiro de 2021, aberta por comprador, fornecedor, departamento e supervisor. Venda é quantidade × (preço − ST) nos pedidos de venda normal; a margem é o lucro sobre a venda. <strong>A divisão da margem é protegida contra venda zero</strong>, evitando distorções no cálculo.",
   function(raiz){
     var estado = {periodo:"12m", corte:"comprador"};
     var barra = el("div","filters"); raiz.appendChild(barra);
@@ -1712,9 +1735,9 @@ function blocoNotas(){
    "<strong>Origem:</strong> todas as páginas leem o projeto DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor. As consultas rápidas rodam 4x ao dia; o faturamento, 1x por dia de madrugada.",
    "<strong>Verba:</strong> o cartão de verba da página Compras agora usa a consulta oficial de saldo de verba (Consulta3/SALDOMOV). Nas primeiras versões deste painel ele somava a coluna de verba da própria consulta de ruptura, que é por fornecedor principal — o valor saía cerca do dobro do real.",
    "<strong>Status ATIVO/FORALINHA:</strong> a coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Até corrigirmos a origem, quem não é explicitamente FORALINHA é tratado como ativo.",
-   "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8. Na página Saldo verba x avaria ela soma todas as filiais, porque a consulta de origem do Power BI tem o filtro de filial comentado e depois do GROUP BY — nunca executa. Mantivemos o comportamento original para os números baterem com o BI atual.",
-   "<strong>Sugestão por fornecedor:</strong> o Power BI multiplica a soma da sugestão de todos os produtos pelo preço do produto mais caro do fornecedor. O painel mostra esse valor e o cálculo correto lado a lado.",
-   "<strong>Margem do faturamento:</strong> corrigida. O original protegia a divisão comparando a venda com 100 em vez de zero, o que é claramente um resquício de teste.",
+   "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8. Na página Saldo verba x avaria ela soma todas as filiais, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado.",
+   "<strong>Sugestão por fornecedor:</strong> cada produto da carteira do fornecedor é avaliado ao seu próprio preço de venda, e a sugestão soma o valor de cada item individualmente.",
+   "<strong>Margem do faturamento:</strong> a divisão é protegida contra venda zero, evitando distorções no cálculo quando não há venda no período.",
    "<strong>Atualização:</strong> esta página guarda uma fotografia dos dados do momento em que foi publicada. Os números do banco continuam sendo atualizados pelo pipeline; peça uma republicação quando quiser a foto mais recente."
   ].forEach(function(t){ var li = document.createElement("li"); li.innerHTML = t; ul.appendChild(li); });
   d.appendChild(ul);
@@ -1754,8 +1777,21 @@ function abrir(id){
       pg.container.appendChild(cabecalho(pg));
       renders[pg.id] = pg.montar(pg.container);
       pg.pronta = true;
+      /* revela em blocos (cartoes, barra de filtro) e, dentro de cada
+         grade de KPI/ranking, revela cada numero individualmente — assim
+         os dados aparecem aos poucos conforme a pagina rola pra dentro
+         da tela, em vez de tudo de uma vez. */
       Array.prototype.forEach.call(pg.container.children, function(filho, i){
-        revelar(filho, Math.min(i*70, 420));
+        if(filho.classList.contains("kpi-grid")){
+          Array.prototype.forEach.call(filho.children, function(kpi, j){
+            revelar(kpi, Math.min(j*45, 380));
+          });
+        } else {
+          revelar(filho, Math.min(i*70, 420));
+          Array.prototype.forEach.call(filho.querySelectorAll(".rank-row"), function(linha, j){
+            revelar(linha, Math.min(j*35, 350));
+          });
+        }
       });
     }
   });
