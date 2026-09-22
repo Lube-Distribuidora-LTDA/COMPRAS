@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Central Comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A1A; --bg2:#0A1130; --veil:rgba(8,13,36,.72);
+    --surface:rgba(255,255,255,.045); --surface2:rgba(255,255,255,.075); --surface3:rgba(255,255,255,.11);
+    --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.20);
+    --ink:#EEF1FF; --ink2:#AEB6DA; --muted:#8A93BB;
+    --blue:#5B7BFF; --blue2:#8AA0FF; --red:#FF4D57; --gold:#D9B678;
+    --good:#3FD08A; --good-soft:rgba(63,208,138,.14);
+    --warn:#EDB753; --warn-soft:rgba(237,183,83,.14);
+    --crit:#FF4D57; --crit-soft:rgba(255,77,87,.14);
+    --muted-soft:rgba(138,147,187,.16);
+    --shadow:0 30px 70px -40px rgba(0,0,0,.9);
+    --grid:rgba(255,255,255,.09);
+  }
+  :root[data-theme="light"]{
+    --bg:#EFF1F7; --bg2:#FFFFFF; --veil:rgba(255,255,255,.75);
+    --surface:#FFFFFF; --surface2:#F4F6FC; --surface3:#E7EAF5;
+    --line:rgba(12,20,60,.11); --line2:rgba(12,20,60,.22);
+    --ink:#0B1233; --ink2:#3C4570; --muted:#6B7499;
+    --blue:#1B2A8C; --blue2:#3F53C4; --red:#D3121C; --gold:#A4801F;
+    --good:#0E8F58; --good-soft:rgba(14,143,88,.12);
+    --warn:#8F6205; --warn-soft:rgba(143,98,5,.12);
+    --crit:#D3121C; --crit-soft:rgba(211,18,28,.10);
+    --muted-soft:rgba(107,116,153,.12);
+    --shadow:0 20px 44px -30px rgba(12,20,60,.45);
+    --grid:rgba(12,20,60,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(1200px 620px at 78% -8%, color-mix(in oklch, var(--blue) 26%, transparent), transparent 70%),
+      radial-gradient(900px 480px at 2% 0%, color-mix(in oklch, var(--red) 12%, transparent), transparent 68%);
+    color:var(--ink); font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--blue);color:#fff;}
+  .num{font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+  h1,h2,h3{font-family:"Bricolage Grotesque", sans-serif; margin:0; text-wrap:balance;}
+  @keyframes lubeRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes lubePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.82);}}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:20px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .wrap{max-width:1720px; margin:0 auto; padding:0 clamp(16px,2.4vw,34px) 56px;}
+
+  header{position:sticky; top:0; z-index:40; backdrop-filter:blur(18px); background:var(--veil); border-bottom:1px solid var(--line);}
+  .header-top{max-width:1720px; margin:0 auto; padding:14px clamp(16px,2.4vw,34px); display:flex; align-items:center; gap:22px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:16px;}
+  .logo-badge{background:#fff; border-radius:12px; padding:9px 13px; box-shadow:0 10px 26px -14px rgba(0,0,0,.55); display:flex; align-items:center;}
+  .logo-badge img{height:30px; width:auto; display:block;}
+  .brand-div{width:1px; height:38px; background:linear-gradient(180deg,transparent,var(--line2),transparent);}
+  .brand-eyebrow{font:700 10px/1 Barlow; letter-spacing:.2em; text-transform:uppercase; color:var(--gold);}
+  .brand-title{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:19px; letter-spacing:-.01em; margin-top:5px;}
+  .header-actions{margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .sync-pill{display:flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line); border-radius:100px; background:var(--surface);}
+  .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--good); animation:lubePulse 2.6s ease-in-out infinite; display:inline-block;}
+  .sync-pill .txt{font-size:12px; color:var(--ink2);}
+  .sync-pill strong{color:var(--ink); font-family:"JetBrains Mono",monospace; font-weight:500;}
+  .source-badge{padding:6px 12px; border-radius:100px; border:1px dashed var(--gold); font:700 10.5px/1.6 Barlow; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); white-space:nowrap;}
+  .theme-toggle{display:flex; border:1px solid var(--line); border-radius:100px; overflow:hidden; background:var(--surface);}
+  .theme-toggle button{border:0; cursor:pointer; font:600 12px Barlow; padding:7px 14px; background:transparent; color:var(--ink2);}
+  .theme-toggle button.active{background:var(--blue); color:#fff;}
+
+  nav.tabs{max-width:1720px; margin:0 auto; padding:0 clamp(16px,2.4vw,34px); display:flex; gap:2px; flex-wrap:wrap;}
+  nav.tabs button{border:0; background:transparent; cursor:pointer; padding:11px 14px 13px; display:flex; align-items:center; gap:8px; border-bottom:2px solid transparent; color:var(--muted); font:600 13px Barlow;}
+  nav.tabs button .tnum{font-family:"JetBrains Mono",monospace; font-size:10.5px; color:var(--muted);}
+  nav.tabs button.active{color:var(--ink); border-bottom-color:var(--blue);}
+  nav.tabs button.active .tnum{color:var(--blue);}
+  nav.tabs button:not(.active):hover{color:var(--ink);}
+
+  main{padding-top:26px; display:flex; flex-direction:column; gap:20px;}
+  .pagina{display:none; flex-direction:column; gap:20px;}
+  .pagina.ativa{display:flex; animation:lubeRise .45s ease both;}
+  .module-eyebrow{font:700 10.5px/1 Barlow; letter-spacing:.2em; text-transform:uppercase; color:var(--gold);}
+  .module-title{margin:8px 0 0; font-size:clamp(22px,2.4vw,30px); font-weight:700; letter-spacing:-.02em;}
+  .module-desc{margin:7px 0 0; max-width:86ch; font-size:13.5px; color:var(--ink2); line-height:1.6;}
+  .module-desc strong{color:var(--ink);}
+
+  .filters{border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:var(--shadow); padding:14px 16px; display:flex; flex-wrap:wrap; gap:14px; align-items:center;}
+  .filter-group{display:flex; align-items:center; gap:7px; flex-wrap:wrap;}
+  .filter-label{font:700 10px Barlow; letter-spacing:.13em; text-transform:uppercase; color:var(--muted);}
+  .chip{cursor:pointer; border:1px solid var(--line); background:var(--surface2); color:var(--ink2); font:600 12px Barlow; padding:6px 12px; border-radius:100px; white-space:nowrap; transition:background .15s,color .15s,border-color .15s;}
+  .chip:hover{border-color:var(--line2);}
+  .chip.on{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .chip.tone-crit.on{background:var(--crit); border-color:var(--crit); color:#fff;}
+  .chip.tone-warn.on{background:var(--warn); border-color:var(--warn); color:#241900;}
+  .chip.tone-good.on{background:var(--good); border-color:var(--good); color:#04170e;}
+  .search-block{margin-left:auto; display:flex; gap:8px; align-items:center; flex:1 1 240px; min-width:200px;}
+  .search-block input{flex:1 1 auto; min-width:0; padding:9px 13px; border-radius:10px; border:1px solid var(--line); background:var(--surface2); color:var(--ink); font:400 13px Barlow; outline:none;}
+  .search-block input:focus{border-color:var(--blue);}
+  .clear-btn{cursor:pointer; border:1px solid var(--line); background:var(--surface2); color:var(--ink2); font:600 12px Barlow; padding:9px 13px; border-radius:10px; white-space:nowrap;}
+  .clear-btn:hover{color:var(--ink); border-color:var(--line2);}
+
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:12px;}
+  .kpi{position:relative; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:var(--shadow); padding:15px 17px 14px; display:flex; flex-direction:column; gap:6px;}
+  .kpi-bar{position:absolute; left:0; top:15px; bottom:15px; width:3px; border-radius:0 3px 3px 0;}
+  .kpi-label{font:700 10px/1 Barlow; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:6px;}
+  .kpi-value{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:23px; letter-spacing:-.02em;}
+  .kpi-sub{font-size:11.5px; line-height:1.45; color:var(--ink2);}
+  .info-dot{width:13px; height:13px; border-radius:50%; border:1px solid var(--line2); color:var(--muted); font-size:9.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; cursor:default; position:relative;}
+  .info-dot .tip{display:none; position:absolute; bottom:19px; left:50%; transform:translateX(-50%); width:230px; background:var(--ink); color:var(--bg); font-size:11px; font-weight:500; line-height:1.4; padding:8px 10px; border-radius:8px; text-transform:none; letter-spacing:0; z-index:9; box-shadow:var(--shadow);}
+  .info-dot:hover .tip, .info-dot:focus .tip{display:block;}
+
+  section.card{border:1px solid var(--line); border-radius:20px; background:var(--surface); box-shadow:var(--shadow); padding:22px 24px;}
+  .card-title{font-size:16.5px; font-weight:700;}
+  .card-note{font-size:12.5px; color:var(--muted); margin:5px 0 0;}
+  .row-2col{display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:18px;}
+
+  /* donut */
+  .donut-wrap{display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-top:14px;}
+  .donut-svg-box{position:relative; width:150px; height:150px; flex:0 0 auto;}
+  .donut-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .donut-pct{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:26px; letter-spacing:-.02em;}
+  .donut-pct-label{font:700 9px/1 Barlow; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-top:4px;}
+  .donut-legend{flex:1 1 150px; min-width:140px; display:flex; flex-direction:column; gap:11px;}
+  .legend-row{display:flex; align-items:center; gap:9px; font-size:13px;}
+  .legend-swatch{width:10px; height:10px; border-radius:3px; flex:0 0 auto;}
+  .legend-row .lbl{color:var(--ink2);}
+  .legend-row .val{margin-left:auto; font-family:"JetBrains Mono",monospace; font-size:12.5px;}
+  .donut-reading{margin:6px 0 0; font-size:12px; line-height:1.5; color:var(--muted);}
+
+  /* ranking em barras */
+  .rank{display:flex; flex-direction:column; gap:9px; margin-top:16px;}
+  .rank-row{display:grid; grid-template-columns:minmax(120px,26%) 1fr auto; gap:12px; align-items:center; font-size:12.5px;}
+  .rank-nome{color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .rank-trilho{height:14px; background:var(--surface3); border-radius:4px; overflow:hidden; display:flex;}
+  .rank-barra{height:100%; border-radius:0 4px 4px 0;}
+  .rank-val{font-family:"JetBrains Mono",monospace; font-size:12px; text-align:right; white-space:nowrap;}
+
+  /* grafico de colunas */
+  .chart-box{margin-top:16px; width:100%; overflow-x:auto;}
+  .chart-box svg{display:block;}
+  .chart-legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--ink2);}
+  .chart-legend span.key{display:inline-flex; align-items:center; gap:7px;}
+  .chart-legend i{width:14px; height:3px; border-radius:2px; display:inline-block;}
+  .chart-legend i.sq{width:11px; height:11px; border-radius:3px;}
+
+  /* tabelas */
+  .table-scroll{overflow-x:auto; margin-top:14px; border:1px solid var(--line); border-radius:14px;}
+  table.dados{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.dados thead th{position:sticky; top:0; text-align:left; font:700 10px Barlow; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:11px 12px; border-bottom:1px solid var(--line); background:var(--surface2); white-space:nowrap; cursor:pointer; user-select:none;}
+  table.dados thead th.num{text-align:right;}
+  table.dados thead th:hover{color:var(--ink);}
+  table.dados thead th .arrow{opacity:.4; margin-left:3px; font-size:10px;}
+  table.dados thead th.sorted .arrow{opacity:1; color:var(--blue);}
+  table.dados tbody td{padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap;}
+  table.dados tbody td.num{text-align:right; font-family:"JetBrains Mono",monospace; font-size:12px;}
+  table.dados tbody tr:nth-child(even){background:color-mix(in oklch, var(--surface2) 55%, transparent);}
+  table.dados tbody tr:hover{background:var(--surface3);}
+  td.trunc{max-width:280px; overflow:hidden; text-overflow:ellipsis;}
+  td.mono-muted{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--muted);}
+  .pill{font:700 10.5px Barlow; letter-spacing:.06em; padding:3px 8px; border-radius:100px; white-space:nowrap; display:inline-block;}
+  .pill.good{background:var(--good-soft); color:var(--good);}
+  .pill.warn{background:var(--warn-soft); color:var(--warn);}
+  .pill.crit{background:var(--crit-soft); color:var(--crit);}
+  .pill.neutro{background:var(--muted-soft); color:var(--ink2);}
+  .table-footer{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px;}
+  .table-footer .info{font-size:12.5px; color:var(--ink2);}
+  .pager{display:flex; gap:6px;}
+  .pager button{cursor:pointer; border:1px solid var(--line); background:var(--surface2); color:var(--ink); font:600 12px "JetBrains Mono",monospace; padding:7px 13px; border-radius:9px;}
+  .pager button:hover:not(:disabled){border-color:var(--line2);}
+  .pager button:disabled{opacity:.35; cursor:default; color:var(--muted);}
+
+  details.notas summary{cursor:pointer; font-size:16.5px; font-weight:700; font-family:"Bricolage Grotesque",sans-serif; list-style:none; display:flex; align-items:center; gap:8px;}
+  details.notas summary::-webkit-details-marker{display:none;}
+  details.notas summary::before{content:"›"; display:inline-block; font-size:18px; color:var(--gold); transition:transform .15s;}
+  details.notas[open] summary::before{transform:rotate(90deg);}
+  details.notas ul{margin:14px 0 0; padding-left:18px; font-size:12.5px; color:var(--ink2); line-height:1.65;}
+  details.notas li{margin-bottom:8px;}
+  details.notas code{background:var(--surface2); padding:1px 5px; border-radius:4px; font-size:11.5px; font-family:"JetBrains Mono",monospace; color:var(--ink);}
+  details.notas strong{color:var(--ink);}
+  .foot-meta{margin-top:6px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+<style>
+  #carregando{position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:18px; background:var(--bg); z-index:100; text-align:center; padding:24px;}
+  #carregando .marca{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:20px; color:var(--ink);}
+  #carregando .dizer{font-size:13.5px; color:var(--ink2); max-width:46ch; line-height:1.6;}
+  #carregando .barra{width:220px; height:4px; border-radius:100px; background:var(--surface3); overflow:hidden;}
+  #carregando .barra i{display:block; height:100%; width:40%; border-radius:100px; background:var(--blue);
+    animation:vaiEVem 1.15s ease-in-out infinite;}
+  @keyframes vaiEVem{0%{transform:translateX(-100%);}100%{transform:translateX(350%);}}
+  #carregando.falhou .barra{display:none;}
+  #carregando .erro{border:1px solid var(--crit); background:var(--crit-soft); color:var(--ink);
+    border-radius:14px; padding:16px 18px; max-width:62ch; font-size:13px; line-height:1.6; text-align:left;}
+  #carregando .erro code{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--ink2);
+    display:block; margin-top:10px; word-break:break-word;}
+  #raiz[hidden]{display:none;}
+</style>
+
+</head>
+<body>
+
+<div id="carregando">
+  <div class="marca">Central Comercial</div>
+  <div class="barra"><i></i></div>
+  <div class="dizer" id="carregandoTexto">Lendo o DATA WAREHOUSE…</div>
+</div>
+<div id="raiz" data-theme="dark" style="min-height:100vh;">
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <div class="logo-badge"><img src="logo-lube.png" alt="Lube Distribuidora"></div>
+        <div class="brand-div"></div>
+        <div>
+          <div class="brand-eyebrow">Business Intelligence</div>
+          <div class="brand-title">Central Comercial</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="sync-pill">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span class="txt">Última carga <strong id="lastSync">—</strong></span>
+        </div>
+        <div class="source-badge">Compras · WinThor/Oracle</div>
+        <div class="theme-toggle" role="group" aria-label="Tema">
+          <button type="button" data-theme-btn="dark" class="active">Escuro</button>
+          <button type="button" data-theme-btn="light">Claro</button>
+        </div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </header>
+  <div class="wrap"><main id="main"></main></div>
+</div>
+
+<script>
+function iniciarPainel(){
+
+"use strict";
+
+var D = window.BI || {};
+var COMPRADORES = D.compradores || {};
+var FORNEC = D.fornecedores || {};
+
+/* ---------------- formatadores ---------------- */
+var fInt = function(n){ return Math.round(n||0).toLocaleString("pt-BR"); };
+var fNum = function(n,d){ return (n==null) ? "—" : Number(n).toLocaleString("pt-BR",{maximumFractionDigits:d==null?2:d}); };
+var fR$  = function(n){ return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}); };
+var fR$2 = function(n){ return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); };
+var fPct = function(n){ return (n==null) ? "—" : (n*100).toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"; };
+function fCurto(n){
+  var a = Math.abs(n||0);
+  if(a >= 1e9) return "R$ "+ (n/1e9).toLocaleString("pt-BR",{maximumFractionDigits:2}) +" bi";
+  if(a >= 1e6) return "R$ "+ (n/1e6).toLocaleString("pt-BR",{maximumFractionDigits:1}) +" mi";
+  if(a >= 1e3) return "R$ "+ (n/1e3).toLocaleString("pt-BR",{maximumFractionDigits:0}) +" mil";
+  return fR$(n);
+}
+var MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+function rotuloMes(m){ var p=m.split("-"); return MESES[+p[1]-1]+"/"+p[0].slice(2); }
+function nomeComprador(c){ return COMPRADORES[c] || COMPRADORES[String(c)] || "—"; }
+/* Nome curto para os chips: usa só o primeiro nome, mas quando dois
+   compradores têm o mesmo primeiro nome acrescenta a inicial do sobrenome
+   (ex.: SERGIO F. e SERGIO B.) para não ficarem indistinguíveis. */
+var CURTO = (function(){
+  var contagem = {}, mapa = {};
+  Object.keys(COMPRADORES).forEach(function(k){
+    var p = String(COMPRADORES[k]).trim().split(/\s+/)[0];
+    contagem[p] = (contagem[p]||0) + 1;
+  });
+  Object.keys(COMPRADORES).forEach(function(k){
+    var partes = String(COMPRADORES[k]).trim().split(/\s+/);
+    mapa[k] = contagem[partes[0]] > 1 && partes[1]
+      ? partes[0] + " " + partes[1].charAt(0) + "."
+      : partes[0];
+  });
+  return mapa;
+})();
+function nomeCurto(cod){ return CURTO[cod] || CURTO[String(cod)] || "—"; }
+function primeiroNome(s){ return String(s||"").trim().split(/\s+/)[0]; }
+function nomeFornec(c){ var f = FORNEC[c] || FORNEC[String(c)]; return f ? f[0] : "—"; }
+
+/* ---------------- dados normalizados ---------------- */
+var PROD = {};                    // codprod -> {desc, comp, fornec, status}
+(D.produtos||[]).forEach(function(p){ PROD[p[0]] = {desc:p[1], comp:p[2], fornec:p[3], ativo:p[4]!=="F"}; });
+function prod(c){ return PROD[c] || {desc:"—", comp:null, fornec:null, ativo:true}; }
+
+var RUPT = (D.ruptura||[]).map(function(r){
+  var p = prod(r[0]);
+  return {codprod:r[0], desc:p.desc, comp:p.comp, fornec:p.fornec, ativo:p.ativo,
+          estCx:r[1], giroCx:r[2], dias:r[3], ruptura:r[4], cobertura:r[5], avaria:r[6]};
+});
+var EV = (D.ev||[]).map(function(r){
+  var p = prod(r[0]);
+  return {codprod:r[0], desc:p.desc, comp:p.comp, fornec:p.fornec, ativo:p.ativo,
+          disp:r[1], avariaQt:r[2], preco:r[3], pendente:r[4],
+          semanas:[r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13]],
+          vendaTot:r[14], media:r[15], cob:r[16], sug:r[17],
+          valorSug:(r[17]||0)*(r[3]||0)};
+});
+var VERBA = (D.verba||[]).map(function(r){
+  return {cod:r[0], nome:r[1], verba:r[2], entrada:r[3], saida:r[4],
+          vencidas:r[5], avencer:r[6], avaria:r[7], itens:r[8], comp:r[9],
+          saldo:(r[2]||0)-(r[7]||0)};
+});
+var SUGF = (D.sugfornec||[]).map(function(r){
+  return {cod:r[0], nome:r[1], comp:r[2], giro:r[3], disp:r[4], sug:r[5], valor:r[6], valorPbi:r[7]};
+});
+var EXC = (D.excesso||[]).map(function(r){
+  return {codprod:r[0], desc:r[1], fornec:r[2], comp:r[3], giro:r[4], disp:r[5],
+          sug:r[6], preco:r[7], valor:Math.abs(r[8]||0)};
+});
+var AVP = (D.avariaprod||[]).map(function(r){
+  return {codprod:r[0], desc:r[1], comp:r[2], fornec:r[3], valor:r[4]};
+});
+var SUGP = (D.sugprod||[]).map(function(r){
+  return {filial:r[0], codprod:r[1], desc:r[2], comp:r[3], fornec:r[4],
+          volume:r[5], giro:r[6], disp:r[7], sug:r[8], preco:r[9], valor:r[10]};
+});
+var FAT = D.fat || {};
+var FATMES = (FAT.mes||[]).map(function(r){
+  return {mes:r[0], venda:r[1], cmv:r[2], lucro:r[3], pedidos:r[4], posit:r[5],
+          margem:r[1] ? r[3]/r[1] : null};
+});
+var FATCOMP = (FAT.comprador||[]).map(function(r){
+  return {comp:r[0], venda:r[1], lucro:r[2], pedidos:r[3], posit:r[4], v12:r[5], l12:r[6],
+          margem:r[1]?r[2]/r[1]:null, margem12:r[5]?r[6]/r[5]:null};
+});
+var FATFORN = (FAT.fornec||[]).map(function(r){ return {cod:r[0], venda:r[1], lucro:r[2], v12:r[3]}; });
+var FATDEPTO = (FAT.depto||[]).map(function(r){ return {cod:r[0], nome:r[1], venda:r[2], lucro:r[3], v12:r[4]}; });
+var FATSEC = (FAT.secao||[]).map(function(r){ return {cod:r[0], nome:r[1], venda:r[2], lucro:r[3]}; });
+var FATUF = (FAT.estado||[]).map(function(r){ return {uf:r[0], venda:r[1], lucro:r[2]}; });
+var FATSUP = (FAT.superv||[]).map(function(r){ return {cod:r[0], nome:r[1], venda:r[2], lucro:r[3], v12:r[4]}; });
+var FATMESCOMP = FAT.mescomp || [];
+
+var COMP_LISTA = Object.keys(COMPRADORES).map(function(k){ return {cod:+k, nome:COMPRADORES[k]}; })
+  .sort(function(a,b){ return a.nome.localeCompare(b.nome,"pt-BR"); });
+
+/* ---------------- tema ---------------- */
+var raiz = document.getElementById("raiz");
+var doc = document.documentElement;
+function aplicarTema(t){
+  doc.setAttribute("data-theme", t==="light" ? "light" : "dark");
+  raiz.setAttribute("data-theme", t==="light" ? "light" : "dark");
+  document.querySelectorAll("[data-theme-btn]").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-theme-btn")===t);
+  });
+  try{ localStorage.setItem("bi_tema", t); }catch(e){}
+  redesenhar();
+}
+document.querySelectorAll("[data-theme-btn]").forEach(function(b){
+  b.addEventListener("click", function(){ aplicarTema(b.getAttribute("data-theme-btn")); });
+});
+
+document.getElementById("lastSync").textContent =
+  D.geradoEm ? new Date(D.geradoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+
+/* ---------------- helpers de DOM ---------------- */
+function el(tag, cls, txt){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt != null) e.textContent = txt;
+  return e;
+}
+function cor(nome){ return "var(--"+nome+")"; }
+function lerCor(nome){
+  return getComputedStyle(raiz).getPropertyValue("--"+nome).trim() || "#888";
+}
+
+/* KPIs */
+function montarKpis(destino, defs){
+  destino.innerHTML = "";
+  defs.forEach(function(d){
+    var t = el("div","kpi");
+    var barra = el("div","kpi-bar"); barra.style.background = cor(d.cor||"ink");
+    var lab = el("div","kpi-label"); lab.appendChild(document.createTextNode(d.label));
+    if(d.info){
+      var dot = el("span","info-dot","i"); dot.tabIndex = 0;
+      var tip = el("span","tip", d.info); dot.appendChild(tip); lab.appendChild(dot);
+    }
+    var val = el("div","kpi-value", d.valor); val.style.color = cor(d.cor||"ink");
+    var sub = el("div","kpi-sub", d.sub||"");
+    t.appendChild(barra); t.appendChild(lab); t.appendChild(val); t.appendChild(sub);
+    destino.appendChild(t);
+  });
+}
+
+/* ranking horizontal */
+function montarRanking(destino, itens, opts){
+  opts = opts || {};
+  destino.innerHTML = "";
+  var max = itens.reduce(function(m,i){ return Math.max(m, Math.abs(i.valor)||0); }, 0) || 1;
+  itens.forEach(function(i){
+    var linha = el("div","rank-row");
+    linha.appendChild(el("div","rank-nome", i.nome));
+    var trilho = el("div","rank-trilho");
+    var barra = el("div","rank-barra");
+    barra.style.width = Math.max(1.5, Math.abs(i.valor)/max*100) + "%";
+    barra.style.background = cor(i.cor || opts.cor || "blue");
+    trilho.appendChild(barra);
+    linha.appendChild(trilho);
+    linha.appendChild(el("div","rank-val", i.rotulo));
+    destino.appendChild(linha);
+  });
+}
+
+/* donut */
+function montarDonut(caixa, partes, leitura){
+  caixa.innerHTML = "";
+  var total = partes.reduce(function(s,p){ return s+(p.valor||0); },0) || 1;
+  var env = el("div","donut-wrap");
+  var box = el("div","donut-svg-box");
+  var ns = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(ns,"svg");
+  svg.setAttribute("viewBox","0 0 150 150");
+  svg.style.cssText = "width:100%;height:100%;transform:rotate(-90deg);";
+  var r=60, circ=2*Math.PI*r, offset=0;
+  var fundo = document.createElementNS(ns,"circle");
+  fundo.setAttribute("cx",75); fundo.setAttribute("cy",75); fundo.setAttribute("r",r);
+  fundo.setAttribute("fill","none"); fundo.setAttribute("stroke","var(--surface3)"); fundo.setAttribute("stroke-width",18);
+  svg.appendChild(fundo);
+  partes.forEach(function(p){
+    var len = circ*((p.valor||0)/total);
+    var seg = document.createElementNS(ns,"circle");
+    seg.setAttribute("cx",75); seg.setAttribute("cy",75); seg.setAttribute("r",r);
+    seg.setAttribute("fill","none"); seg.setAttribute("stroke",cor(p.cor)); seg.setAttribute("stroke-width",18);
+    seg.setAttribute("stroke-linecap","round");
+    seg.setAttribute("stroke-dasharray", Math.max(len-2,0)+" "+(circ-len+2));
+    seg.setAttribute("stroke-dashoffset", -offset);
+    seg.style.transition = "stroke-dasharray .9s cubic-bezier(.22,1,.36,1)";
+    svg.appendChild(seg);
+    offset += len;
+  });
+  box.appendChild(svg);
+  var centro = el("div","donut-center");
+  var pct = el("span","donut-pct num", fPct((partes[0].valor||0)/total));
+  pct.style.color = cor(partes[0].cor);
+  centro.appendChild(pct);
+  centro.appendChild(el("span","donut-pct-label", partes[0].label.toUpperCase()));
+  box.appendChild(centro);
+  env.appendChild(box);
+
+  var leg = el("div","donut-legend");
+  partes.forEach(function(p){
+    var l = el("div","legend-row");
+    var sw = el("span","legend-swatch"); sw.style.background = cor(p.cor);
+    l.appendChild(sw);
+    l.appendChild(el("span","lbl", p.label));
+    l.appendChild(el("span","val num", fInt(p.valor)+" ("+fPct((p.valor||0)/total)+")"));
+    leg.appendChild(l);
+  });
+  if(leitura) leg.appendChild(el("p","donut-reading", leitura));
+  env.appendChild(leg);
+  caixa.appendChild(env);
+}
+
+/* grafico de colunas com linha opcional */
+function montarColunas(caixa, dados, opts){
+  opts = opts || {};
+  caixa.innerHTML = "";
+  if(!dados.length) return;
+  var larguraCol = opts.larguraCol || 26;
+  var L = Math.max(640, dados.length*larguraCol + 90);
+  var A = opts.altura || 260;
+  var mE = 64, mD = opts.linha ? 52 : 14, mT = 16, mB = 34;
+  var pw = L-mE-mD, ph = A-mT-mB;
+  var ns = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(ns,"svg");
+  svg.setAttribute("viewBox","0 0 "+L+" "+A);
+  svg.setAttribute("width", L); svg.setAttribute("height", A);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label", opts.aria || "Gráfico de colunas");
+
+  function cria(t, attrs){
+    var e = document.createElementNS(ns,t);
+    for(var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  var maxV = Math.max.apply(null, dados.map(function(d){ return d.valor||0; })) || 1;
+  var passos = 4, escala = Math.pow(10, Math.floor(Math.log10(maxV/passos)));
+  var passo = Math.ceil(maxV/passos/escala)*escala;
+  var topo = passo*passos;
+
+  for(var i=0;i<=passos;i++){
+    var y = mT + ph - (i*passo/topo)*ph;
+    svg.appendChild(cria("line",{x1:mE,y1:y,x2:mE+pw,y2:y,stroke:"var(--grid)","stroke-width":1}));
+    var tx = cria("text",{x:mE-8,y:y+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});
+    tx.textContent = opts.eixoFmt ? opts.eixoFmt(i*passo) : fInt(i*passo);
+    svg.appendChild(tx);
+  }
+
+  var bw = Math.min(24, pw/dados.length*0.62);
+  dados.forEach(function(d,i){
+    var cx = mE + (i+0.5)*(pw/dados.length);
+    var h = Math.max(1, ((d.valor||0)/topo)*ph);
+    var y = mT + ph - h;
+    var g = cria("g",{});
+    var barra = cria("rect",{x:cx-bw/2, y:y, width:bw, height:h, rx:4, fill: cor(d.cor||opts.cor||"blue")});
+    barra.appendChild(cria("title",{})).textContent = d.rotulo + ": " + (opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor));
+    g.appendChild(barra);
+    // canto inferior reto
+    g.appendChild(cria("rect",{x:cx-bw/2, y:mT+ph-Math.min(h,4), width:bw, height:Math.min(h,4), fill:cor(d.cor||opts.cor||"blue")}));
+    svg.appendChild(g);
+    if(dados.length <= 40 || i % Math.ceil(dados.length/24) === 0){
+      var lb = cria("text",{x:cx, y:A-12,"text-anchor":"middle","font-size":9.5,fill:"var(--muted)"});
+      lb.textContent = d.rotulo;
+      svg.appendChild(lb);
+    }
+  });
+
+  if(opts.linha){
+    var maxL = Math.max.apply(null, opts.linha.map(function(v){ return v==null?0:v; })) || 1;
+    var minL = Math.min.apply(null, opts.linha.map(function(v){ return v==null?maxL:v; }));
+    var faixa = (maxL-minL) || 1;
+    var pts = [];
+    opts.linha.forEach(function(v,i){
+      if(v==null) return;
+      var cx = mE + (i+0.5)*(pw/dados.length);
+      var y = mT + ph - ((v-minL)/faixa)*ph*0.82 - ph*0.09;
+      pts.push([cx,y]);
+    });
+    if(pts.length){
+      svg.appendChild(cria("polyline",{points:pts.map(function(p){return p.join(",");}).join(" "),
+        fill:"none", stroke:cor(opts.linhaCor||"gold"), "stroke-width":2,
+        "stroke-linejoin":"round","stroke-linecap":"round"}));
+      var ult = pts[pts.length-1];
+      svg.appendChild(cria("circle",{cx:ult[0],cy:ult[1],r:4,fill:cor(opts.linhaCor||"gold"),
+        stroke:"var(--bg)","stroke-width":2}));
+      var rot = cria("text",{x:Math.min(ult[0]+9,L-4), y:ult[1]+4,"font-size":11,
+        fill:"var(--ink)","font-family":"JetBrains Mono, monospace","font-weight":600});
+      rot.textContent = opts.linhaFmt ? opts.linhaFmt(opts.linha[opts.linha.length-1]) : "";
+      svg.appendChild(rot);
+    }
+  }
+  caixa.appendChild(svg);
+}
+
+/* tabela reutilizavel com ordenacao e paginacao */
+function Tabela(destino, cfg){
+  this.destino = destino;
+  this.cfg = cfg;
+  this.ordem = cfg.ordemInicial || cfg.colunas[0].campo;
+  this.dir = cfg.dirInicial || -1;
+  this.pagina = 1;
+  this.tam = cfg.porPagina || 40;
+  this.linhas = [];
+}
+Tabela.prototype.definir = function(linhas){ this.linhas = linhas; this.pagina = 1; this.desenhar(); };
+Tabela.prototype.desenhar = function(){
+  var self = this, cfg = this.cfg;
+  var ordenadas = this.linhas.slice().sort(function(a,b){
+    var av = a[self.ordem], bv = b[self.ordem];
+    if(av==null && bv==null) return 0;
+    if(av==null) return 1;
+    if(bv==null) return -1;
+    if(typeof av === "string") return av.localeCompare(bv,"pt-BR")*self.dir;
+    return (av-bv)*self.dir;
+  });
+  var totalPag = Math.max(1, Math.ceil(ordenadas.length/this.tam));
+  if(this.pagina > totalPag) this.pagina = totalPag;
+  var ini = (this.pagina-1)*this.tam;
+  var pag = ordenadas.slice(ini, ini+this.tam);
+
+  this.destino.innerHTML = "";
+  var envolt = el("div","table-scroll");
+  var tab = el("table","dados");
+  var thead = el("thead"), trh = el("tr");
+  cfg.colunas.forEach(function(c){
+    var th = el("th", c.num ? "num" : null);
+    th.appendChild(document.createTextNode(c.titulo));
+    var seta = el("span","arrow", self.ordem===c.campo ? (self.dir===1?"↑":"↓") : "↕");
+    th.appendChild(seta);
+    if(self.ordem===c.campo) th.classList.add("sorted");
+    if(c.largura) th.style.width = c.largura;
+    th.addEventListener("click", function(){
+      if(self.ordem===c.campo) self.dir *= -1;
+      else { self.ordem = c.campo; self.dir = c.texto ? 1 : -1; }
+      self.pagina = 1; self.desenhar();
+    });
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); tab.appendChild(thead);
+  var tbody = el("tbody");
+  pag.forEach(function(linha){
+    var tr = el("tr");
+    cfg.colunas.forEach(function(c){
+      var td = el("td", c.num ? "num" : (c.classe||null));
+      var v = linha[c.campo];
+      if(c.pill){
+        var p = c.pill(linha);
+        var sp = el("span","pill "+p.tom, p.texto);
+        td.appendChild(sp);
+      } else {
+        td.textContent = c.fmt ? c.fmt(v, linha) : (v==null ? "—" : v);
+        if(c.corTexto) td.style.color = c.corTexto(v, linha);
+        if(c.classe === "trunc") td.title = String(v==null?"":v);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  tab.appendChild(tbody);
+  envolt.appendChild(tab);
+  this.destino.appendChild(envolt);
+
+  var rodape = el("div","table-footer");
+  rodape.appendChild(el("span","info",
+    ordenadas.length ? ("Mostrando "+fInt(ini+1)+"–"+fInt(ini+pag.length)+" de "+fInt(ordenadas.length)+" · página "+this.pagina+" de "+totalPag)
+                     : "Nenhum item no filtro atual"));
+  var pager = el("div","pager");
+  function botao(rot, p, desab){
+    var b = el("button", null, rot); b.type="button"; b.disabled = !!desab;
+    b.addEventListener("click", function(){ self.pagina = p; self.desenhar(); });
+    return b;
+  }
+  pager.appendChild(botao("«",1,this.pagina<=1));
+  pager.appendChild(botao("‹",Math.max(1,this.pagina-1),this.pagina<=1));
+  pager.appendChild(botao("›",Math.min(totalPag,this.pagina+1),this.pagina>=totalPag));
+  pager.appendChild(botao("»",totalPag,this.pagina>=totalPag));
+  rodape.appendChild(pager);
+  this.destino.appendChild(rodape);
+};
+
+/* barra de filtro por comprador, reutilizada nas paginas */
+function filtroComprador(destino, estado, aoMudar, extras){
+  destino.innerHTML = "";
+  var g = el("div","filter-group");
+  g.appendChild(el("span","filter-label","Comprador"));
+  var todos = el("button","chip"+(estado.comps.size===COMP_LISTA.length?" on":""),"Todos");
+  todos.type="button";
+  todos.addEventListener("click", function(){
+    estado.comps = new Set(COMP_LISTA.map(function(c){return c.cod;}));
+    aoMudar();
+  });
+  g.appendChild(todos);
+  COMP_LISTA.forEach(function(c){
+    var b = el("button","chip"+(estado.comps.has(c.cod) && estado.comps.size<COMP_LISTA.length?" on":""), nomeCurto(c.cod));
+    b.type="button"; b.title = c.nome;
+    b.addEventListener("click", function(){
+      estado.comps = new Set([c.cod]);
+      aoMudar();
+    });
+    g.appendChild(b);
+  });
+  destino.appendChild(g);
+  (extras||[]).forEach(function(e){ destino.appendChild(e); });
+}
+function grupoChips(rotulo, opcoes, atual, aoEscolher){
+  var g = el("div","filter-group");
+  g.appendChild(el("span","filter-label",rotulo));
+  opcoes.forEach(function(o){
+    var b = el("button","chip"+(o.tom?" tone-"+o.tom:"")+(atual===o.valor?" on":""), o.label);
+    b.type="button";
+    b.addEventListener("click", function(){ aoEscolher(o.valor); });
+    g.appendChild(b);
+  });
+  return g;
+}
+function blocoBusca(valor, aoDigitar, aoLimpar){
+  var bloco = el("div","search-block");
+  var inp = document.createElement("input");
+  inp.type="text"; inp.placeholder="Buscar produto, código ou fornecedor…"; inp.value = valor||"";
+  inp.autocomplete="off";
+  inp.addEventListener("input", function(){ aoDigitar(inp.value.trim().toLowerCase()); });
+  var btn = el("button","clear-btn","Limpar"); btn.type="button";
+  btn.addEventListener("click", aoLimpar);
+  bloco.appendChild(inp); bloco.appendChild(btn);
+  return bloco;
+}
+
+/* ---------------- paginas ---------------- */
+var PAGINAS = [];
+function pagina(id, num, titulo, subtitulo, descricao, montar){
+  PAGINAS.push({id:id, num:num, titulo:titulo, subtitulo:subtitulo, descricao:descricao, montar:montar, pronta:false});
+}
+function cabecalho(pg){
+  var d = el("div");
+  d.appendChild(el("div","module-eyebrow","Página "+pg.num+" · "+pg.titulo));
+  d.appendChild(el("h2","module-title",pg.subtitulo));
+  var p = el("p","module-desc");
+  p.innerHTML = pg.descricao;
+  d.appendChild(p);
+  return d;
+}
+function cartao(titulo, nota){
+  var s = el("section","card");
+  var cab = el("div");
+  cab.appendChild(el("div","card-title",titulo));
+  if(nota) cab.appendChild(el("p","card-note",nota));
+  s.appendChild(cab);
+  return s;
+}
+function todosComps(){ return new Set(COMP_LISTA.map(function(c){ return c.cod; })); }
+function porComprador(lista, comps, campo){
+  if(comps.size >= COMP_LISTA.length) return lista;
+  return lista.filter(function(i){ return comps.has(i[campo||"comp"]); });
+}
+function agruparPorComprador(lista, valorDe){
+  var m = new Map();
+  lista.forEach(function(i){
+    var c = i.comp;
+    if(c==null) return;
+    m.set(c, (m.get(c)||0) + (valorDe(i)||0));
+  });
+  return Array.from(m.entries())
+    .map(function(e){ return {cod:e[0], nome:nomeCurto(e[0]), valor:e[1]}; })
+    .sort(function(a,b){ return Math.abs(b.valor)-Math.abs(a.valor); });
+}
+
+/* =========================================================================
+   PÁGINA 01 — COMPRAS (ruptura e cobertura)
+   ========================================================================= */
+pagina("compras","01","Compras","Ruptura & cobertura de estoque",
+  "Ruptura compara a necessidade de 7 dias de venda com o estoque disponível. Cobertura usa 56 dias (8 semanas): acima disso o item entra como excesso. A verba vem da consulta oficial de saldo de verba, não mais da coluna da própria consulta de ruptura — por isso o valor mudou em relação às primeiras versões deste painel.",
+  function(raiz){
+    var estado = {comps:todosComps(), status:"todos", rup:"todos", cob:"todos", busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+    var linha2 = el("div","row-2col"); raiz.appendChild(linha2);
+    var cRup = cartao("Ruptura de venda","Necessidade de 7 dias de venda vs. estoque disponível");
+    var cCob = cartao("Cobertura de estoque","Necessidade de 56 dias (8 semanas) vs. estoque disponível");
+    var boxRup = el("div"), boxCob = el("div");
+    cRup.appendChild(boxRup); cCob.appendChild(boxCob);
+    linha2.appendChild(cRup); linha2.appendChild(cCob);
+
+    var cMatriz = cartao("Matriz por comprador","Saldo é a verba do fornecedor menos a avaria. Negativo significa que a avaria já consumiu a verba negociada.");
+    var boxMatriz = el("div"); cMatriz.appendChild(boxMatriz); raiz.appendChild(cMatriz);
+
+    var cTab = cartao("Detalhe por produto","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"estCx", dirInicial:-1,
+      colunas:[
+        {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
+        {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
+        {titulo:"Est. disp. (CX)", campo:"estCx", num:true, fmt:function(v){ return fNum(v,1); }},
+        {titulo:"Giro/dia (CX)", campo:"giroCx", num:true, fmt:function(v){ return fNum(v,3); }},
+        {titulo:"Dias de venda", campo:"dias", num:true, fmt:function(v){ return fNum(v,1); }},
+        {titulo:"Status", campo:"ativo", pill:function(l){ return l.ativo ? {tom:"good",texto:"ATIVO"} : {tom:"crit",texto:"FORALINHA"}; }},
+        {titulo:"Ruptura", campo:"ruptura", pill:function(l){ return l.ruptura ? {tom:"crit",texto:"Sim"} : {tom:"neutro",texto:"Não"}; }},
+        {titulo:"Cobertura", campo:"cobertura", pill:function(l){ return l.cobertura ? {tom:"neutro",texto:"Dentro da meta"} : {tom:"warn",texto:"Excesso"}; }},
+        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2}
+      ]
+    });
+
+    function filtrar(){
+      return RUPT.filter(function(r){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(r.comp)) return false;
+        if(estado.status==="ativo" && !r.ativo) return false;
+        if(estado.status==="fora" && r.ativo) return false;
+        if(estado.rup==="sim" && !r.ruptura) return false;
+        if(estado.rup==="nao" && r.ruptura) return false;
+        if(estado.cob==="excesso" && r.cobertura) return false;
+        if(estado.cob==="ideal" && !r.cobertura) return false;
+        if(estado.busca){
+          var h = (r.desc+" "+nomeFornec(r.fornec)+" "+r.codprod).toLowerCase();
+          if(h.indexOf(estado.busca)===-1) return false;
+        }
+        return true;
+      });
+    }
+    function verbaFiltrada(){
+      return porComprador(VERBA, estado.comps).reduce(function(s,v){ return s+(v.verba||0); },0);
+    }
+
+    function render(){
+      var lista = filtrar();
+      var total = lista.length;
+      var ativos = lista.filter(function(r){ return r.ativo; }).length;
+      var rup = lista.filter(function(r){ return r.ruptura; }).length;
+      var exc = lista.filter(function(r){ return !r.cobertura; }).length;
+      var avaria = lista.reduce(function(s,r){ return s+(r.avaria||0); },0);
+      var verba = verbaFiltrada();
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        grupoChips("Status",[{label:"Todos",valor:"todos"},{label:"Ativo",valor:"ativo",tom:"good"},{label:"Fora de linha",valor:"fora",tom:"crit"}],
+          estado.status, function(v){ estado.status=v; render(); }),
+        grupoChips("Ruptura",[{label:"Todos",valor:"todos"},{label:"Sim",valor:"sim",tom:"crit"},{label:"Não",valor:"nao",tom:"good"}],
+          estado.rup, function(v){ estado.rup=v; render(); }),
+        grupoChips("Cobertura",[{label:"Todos",valor:"todos"},{label:"Excesso",valor:"excesso",tom:"warn"},{label:"Dentro da meta",valor:"ideal",tom:"good"}],
+          estado.cob, function(v){ estado.cob=v; render(); }),
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado = {comps:todosComps(), status:"todos", rup:"todos", cob:"todos", busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Avaria", valor:fR$(avaria), cor:"crit", sub:"Estoque indenizado nas filiais 1, 2, 7 e 8."},
+        {label:"Total ativos", valor:fInt(ativos), cor:"ink", sub:"Itens que não estão marcados como fora de linha.",
+         info:"A coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Quem não é explicitamente FORALINHA entra como ativo."},
+        {label:"Total de itens", valor:fInt(total), cor:"ink", sub:"Produtos de revenda na carga atual."},
+        {label:"Itens c/ ruptura", valor:fInt(rup), cor:"crit", sub:"Menos de 7 dias de venda em estoque."},
+        {label:"Verba", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação por fornecedor principal.",
+         info:"Vem da consulta de saldo de verba (Consulta3/SALDOMOV), que é a fonte oficial do BI original."},
+        {label:"Cobertura excesso", valor:fInt(exc), cor:"warn", sub:"Estoque acima de 56 dias de venda."},
+        {label:"% excesso estoque", valor:fPct(total?exc/total:0), cor:"warn", sub:"Sobre os itens filtrados."},
+        {label:"% ruptura", valor:fPct(total?rup/total:0), cor:"crit", sub:"Sobre os itens filtrados."}
+      ]);
+
+      montarDonut(boxRup,[
+        {label:"Ruptura", valor:rup, cor:"crit"},
+        {label:"Sem ruptura", valor:total-rup, cor:"good"}
+      ], total ? ("1 em cada "+Math.max(1,Math.round(total/Math.max(rup,1)))+" itens do filtro está em ruptura.") : "Sem itens no filtro.");
+      montarDonut(boxCob,[
+        {label:"Excesso", valor:exc, cor:"warn"},
+        {label:"Dentro da meta", valor:total-exc, cor:"good"}
+      ], total ? (fInt(exc)+" itens passam de 56 dias de cobertura e podem estar parados.") : "Sem itens no filtro.");
+
+      // matriz por comprador
+      var porComp = new Map();
+      lista.forEach(function(r){
+        if(r.comp==null) return;
+        if(!porComp.has(r.comp)) porComp.set(r.comp,{itens:0,rup:0,exc:0,avaria:0});
+        var a = porComp.get(r.comp);
+        a.itens++; if(r.ruptura) a.rup++; if(!r.cobertura) a.exc++; a.avaria += (r.avaria||0);
+      });
+      var verbaPorComp = new Map();
+      porComprador(VERBA, estado.comps).forEach(function(v){
+        if(v.comp==null) return;
+        verbaPorComp.set(v.comp, (verbaPorComp.get(v.comp)||0) + (v.verba||0));
+      });
+      var linhas = Array.from(porComp.entries()).map(function(e){
+        var vb = verbaPorComp.get(e[0]) || 0;
+        return {nome:nomeComprador(e[0]), itens:e[1].itens,
+                pctExc:e[1].itens?e[1].exc/e[1].itens:0, pctRup:e[1].itens?e[1].rup/e[1].itens:0,
+                avaria:e[1].avaria, verba:vb, saldo:vb-e[1].avaria};
+      }).sort(function(a,b){ return b.itens-a.itens; });
+
+      boxMatriz.innerHTML = "";
+      var env = el("div","table-scroll"); env.style.marginTop = "14px";
+      var t = el("table","dados");
+      var th = el("thead"), tr = el("tr");
+      ["Comprador","Itens","% Excesso","% Ruptura","Avaria","Verba","Saldo"].forEach(function(h,i){
+        var c = el("th", i>=4||i===1 ? "num" : null, h);
+        c.style.cursor = "default";
+        if(i===2||i===3) c.style.width = "19%";
+        tr.appendChild(c);
+      });
+      th.appendChild(tr); t.appendChild(th);
+      var tb = el("tbody");
+      linhas.forEach(function(l){
+        var r = el("tr");
+        var td0 = el("td",null,l.nome); td0.style.fontWeight="600"; r.appendChild(td0);
+        r.appendChild(el("td","num",fInt(l.itens)));
+        [["pctExc","warn"],["pctRup","crit"]].forEach(function(par){
+          var td = el("td");
+          var wrap = el("div"); wrap.style.cssText="display:flex;align-items:center;gap:9px;";
+          var trilho = el("div"); trilho.style.cssText="flex:1 1 auto;min-width:60px;height:7px;border-radius:100px;background:var(--surface3);overflow:hidden;";
+          var f = el("div"); f.style.cssText="height:100%;border-radius:100px;width:"+Math.round(l[par[0]]*100)+"%;background:"+cor(par[1])+";";
+          trilho.appendChild(f);
+          var n = el("span","num",fPct(l[par[0]])); n.style.cssText="font-size:12px;width:48px;text-align:right;flex:0 0 auto;";
+          wrap.appendChild(trilho); wrap.appendChild(n); td.appendChild(wrap); r.appendChild(td);
+        });
+        r.appendChild(el("td","num",fR$2(l.avaria)));
+        r.appendChild(el("td","num",fR$2(l.verba)));
+        var ts = el("td","num",fR$2(l.saldo));
+        ts.style.color = l.saldo>=0 ? cor("good") : cor("crit");
+        ts.style.fontWeight = "700";
+        r.appendChild(ts);
+        tb.appendChild(r);
+      });
+      t.appendChild(tb); env.appendChild(t); boxMatriz.appendChild(env);
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(RUPT.length)+" produtos.";
+      tabela.definir(lista);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 02 — SALDO VERBA X AVARIA
+   ========================================================================= */
+pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria acumulada",
+  "Para cada fornecedor principal, a verba é o saldo de movimentação de crédito e a avaria é o valor do estoque indenizado. O saldo é a diferença: quando fica negativo, a avaria já consumiu toda a verba negociada com aquele fornecedor. <strong>A avaria aqui soma todas as filiais</strong>, diferente da página Compras — é o mesmo comportamento do Power BI original, onde o filtro de filial dessa consulta está comentado e nunca executa.",
+  function(raiz){
+    var estado = {comps:todosComps(), situacao:"todos", busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var cRank = cartao("Onde a avaria mais consome a verba","Os 15 fornecedores com o saldo mais negativo — avaria maior que a verba negociada.");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
+
+    var cTab = cartao("Fornecedores principais","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"saldo", dirInicial:1,
+      colunas:[
+        {titulo:"Código", campo:"cod", num:true, classe:"mono-muted"},
+        {titulo:"Fornecedor principal", campo:"nome", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return v==null?"—":nomeComprador(v); }},
+        {titulo:"Verba (saldo mov.)", campo:"verba", num:true, fmt:fR$2},
+        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2},
+        {titulo:"Saldo", campo:"saldo", num:true, fmt:fR$2,
+         corTexto:function(v){ return v>=0 ? cor("good") : cor("crit"); }},
+        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2},
+        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2},
+        {titulo:"Itens c/ avaria", campo:"itens", num:true, fmt:fInt}
+      ]
+    });
+
+    function filtrar(){
+      return VERBA.filter(function(v){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(v.comp)) return false;
+        if(estado.situacao==="negativo" && v.saldo >= 0) return false;
+        if(estado.situacao==="positivo" && v.saldo < 0) return false;
+        if(estado.situacao==="vencida" && !(v.vencidas > 0)) return false;
+        if(estado.busca && String(v.nome).toLowerCase().indexOf(estado.busca)===-1
+           && String(v.cod).indexOf(estado.busca)===-1) return false;
+        return true;
+      });
+    }
+    function render(){
+      var lista = filtrar();
+      var verba = lista.reduce(function(s,v){ return s+(v.verba||0); },0);
+      var avaria = lista.reduce(function(s,v){ return s+(v.avaria||0); },0);
+      var negativos = lista.filter(function(v){ return v.saldo < 0; });
+      var vencidas = lista.reduce(function(s,v){ return s+(v.vencidas||0); },0);
+      var avencer = lista.reduce(function(s,v){ return s+(v.avencer||0); },0);
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        grupoChips("Situação",[
+          {label:"Todos",valor:"todos"},
+          {label:"Saldo negativo",valor:"negativo",tom:"crit"},
+          {label:"Saldo positivo",valor:"positivo",tom:"good"},
+          {label:"Com verba vencida",valor:"vencida",tom:"warn"}
+        ], estado.situacao, function(v){ estado.situacao=v; render(); }),
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado={comps:todosComps(),situacao:"todos",busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Verba total", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação de crédito com fornecedores."},
+        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Todas as filiais, como no BI original."},
+        {label:"Saldo líquido", valor:fR$(verba-avaria), cor:(verba-avaria)>=0?"good":"crit", sub:"Verba menos avaria."},
+        {label:"Fornecedores no vermelho", valor:fInt(negativos.length), cor:"crit",
+         sub:"Avaria já maior que a verba — "+fPct(lista.length?negativos.length/lista.length:0)+" do total."},
+        {label:"Verba vencida", valor:fR$(vencidas), cor:"warn", sub:"Crédito com vencimento já passado."},
+        {label:"Verba a vencer", valor:fR$(avencer), cor:"blue", sub:"Ainda dentro do prazo."}
+      ]);
+
+      montarRanking(boxRank, negativos.slice().sort(function(a,b){ return a.saldo-b.saldo; }).slice(0,15)
+        .map(function(v){ return {nome:v.nome, valor:Math.abs(v.saldo), rotulo:fR$(v.saldo), cor:"crit"}; }),
+        {cor:"crit"});
+      if(!negativos.length){
+        boxRank.innerHTML = "";
+        boxRank.appendChild(el("p","card-note","Nenhum fornecedor com saldo negativo no filtro atual."));
+      }
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
+      tabela.definir(lista);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 03 — ESTOQUE x VENDA
+   ========================================================================= */
+pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertura e sugestão",
+  "A consulta mais rica do BI. Para cada produto ela monta a venda das últimas 9 semanas, calcula a <strong>média aparada</strong> (descartando a melhor e a pior semana), converte o estoque disponível em <strong>semanas de cobertura</strong> e sugere quanto comprar para 8 semanas. Produtos sem venda suficiente no período ficam sem média — e, por consequência, sem cobertura e sem sugestão.",
+  function(raiz){
+    var estado = {comps:todosComps(), foco:"todos", busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var linha = el("div","row-2col"); raiz.appendChild(linha);
+    var cSem = cartao("Venda das últimas 9 semanas","Soma das unidades vendidas por semana, da mais antiga para a atual. A semana 0 é a corrente e costuma estar incompleta.");
+    var boxSem = el("div","chart-box"); cSem.appendChild(boxSem); linha.appendChild(cSem);
+    var cFaixa = cartao("Distribuição da cobertura","Quantos produtos estão em cada faixa de semanas de estoque. A meta de compra do BI é 8 semanas.");
+    var boxFaixa = el("div","chart-box"); cFaixa.appendChild(boxFaixa); linha.appendChild(cFaixa);
+
+    var cRank = cartao("Maior valor sugerido por comprador","Sugestão de compra para 8 semanas, avaliada ao preço de venda do produto.");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
+
+    var cTab = cartao("Detalhe por produto","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"valorSug", dirInicial:-1,
+      colunas:[
+        {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
+        {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
+        {titulo:"Est. disp.", campo:"disp", num:true, fmt:function(v){ return fInt(v); }},
+        {titulo:"Venda 9 sem.", campo:"vendaTot", num:true, fmt:function(v){ return fInt(v); }},
+        {titulo:"Média aparada", campo:"media", num:true, fmt:function(v){ return fNum(v,1); }},
+        {titulo:"Cobertura (sem.)", campo:"cob", num:true, fmt:function(v){ return v==null?"—":fNum(v,1); },
+         corTexto:function(v){ return v==null ? "" : (v<2 ? cor("crit") : (v>8 ? cor("warn") : cor("good"))); }},
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:function(v){ return v==null?"—":fInt(v); }},
+        {titulo:"Valor sugerido", campo:"valorSug", num:true, fmt:function(v){ return v?fR$(v):"—"; }},
+        {titulo:"Pendente", campo:"pendente", num:true, fmt:function(v){ return v?fInt(v):"—"; }}
+      ]
+    });
+
+    function filtrar(){
+      return EV.filter(function(r){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(r.comp)) return false;
+        if(estado.foco==="sugestao" && !(r.sug>0)) return false;
+        if(estado.foco==="curta" && !(r.cob!=null && r.cob<2)) return false;
+        if(estado.foco==="longa" && !(r.cob!=null && r.cob>8)) return false;
+        if(estado.foco==="sem_venda" && (r.vendaTot||0) > 0) return false;
+        if(estado.busca){
+          var h = (r.desc+" "+nomeFornec(r.fornec)+" "+r.codprod).toLowerCase();
+          if(h.indexOf(estado.busca)===-1) return false;
+        }
+        return true;
+      });
+    }
+    function render(){
+      var lista = filtrar();
+      var comCob = lista.filter(function(r){ return r.cob!=null; });
+      var comSug = lista.filter(function(r){ return r.sug>0; });
+      var semVenda = lista.filter(function(r){ return !(r.vendaTot>0); });
+      var valorSug = comSug.reduce(function(s,r){ return s+(r.valorSug||0); },0);
+      var cobMedia = comCob.length ? comCob.reduce(function(s,r){ return s+r.cob; },0)/comCob.length : null;
+      var vendaTot = lista.reduce(function(s,r){ return s+(r.vendaTot||0); },0);
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        grupoChips("Foco",[
+          {label:"Todos",valor:"todos"},
+          {label:"Com sugestão",valor:"sugestao",tom:"good"},
+          {label:"Cobertura < 2 sem.",valor:"curta",tom:"crit"},
+          {label:"Cobertura > 8 sem.",valor:"longa",tom:"warn"},
+          {label:"Sem venda 9 sem.",valor:"sem_venda"}
+        ], estado.foco, function(v){ estado.foco=v; render(); }),
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado={comps:todosComps(),foco:"todos",busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Produtos no filtro", valor:fInt(lista.length), cor:"ink", sub:"De "+fInt(EV.length)+" na carga completa."},
+        {label:"Venda 9 semanas", valor:fInt(vendaTot), cor:"blue", sub:"Unidades movimentadas nas filiais 1, 7 e 10."},
+        {label:"Com cobertura calculada", valor:fInt(comCob.length), cor:"ink",
+         sub:fPct(lista.length?comCob.length/lista.length:0)+" dos itens têm venda suficiente para o cálculo.",
+         info:"A média aparada exige pelo menos 3 semanas com venda: descarta a melhor e a pior e divide pelo resto."},
+        {label:"Cobertura média", valor:cobMedia==null?"—":fNum(cobMedia,1)+" sem", cor:cobMedia>8?"warn":"good",
+         sub:"A meta de compra do BI é 8 semanas."},
+        {label:"Itens com sugestão", valor:fInt(comSug.length), cor:"good", sub:"Estoque abaixo da necessidade de 8 semanas."},
+        {label:"Valor sugerido", valor:fCurto(valorSug), cor:"good", sub:"Sugestão avaliada ao preço de venda."},
+        {label:"Sem venda em 9 sem.", valor:fInt(semVenda.length), cor:"warn", sub:"Candidatos a revisão de mix."},
+        {label:"Cobertura > 8 sem.", valor:fInt(comCob.filter(function(r){return r.cob>8;}).length), cor:"warn",
+         sub:"Estoque acima da meta de compra."}
+      ]);
+
+      var somaSem = [0,0,0,0,0,0,0,0,0];
+      lista.forEach(function(r){ r.semanas.forEach(function(v,i){ somaSem[i] += (v||0); }); });
+      montarColunas(boxSem, somaSem.slice().reverse().map(function(v,i){
+        var idx = 8-i;
+        return {rotulo: idx===0 ? "atual" : ("-"+idx), valor:v, cor: idx===0 ? "muted" : "blue"};
+      }), {altura:230, larguraCol:56, valorFmt:function(v){ return fInt(v)+" un"; },
+           eixoFmt:function(v){ return v>=1000 ? Math.round(v/1000)+"k" : fInt(v); },
+           aria:"Venda por semana"});
+
+      var faixas = [
+        {rotulo:"0–2", min:0, max:2, cor:"crit"},
+        {rotulo:"2–4", min:2, max:4, cor:"warn"},
+        {rotulo:"4–8", min:4, max:8, cor:"good"},
+        {rotulo:"8–16", min:8, max:16, cor:"warn"},
+        {rotulo:"16+", min:16, max:1e9, cor:"crit"}
+      ].map(function(f){
+        return {rotulo:f.rotulo, cor:f.cor,
+                valor: comCob.filter(function(r){ return r.cob>=f.min && r.cob<f.max; }).length};
+      });
+      montarColunas(boxFaixa, faixas, {altura:230, larguraCol:74,
+        valorFmt:function(v){ return fInt(v)+" produtos"; }, aria:"Distribuição de cobertura"});
+
+      montarRanking(boxRank, agruparPorComprador(comSug, function(r){ return r.valorSug; }).slice(0,12)
+        .map(function(c){ return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor)}; }), {cor:"good"});
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Ordenado por valor sugerido. Clique em qualquer coluna para reordenar.";
+      tabela.definir(lista);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 04 — SUGESTÃO FORNECEDOR X PRODUTO
+   ========================================================================= */
+pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por fornecedor e por produto",
+  "Sugestão de compra para 30 dias, a partir do giro cadastrado no WinThor contra o estoque disponível. <strong>O cálculo do Power BI está errado nesta consulta</strong>: ele multiplica a soma da sugestão de todos os produtos do fornecedor pelo preço do produto mais caro. O painel mostra as duas colunas lado a lado para você comparar antes de confiar no número.",
+  function(raiz){
+    var estado = {comps:todosComps(), visao:"fornecedor", busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var cRank = cartao("Maiores sugestões","Pelo cálculo corrigido — cada produto avaliado ao seu próprio preço.");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
+
+    var cTab = cartao("Detalhe","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+
+    var tabFornec = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"valor", dirInicial:-1,
+      colunas:[
+        {titulo:"Código", campo:"cod", num:true, classe:"mono-muted"},
+        {titulo:"Fornecedor", campo:"nome", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
+        {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,2); }},
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt},
+        {titulo:"Valor corrigido", campo:"valor", num:true, fmt:fR$},
+        {titulo:"Valor no Power BI", campo:"valorPbi", num:true, fmt:fR$, corTexto:function(){ return cor("muted"); }}
+      ]
+    });
+    var tabProd = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"valor", dirInicial:-1,
+      colunas:[
+        {titulo:"Filial", campo:"filial", num:true, classe:"mono-muted"},
+        {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
+        {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
+        {titulo:"Volume líq. 3m", campo:"volume", num:true, fmt:fInt},
+        {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,3); }},
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt},
+        {titulo:"Preço", campo:"preco", num:true, fmt:fR$2},
+        {titulo:"Valor", campo:"valor", num:true, fmt:fR$}
+      ]
+    });
+
+    function render(){
+      var porFornec = SUGF.filter(function(f){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(f.comp)) return false;
+        if(estado.busca && String(f.nome).toLowerCase().indexOf(estado.busca)===-1) return false;
+        return true;
+      });
+      var porProd = SUGP.filter(function(p){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(p.comp)) return false;
+        if(estado.busca){
+          var h = (p.desc+" "+p.codprod).toLowerCase();
+          if(h.indexOf(estado.busca)===-1) return false;
+        }
+        return true;
+      });
+      var vCorrigido = porFornec.reduce(function(s,f){ return s+(f.valor||0); },0);
+      var vPbi = porFornec.reduce(function(s,f){ return s+(f.valorPbi||0); },0);
+      var vProd = porProd.reduce(function(s,p){ return s+(p.valor||0); },0);
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        grupoChips("Visão",[
+          {label:"Por fornecedor",valor:"fornecedor"},
+          {label:"Por produto",valor:"produto"}
+        ], estado.visao, function(v){ estado.visao=v; render(); }),
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado={comps:todosComps(),visao:estado.visao,busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Valor sugerido (correto)", valor:fCurto(vCorrigido), cor:"good",
+         sub:"Cada produto avaliado ao seu próprio preço."},
+        {label:"Valor no Power BI", valor:fCurto(vPbi), cor:"crit",
+         sub:"Soma da sugestão × preço do produto mais caro.",
+         info:"Cálculo original do BI. Superestima porque aplica o preço do item mais caro do fornecedor a toda a sugestão."},
+        {label:"Diferença", valor:fCurto(vPbi-vCorrigido), cor:"warn",
+         sub:vCorrigido ? (fNum(vPbi/vCorrigido,1)+"x maior que o valor real") : "—"},
+        {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias."},
+        {label:"Produtos (30 dias)", valor:fInt(porProd.length), cor:"ink", sub:"Filiais 1, 7 e 12."},
+        {label:"Valor por produto", valor:fCurto(vProd), cor:"blue",
+         sub:"Consulta de sugestão por produto, calculada à parte."}
+      ]);
+
+      if(estado.visao==="fornecedor"){
+        montarRanking(boxRank, porFornec.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
+          .map(function(f){ return {nome:f.nome, valor:f.valor, rotulo:fCurto(f.valor)}; }), {cor:"good"});
+        tabProd.destino === boxTab && (boxTab.innerHTML = "");
+        tabFornec.definir(porFornec);
+        cTab.querySelector(".card-note").textContent = "Sugestão consolidada por fornecedor — estoque das filiais 1, 2, 7 e 8.";
+      } else {
+        montarRanking(boxRank, porProd.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
+          .map(function(p){ return {nome:p.desc, valor:p.valor, rotulo:fCurto(p.valor)}; }), {cor:"blue"});
+        boxTab.innerHTML = "";
+        tabProd.definir(porProd);
+        cTab.querySelector(".card-note").textContent = "Sugestão por produto e filial, baseada nos 3 meses fechados anteriores.";
+      }
+    }
+    cTab.insertBefore(el("p","card-note",""), boxTab);
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 05 — EXCESSO DE ESTOQUE
+   ========================================================================= */
+pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro insuficiente",
+  "Produtos cuja sugestão de compra para 60 dias fica negativa: o estoque das filiais 1, 2 e 8 já cobre mais do que o giro cadastrado consome nesse período. O valor é o excedente avaliado ao preço de tabela — é quanto de capital está imobilizado além do necessário.",
+  function(raiz){
+    var estado = {comps:todosComps(), busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var linha = el("div","row-2col"); raiz.appendChild(linha);
+    var cRank = cartao("Excesso por comprador","Valor imobilizado além da necessidade de 60 dias.");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); linha.appendChild(cRank);
+    var cTop = cartao("Os 12 produtos mais pesados","Concentram a maior parte do capital parado.");
+    var boxTop = el("div","rank"); cTop.appendChild(boxTop); linha.appendChild(cTop);
+
+    var cTab = cartao("Detalhe por produto","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"valor", dirInicial:-1,
+      colunas:[
+        {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
+        {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
+        {titulo:"Fornecedor", campo:"fornec", classe:"trunc", texto:true, fmt:function(v){ return nomeFornec(v); }},
+        {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,3); }},
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
+        {titulo:"Excedente (un)", campo:"sug", num:true, fmt:function(v){ return fInt(Math.abs(v)); }},
+        {titulo:"Preço", campo:"preco", num:true, fmt:fR$2},
+        {titulo:"Capital parado", campo:"valor", num:true, fmt:fR$,
+         corTexto:function(){ return cor("warn"); }}
+      ]
+    });
+
+    function render(){
+      var lista = EXC.filter(function(e){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(e.comp)) return false;
+        if(estado.busca){
+          var h = (e.desc+" "+nomeFornec(e.fornec)+" "+e.codprod).toLowerCase();
+          if(h.indexOf(estado.busca)===-1) return false;
+        }
+        return true;
+      });
+      var total = lista.reduce(function(s,e){ return s+(e.valor||0); },0);
+      var semGiro = lista.filter(function(e){ return !(e.giro>0); });
+      var ordenado = lista.slice().sort(function(a,b){ return b.valor-a.valor; });
+      var top20 = ordenado.slice(0, Math.ceil(ordenado.length*0.2));
+      var conc = total ? top20.reduce(function(s,e){ return s+e.valor; },0)/total : 0;
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado={comps:todosComps(),busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Capital parado", valor:fCurto(total), cor:"warn", sub:"Excedente avaliado ao preço de tabela."},
+        {label:"Produtos em excesso", valor:fInt(lista.length), cor:"ink", sub:"Sugestão negativa em 60 dias."},
+        {label:"Valor médio por item", valor:fR$(lista.length?total/lista.length:0), cor:"ink", sub:"Quanto cada item carrega, em média."},
+        {label:"Sem giro cadastrado", valor:fInt(semGiro.length), cor:"crit",
+         sub:"Giro/dia zerado — o excesso é todo o estoque."},
+        {label:"Concentração", valor:fPct(conc), cor:"blue",
+         sub:"Parcela do capital parado nos 20% de produtos mais pesados."},
+        {label:"Pior item", valor:ordenado.length?fCurto(ordenado[0].valor):"—", cor:"warn",
+         sub:ordenado.length?ordenado[0].desc:"—"}
+      ]);
+
+      montarRanking(boxRank, agruparPorComprador(lista, function(e){ return e.valor; })
+        .map(function(c){ return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor)}; }), {cor:"warn"});
+      montarRanking(boxTop, ordenado.slice(0,12)
+        .map(function(e){ return {nome:e.desc, valor:e.valor, rotulo:fCurto(e.valor)}; }), {cor:"warn"});
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(EXC.length)+" produtos com excesso.";
+      tabela.definir(lista);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 06 — PERFORMANCE COMPRAS
+   ========================================================================= */
+pagina("performance","06","Performance compras","Resultado de venda por comprador e fornecedor",
+  "Venda (sell-out) desde janeiro de 2021, aberta por comprador, fornecedor, departamento e supervisor. Venda é quantidade × (preço − ST) nos pedidos de venda normal; a margem é o lucro sobre a venda. <strong>A margem foi corrigida em relação ao Power BI</strong>, que protegia a divisão comparando a venda com 100 em vez de zero.",
+  function(raiz){
+    var estado = {periodo:"12m", corte:"comprador"};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var cRank = cartao("Ranking","");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
+
+    var cTab = cartao("Compradores","Total do período completo e dos últimos 12 meses, lado a lado.");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:20, ordemInicial:"v12", dirInicial:-1,
+      colunas:[
+        {titulo:"Comprador", campo:"nome", classe:"trunc", texto:true},
+        {titulo:"Venda 12m", campo:"v12", num:true, fmt:fCurto},
+        {titulo:"Lucro 12m", campo:"l12", num:true, fmt:fCurto},
+        {titulo:"Margem 12m", campo:"margem12", num:true, fmt:fPct,
+         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
+        {titulo:"Venda total", campo:"venda", num:true, fmt:fCurto},
+        {titulo:"Lucro total", campo:"lucro", num:true, fmt:fCurto},
+        {titulo:"Margem total", campo:"margem", num:true, fmt:fPct},
+        {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
+        {titulo:"Positivação", campo:"posit", num:true, fmt:fInt}
+      ]
+    });
+
+    function render(){
+      var use12 = estado.periodo==="12m";
+      var totalVenda = FATCOMP.reduce(function(s,c){ return s+(use12?c.v12:c.venda)||0; },0);
+      var totalLucro = FATCOMP.reduce(function(s,c){ return s+(use12?c.l12:c.lucro)||0; },0);
+      var pedidos = FATCOMP.reduce(function(s,c){ return s+(c.pedidos||0); },0);
+      var posit = FATCOMP.reduce(function(s,c){ return s+(c.posit||0); },0);
+      var melhor = FATCOMP.slice().sort(function(a,b){
+        return (use12?b.margem12:b.margem) - (use12?a.margem12:a.margem); })[0];
+
+      barra.innerHTML = "";
+      barra.appendChild(grupoChips("Período",[
+        {label:"Últimos 12 meses",valor:"12m"},{label:"Desde 2021",valor:"tudo"}
+      ], estado.periodo, function(v){ estado.periodo=v; render(); }));
+      barra.appendChild(grupoChips("Ranking por",[
+        {label:"Comprador",valor:"comprador"},{label:"Fornecedor",valor:"fornecedor"},
+        {label:"Departamento",valor:"departamento"},{label:"Supervisor",valor:"supervisor"}
+      ], estado.corte, function(v){ estado.corte=v; render(); }));
+
+      montarKpis(kpis,[
+        {label:use12?"Venda 12 meses":"Venda desde 2021", valor:fCurto(totalVenda), cor:"blue", sub:"Somente venda normal (condição 1)."},
+        {label:"Lucro", valor:fCurto(totalLucro), cor:"good", sub:"Venda menos CMV."},
+        {label:"Margem", valor:fPct(totalVenda?totalLucro/totalVenda:0), cor:"gold", sub:"Lucro sobre a venda do período."},
+        {label:"Pedidos", valor:fInt(pedidos), cor:"ink", sub:"Total acumulado desde 2021."},
+        {label:"Positivação", valor:fInt(posit), cor:"ink", sub:"Clientes distintos atendidos, somados por dia."},
+        {label:"Melhor margem", valor:melhor?fPct(use12?melhor.margem12:melhor.margem):"—", cor:"good",
+         sub:melhor?nomeComprador(melhor.comp):"—"}
+      ]);
+
+      var itens, titulo, nota, corBarra;
+      if(estado.corte==="comprador"){
+        itens = FATCOMP.map(function(c){ return {nome:nomeComprador(c.comp), valor:use12?c.v12:c.venda}; });
+        titulo = "Venda por comprador"; nota = "Cada comprador responde pela carteira de fornecedores sob sua gestão."; corBarra="blue";
+      } else if(estado.corte==="fornecedor"){
+        itens = FATFORN.slice(0,20).map(function(f){ return {nome:nomeFornec(f.cod), valor:use12?f.v12:f.venda}; });
+        titulo = "Top 20 fornecedores"; nota = "Ordenado pela venda do período selecionado."; corBarra="blue";
+      } else if(estado.corte==="departamento"){
+        itens = FATDEPTO.map(function(d){ return {nome:d.nome, valor:use12?d.v12:d.venda}; });
+        titulo = "Venda por departamento"; nota = "Classificação de produto do WinThor."; corBarra="gold";
+      } else {
+        itens = FATSUP.map(function(s){ return {nome:s.nome, valor:use12?s.v12:s.venda}; });
+        titulo = "Venda por supervisor"; nota = "Equipe comercial responsável pelo pedido."; corBarra="gold";
+      }
+      itens = itens.filter(function(i){ return i.valor>0; }).sort(function(a,b){ return b.valor-a.valor; }).slice(0,20);
+      cRank.querySelector(".card-title").textContent = titulo;
+      cRank.querySelector(".card-note").textContent = nota;
+      montarRanking(boxRank, itens.map(function(i){ return {nome:i.nome, valor:i.valor, rotulo:fCurto(i.valor)}; }), {cor:corBarra});
+
+      tabela.definir(FATCOMP.map(function(c){
+        var o = {}; for(var k in c) o[k]=c[k];
+        o.nome = nomeComprador(c.comp);
+        return o;
+      }));
+    }
+    cRank.insertBefore(el("p","card-note",""), boxRank);
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 07 — MÉTRICAS
+   ========================================================================= */
+pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
+  "A mesma base de faturamento vista no tempo: venda mês a mês desde janeiro de 2021, com a margem sobrepostada em linha. Use o seletor de período para aproximar. O mês corrente costuma aparecer menor porque ainda está em curso.",
+  function(raiz){
+    var estado = {janela:"24m", metrica:"venda"};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var cEvo = cartao("Evolução mensal","Colunas: valor do mês. Linha dourada: margem do mês, em escala própria.");
+    var boxEvo = el("div","chart-box"); cEvo.appendChild(boxEvo);
+    var legenda = el("div","chart-legend"); cEvo.appendChild(legenda);
+    raiz.appendChild(cEvo);
+
+    var linha = el("div","row-2col"); raiz.appendChild(linha);
+    var cDep = cartao("Departamentos","Venda acumulada desde 2021.");
+    var boxDep = el("div","rank"); cDep.appendChild(boxDep); linha.appendChild(cDep);
+    var cUf = cartao("Estados","Onde a venda acontece.");
+    var boxUf = el("div","rank"); cUf.appendChild(boxUf); linha.appendChild(cUf);
+
+    var cSec = cartao("Seções mais vendidas","As 20 maiores seções de produto por venda acumulada.");
+    var boxSec = el("div","rank"); cSec.appendChild(boxSec); raiz.appendChild(cSec);
+
+    var cTab = cartao("Mês a mês","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:24, ordemInicial:"mes", dirInicial:-1,
+      colunas:[
+        {titulo:"Mês", campo:"mes", texto:true, fmt:function(v){ return rotuloMes(v); }},
+        {titulo:"Venda", campo:"venda", num:true, fmt:fCurto},
+        {titulo:"CMV", campo:"cmv", num:true, fmt:fCurto},
+        {titulo:"Lucro", campo:"lucro", num:true, fmt:fCurto},
+        {titulo:"Margem", campo:"margem", num:true, fmt:fPct,
+         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
+        {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
+        {titulo:"Positivação", campo:"posit", num:true, fmt:fInt}
+      ]
+    });
+
+    function render(){
+      var n = estado.janela==="12m" ? 12 : (estado.janela==="24m" ? 24 : FATMES.length);
+      var serie = FATMES.slice(-n);
+      var venda = serie.reduce(function(s,m){ return s+(m.venda||0); },0);
+      var lucro = serie.reduce(function(s,m){ return s+(m.lucro||0); },0);
+      var melhor = serie.slice().sort(function(a,b){ return b.venda-a.venda; })[0];
+      var fechados = serie.slice(0,-1);
+      var mediaMes = fechados.length ? fechados.reduce(function(s,m){ return s+m.venda; },0)/fechados.length : 0;
+      var ultFechado = fechados[fechados.length-1];
+      var anterior = fechados[fechados.length-2];
+      var variacao = (ultFechado && anterior && anterior.venda) ? (ultFechado.venda/anterior.venda-1) : null;
+
+      barra.innerHTML = "";
+      barra.appendChild(grupoChips("Período",[
+        {label:"12 meses",valor:"12m"},{label:"24 meses",valor:"24m"},{label:"Desde 2021",valor:"tudo"}
+      ], estado.janela, function(v){ estado.janela=v; render(); }));
+      barra.appendChild(grupoChips("Colunas",[
+        {label:"Venda",valor:"venda"},{label:"Lucro",valor:"lucro"},{label:"Pedidos",valor:"pedidos"}
+      ], estado.metrica, function(v){ estado.metrica=v; render(); }));
+
+      montarKpis(kpis,[
+        {label:"Venda no período", valor:fCurto(venda), cor:"blue", sub:serie.length+" meses considerados."},
+        {label:"Lucro no período", valor:fCurto(lucro), cor:"good", sub:"Venda menos CMV."},
+        {label:"Margem do período", valor:fPct(venda?lucro/venda:0), cor:"gold", sub:"Lucro sobre venda."},
+        {label:"Média mensal", valor:fCurto(mediaMes), cor:"ink", sub:"Só meses fechados — ignora o mês corrente."},
+        {label:"Melhor mês", valor:melhor?fCurto(melhor.venda):"—", cor:"good", sub:melhor?rotuloMes(melhor.mes):"—"},
+        {label:"Último mês fechado", valor:ultFechado?fCurto(ultFechado.venda):"—",
+         cor: variacao==null ? "ink" : (variacao>=0?"good":"crit"),
+         sub: variacao==null ? "—" : ((variacao>=0?"+":"")+fPct(variacao)+" contra o mês anterior")}
+      ]);
+
+      var campo = estado.metrica;
+      montarColunas(boxEvo, serie.map(function(m){
+        return {rotulo:rotuloMes(m.mes), valor:m[campo]||0, cor:"blue"};
+      }), {
+        altura:300, larguraCol:Math.max(20, Math.min(46, 900/serie.length)),
+        linha: serie.map(function(m){ return m.margem; }),
+        linhaCor:"gold", linhaFmt:function(v){ return fPct(v); },
+        valorFmt: campo==="pedidos" ? fInt : fCurto,
+        eixoFmt: campo==="pedidos" ? function(v){ return fInt(v); } : function(v){ return v===0 ? "0" : (v>=1e6 ? (v/1e6).toFixed(0)+" mi" : (v/1e3).toFixed(0)+" mil"); },
+        aria:"Evolução mensal"
+      });
+      legenda.innerHTML = "";
+      var k1 = el("span","key"); var i1 = el("i","sq"); i1.style.background=cor("blue");
+      k1.appendChild(i1); k1.appendChild(document.createTextNode(campo==="venda"?"Venda do mês":(campo==="lucro"?"Lucro do mês":"Pedidos do mês")));
+      var k2 = el("span","key"); var i2 = el("i"); i2.style.background=cor("gold");
+      k2.appendChild(i2); k2.appendChild(document.createTextNode("Margem do mês (escala própria)"));
+      legenda.appendChild(k1); legenda.appendChild(k2);
+
+      montarRanking(boxDep, FATDEPTO.slice().sort(function(a,b){ return b.venda-a.venda; })
+        .map(function(d){ return {nome:d.nome, valor:d.venda, rotulo:fCurto(d.venda)}; }), {cor:"gold"});
+      montarRanking(boxUf, FATUF.slice().sort(function(a,b){ return b.venda-a.venda; })
+        .map(function(u){ return {nome:u.uf, valor:u.venda, rotulo:fCurto(u.venda)}; }), {cor:"blue"});
+      montarRanking(boxSec, FATSEC.slice(0,20)
+        .map(function(s){ return {nome:s.nome, valor:s.venda, rotulo:fCurto(s.venda)}; }), {cor:"blue"});
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Todos os "+FATMES.length+" meses da base, do mais recente para o mais antigo.";
+      tabela.definir(FATMES);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   PÁGINA 08 — SALDO VERBA
+   ========================================================================= */
+pagina("saldo_verba","08","Saldo verba","Crédito disponível com os fornecedores",
+  "O saldo de verba por fornecedor principal, sem cruzar com avaria. Entrada é crédito concedido, saída é crédito consumido, e o saldo de movimentação é a diferença — é esse valor que alimenta o cartão de verba da página Compras. As colunas de vencidas e a vencer separam o crédito pelo prazo registrado na verba.",
+  function(raiz){
+    var estado = {comps:todosComps(), busca:""};
+    var barra = el("div","filters"); raiz.appendChild(barra);
+    var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
+
+    var linha = el("div","row-2col"); raiz.appendChild(linha);
+    var cRank = cartao("Maiores saldos","Os 15 fornecedores com mais crédito disponível.");
+    var boxRank = el("div","rank"); cRank.appendChild(boxRank); linha.appendChild(cRank);
+    var cPrazo = cartao("Crédito por prazo","Quanto do saldo já venceu e quanto ainda está no prazo.");
+    var boxPrazo = el("div"); cPrazo.appendChild(boxPrazo); linha.appendChild(cPrazo);
+
+    var cTab = cartao("Todos os fornecedores","");
+    var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
+    var tabela = new Tabela(boxTab,{
+      porPagina:40, ordemInicial:"verba", dirInicial:-1,
+      colunas:[
+        {titulo:"Código", campo:"cod", num:true, classe:"mono-muted"},
+        {titulo:"Fornecedor principal", campo:"nome", classe:"trunc", texto:true},
+        {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return v==null?"—":nomeComprador(v); }},
+        {titulo:"Entrada", campo:"entrada", num:true, fmt:fR$2},
+        {titulo:"Saída", campo:"saida", num:true, fmt:fR$2, corTexto:function(){ return cor("muted"); }},
+        {titulo:"Saldo mov.", campo:"verba", num:true, fmt:fR$2,
+         corTexto:function(v){ return v>=0?cor("good"):cor("crit"); }},
+        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2},
+        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2}
+      ]
+    });
+
+    function render(){
+      var lista = VERBA.filter(function(v){
+        if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(v.comp)) return false;
+        if(estado.busca && String(v.nome).toLowerCase().indexOf(estado.busca)===-1
+           && String(v.cod).indexOf(estado.busca)===-1) return false;
+        return true;
+      });
+      var saldo = lista.reduce(function(s,v){ return s+(v.verba||0); },0);
+      var entrada = lista.reduce(function(s,v){ return s+(v.entrada||0); },0);
+      var saida = lista.reduce(function(s,v){ return s+Math.abs(v.saida||0); },0);
+      var vencidas = lista.reduce(function(s,v){ return s+(v.vencidas||0); },0);
+      var avencer = lista.reduce(function(s,v){ return s+(v.avencer||0); },0);
+      var comSaldo = lista.filter(function(v){ return (v.verba||0) > 0; });
+
+      filtroComprador(barra, estado, function(){ render(); }, [
+        blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
+          function(){ estado={comps:todosComps(),busca:""}; render(); })
+      ]);
+
+      montarKpis(kpis,[
+        {label:"Saldo de verba", valor:fR$(saldo), cor:"good", sub:"Entrada menos saída de crédito."},
+        {label:"Crédito concedido", valor:fR$(entrada), cor:"blue", sub:"Total lançado a favor da empresa."},
+        {label:"Crédito consumido", valor:fR$(saida), cor:"muted", sub:"Já utilizado em abatimentos."},
+        {label:"Fornecedores com saldo", valor:fInt(comSaldo.length), cor:"ink",
+         sub:"De "+fInt(lista.length)+" no filtro atual."},
+        {label:"Vencidas", valor:fR$(vencidas), cor:"warn", sub:"Verba com vencimento já passado."},
+        {label:"A vencer", valor:fR$(avencer), cor:"good", sub:"Ainda dentro do prazo."}
+      ]);
+
+      montarRanking(boxRank, lista.slice().sort(function(a,b){ return b.verba-a.verba; }).slice(0,15)
+        .map(function(v){ return {nome:v.nome, valor:v.verba, rotulo:fR$(v.verba)}; }), {cor:"good"});
+
+      montarDonut(boxPrazo,[
+        {label:"Vencidas", valor:Math.max(0,vencidas), cor:"warn"},
+        {label:"A vencer", valor:Math.max(0,avencer), cor:"good"}
+      ], (vencidas+avencer) ? ("Do crédito com prazo registrado, "+fPct(vencidas/(vencidas+avencer))+" já passou do vencimento.") : "Sem prazo registrado no filtro atual.");
+
+      cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
+      tabela.definir(lista);
+    }
+    render();
+    return render;
+  });
+
+/* =========================================================================
+   NOTAS + MONTAGEM
+   ========================================================================= */
+function blocoNotas(){
+  var d = document.createElement("details");
+  d.className = "card notas"; d.open = false;
+  var s = document.createElement("summary"); s.textContent = "Notas técnicas desta versão";
+  d.appendChild(s);
+  var ul = document.createElement("ul");
+  [
+   "<strong>Origem:</strong> todas as páginas leem o projeto DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor. As consultas rápidas rodam 4x ao dia; o faturamento, 1x por dia de madrugada.",
+   "<strong>Verba:</strong> o cartão de verba da página Compras agora usa a consulta oficial de saldo de verba (Consulta3/SALDOMOV). Nas primeiras versões deste painel ele somava a coluna de verba da própria consulta de ruptura, que é por fornecedor principal — o valor saía cerca do dobro do real.",
+   "<strong>Status ATIVO/FORALINHA:</strong> a coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Até corrigirmos a origem, quem não é explicitamente FORALINHA é tratado como ativo.",
+   "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8. Na página Saldo verba x avaria ela soma todas as filiais, porque a consulta de origem do Power BI tem o filtro de filial comentado e depois do GROUP BY — nunca executa. Mantivemos o comportamento original para os números baterem com o BI atual.",
+   "<strong>Sugestão por fornecedor:</strong> o Power BI multiplica a soma da sugestão de todos os produtos pelo preço do produto mais caro do fornecedor. O painel mostra esse valor e o cálculo correto lado a lado.",
+   "<strong>Margem do faturamento:</strong> corrigida. O original protegia a divisão comparando a venda com 100 em vez de zero, o que é claramente um resquício de teste.",
+   "<strong>Atualização:</strong> esta página guarda uma fotografia dos dados do momento em que foi publicada. Os números do banco continuam sendo atualizados pelo pipeline; peça uma republicação quando quiser a foto mais recente."
+  ].forEach(function(t){ var li = document.createElement("li"); li.innerHTML = t; ul.appendChild(li); });
+  d.appendChild(ul);
+  return d;
+}
+
+var main = document.getElementById("main");
+var navTabs = document.getElementById("tabs");
+var ativa = null, renders = {};
+
+PAGINAS.forEach(function(pg){
+  var b = el("button", null);
+  var n = el("span","tnum", pg.num);
+  b.appendChild(n); b.appendChild(document.createTextNode(pg.titulo));
+  b.type = "button";
+  b.addEventListener("click", function(){ abrir(pg.id); });
+  pg.botao = b;
+  navTabs.appendChild(b);
+
+  var cont = el("div","pagina");
+  cont.id = "pg-"+pg.id;
+  main.appendChild(cont);
+  pg.container = cont;
+});
+main.appendChild(blocoNotas());
+var rodape = el("div","foot-meta");
+rodape.appendChild(el("span","","Fotografia do DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor."));
+rodape.appendChild(el("span","","Lube Distribuidora LTDA"));
+main.appendChild(rodape);
+
+function abrir(id){
+  PAGINAS.forEach(function(pg){
+    var e = pg.id === id;
+    pg.botao.classList.toggle("active", e);
+    pg.container.classList.toggle("ativa", e);
+    if(e && !pg.pronta){
+      pg.container.appendChild(cabecalho(pg));
+      renders[pg.id] = pg.montar(pg.container);
+      pg.pronta = true;
+    }
+  });
+  ativa = id;
+  try{ localStorage.setItem("bi_aba", id); }catch(e){}
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function redesenhar(){ if(ativa && renders[ativa]) renders[ativa](); }
+
+var temaSalvo = "dark";
+try{ temaSalvo = localStorage.getItem("bi_tema") || "dark"; }catch(e){}
+document.documentElement.setAttribute("data-theme", temaSalvo==="light" ? "light" : "dark");
+raiz.setAttribute("data-theme", temaSalvo==="light" ? "light" : "dark");
+document.querySelectorAll("[data-theme-btn]").forEach(function(b){
+  b.classList.toggle("active", b.getAttribute("data-theme-btn")===temaSalvo);
+});
+
+var abaSalva = null;
+try{ abaSalva = localStorage.getItem("bi_aba"); }catch(e){}
+abrir(PAGINAS.some(function(p){ return p.id===abaSalva; }) ? abaSalva : "compras");
+
+}
+
+(function(){
+  var caixa = document.getElementById("carregando");
+  var texto = document.getElementById("carregandoTexto");
+  var raiz  = document.getElementById("raiz");
+  raiz.hidden = true;
+
+  function falhar(titulo, detalhe){
+    caixa.classList.add("falhou");
+    texto.textContent = titulo;
+    var box = document.createElement("div");
+    box.className = "erro";
+    box.textContent = detalhe || "";
+    caixa.appendChild(box);
+  }
+
+  fetch("/api/dados", {headers:{"Accept":"application/json"}})
+    .then(function(r){
+      return r.json().then(function(corpo){
+        if(!r.ok) throw new Error((corpo && corpo.mensagem) || ("HTTP " + r.status));
+        return corpo;
+      }, function(){ throw new Error("A resposta do servidor não veio em JSON (HTTP " + r.status + ")."); });
+    })
+    .then(function(dados){
+      window.BI = dados;
+      iniciarPainel();
+      caixa.remove();
+      raiz.hidden = false;
+    })
+    .catch(function(e){
+      falhar("Não consegui carregar os dados.",
+             (e && e.message ? e.message : String(e)) +
+             "  ·  Se isto acabou de ser publicado, confira as variáveis de ambiente do projeto na Vercel.");
+    });
+})();
+</script>
+
+</body>
+</html>
