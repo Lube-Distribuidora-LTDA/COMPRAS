@@ -47,11 +47,11 @@
     -webkit-font-smoothing:antialiased;
   }
   ::selection{background:var(--blue);color:#fff;}
-  .num{font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+  .num{font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; font-weight:600;}
   h1,h2,h3{font-family:"Bricolage Grotesque", sans-serif; margin:0; text-wrap:balance;}
   @keyframes lubeRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
   @keyframes lubePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.82);}}
-  @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
   ::-webkit-scrollbar{height:10px;width:10px;}
   ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:20px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -87,15 +87,22 @@
   .pagina{display:none; flex-direction:column; gap:20px;}
   .pagina.ativa{display:flex; animation:lubeRise .45s ease both;}
   .module-eyebrow{font:700 10.5px/1 Barlow; letter-spacing:.2em; text-transform:uppercase; color:var(--gold);}
-  .module-title{margin:8px 0 0; font-size:clamp(22px,2.4vw,30px); font-weight:700; letter-spacing:-.02em;}
-  .module-desc{margin:7px 0 0; max-width:86ch; font-size:13.5px; color:var(--ink2); line-height:1.6;}
+  .module-title-row{margin-top:8px; display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;}
+  .module-title{margin:0; font-size:clamp(22px,2.4vw,30px); font-weight:700; letter-spacing:-.02em;}
+  .module-info{margin-bottom:2px;}
+  .module-info summary{cursor:pointer; list-style:none; font:700 10.5px Barlow; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; transition:color .15s ease;}
+  .module-info summary::-webkit-details-marker{display:none;}
+  .module-info summary::before{content:"ⓘ "; font-size:11px;}
+  .module-info summary:hover, .module-info[open] summary{color:var(--gold);}
+  .module-desc{margin:9px 0 0; max-width:86ch; font-size:13.5px; color:var(--ink2); line-height:1.6;}
   .module-desc strong{color:var(--ink);}
 
   .filters{border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:var(--shadow); padding:14px 16px; display:flex; flex-wrap:wrap; gap:14px; align-items:center;}
   .filter-group{display:flex; align-items:center; gap:7px; flex-wrap:wrap;}
   .filter-label{font:700 10px Barlow; letter-spacing:.13em; text-transform:uppercase; color:var(--muted);}
-  .chip{cursor:pointer; border:1px solid var(--line); background:var(--surface2); color:var(--ink2); font:600 12px Barlow; padding:6px 12px; border-radius:100px; white-space:nowrap; transition:background .15s,color .15s,border-color .15s;}
-  .chip:hover{border-color:var(--line2);}
+  .chip{cursor:pointer; border:1px solid var(--line); background:var(--surface2); color:var(--ink2); font:600 12px Barlow; padding:6px 12px; border-radius:100px; white-space:nowrap; transition:background .15s,color .15s,border-color .15s,transform .15s;}
+  .chip:hover{border-color:var(--line2); transform:translateY(-1px);}
+  .chip:active{transform:scale(.94);}
   .chip.on{background:var(--blue); border-color:var(--blue); color:#fff;}
   .chip.tone-crit.on{background:var(--crit); border-color:var(--crit); color:#fff;}
   .chip.tone-warn.on{background:var(--warn); border-color:var(--warn); color:#241900;}
@@ -107,16 +114,22 @@
   .clear-btn:hover{color:var(--ink); border-color:var(--line2);}
 
   .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:12px;}
-  .kpi{position:relative; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:var(--shadow); padding:15px 17px 14px; display:flex; flex-direction:column; gap:6px;}
+  .kpi{position:relative; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:var(--shadow); padding:15px 17px 14px; display:flex; flex-direction:column; gap:6px; transition:transform .2s cubic-bezier(.22,1,.36,1), border-color .2s ease, background .2s ease;}
+  .kpi:hover{transform:translateY(-3px); border-color:var(--line2); background:var(--surface2);}
+  .kpi.mudou{animation:kpiPulso .7s cubic-bezier(.22,1,.36,1);}
+  @keyframes kpiPulso{0%{box-shadow:var(--shadow), 0 0 0 0 color-mix(in oklch, var(--blue) 55%, transparent);}100%{box-shadow:var(--shadow), 0 0 0 16px color-mix(in oklch, var(--blue) 0%, transparent);}}
   .kpi-bar{position:absolute; left:0; top:15px; bottom:15px; width:3px; border-radius:0 3px 3px 0;}
   .kpi-label{font:700 10px/1 Barlow; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:6px;}
-  .kpi-value{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:23px; letter-spacing:-.02em;}
+  .kpi-value{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:23px; letter-spacing:-.02em; transition:color .3s ease;}
   .kpi-sub{font-size:11.5px; line-height:1.45; color:var(--ink2);}
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
   .info-dot{width:13px; height:13px; border-radius:50%; border:1px solid var(--line2); color:var(--muted); font-size:9.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; cursor:default; position:relative;}
   .info-dot .tip{display:none; position:absolute; bottom:19px; left:50%; transform:translateX(-50%); width:230px; background:var(--ink); color:var(--bg); font-size:11px; font-weight:500; line-height:1.4; padding:8px 10px; border-radius:8px; text-transform:none; letter-spacing:0; z-index:9; box-shadow:var(--shadow);}
   .info-dot:hover .tip, .info-dot:focus .tip{display:block;}
 
-  section.card{border:1px solid var(--line); border-radius:20px; background:var(--surface); box-shadow:var(--shadow); padding:22px 24px;}
+  section.card{border:1px solid var(--line); border-radius:20px; background:var(--surface); box-shadow:var(--shadow); padding:22px 24px; transition:border-color .2s ease;}
+  section.card:hover{border-color:var(--line2);}
   .card-title{font-size:16.5px; font-weight:700;}
   .card-note{font-size:12.5px; color:var(--muted); margin:5px 0 0;}
   .row-2col{display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:18px;}
@@ -131,20 +144,24 @@
   .legend-row{display:flex; align-items:center; gap:9px; font-size:13px;}
   .legend-swatch{width:10px; height:10px; border-radius:3px; flex:0 0 auto;}
   .legend-row .lbl{color:var(--ink2);}
-  .legend-row .val{margin-left:auto; font-family:"JetBrains Mono",monospace; font-size:12.5px;}
+  .legend-row .val{margin-left:auto; font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:700;}
   .donut-reading{margin:6px 0 0; font-size:12px; line-height:1.5; color:var(--muted);}
 
   /* ranking em barras */
   .rank{display:flex; flex-direction:column; gap:9px; margin-top:16px;}
-  .rank-row{display:grid; grid-template-columns:minmax(120px,26%) 1fr auto; gap:12px; align-items:center; font-size:12.5px;}
+  .rank-row{display:grid; grid-template-columns:minmax(120px,26%) 1fr auto; gap:12px; align-items:center; font-size:12.5px; border-radius:8px; transition:transform .15s ease, background .15s ease; padding:2px 4px; margin:-2px -4px;}
+  .rank-row:hover{transform:translateX(3px); background:var(--surface2);}
   .rank-nome{color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .rank-trilho{height:14px; background:var(--surface3); border-radius:4px; overflow:hidden; display:flex;}
-  .rank-barra{height:100%; border-radius:0 4px 4px 0;}
-  .rank-val{font-family:"JetBrains Mono",monospace; font-size:12px; text-align:right; white-space:nowrap;}
+  .rank-barra{height:100%; border-radius:0 4px 4px 0; transition:width .8s cubic-bezier(.22,1,.36,1), filter .15s ease;}
+  .rank-row:hover .rank-barra{filter:brightness(1.18);}
+  .rank-val{font-family:"JetBrains Mono",monospace; font-size:12.5px; font-weight:700; text-align:right; white-space:nowrap;}
 
   /* grafico de colunas */
   .chart-box{margin-top:16px; width:100%; overflow-x:auto;}
   .chart-box svg{display:block;}
+  .chart-box svg rect{transition:height .7s cubic-bezier(.22,1,.36,1), y .7s cubic-bezier(.22,1,.36,1);}
+  .chart-box svg rect:hover{filter:brightness(1.15);}
   .chart-legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--ink2);}
   .chart-legend span.key{display:inline-flex; align-items:center; gap:7px;}
   .chart-legend i{width:14px; height:3px; border-radius:2px; display:inline-block;}
@@ -159,11 +176,12 @@
   table.dados thead th .arrow{opacity:.4; margin-left:3px; font-size:10px;}
   table.dados thead th.sorted .arrow{opacity:1; color:var(--blue);}
   table.dados tbody td{padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap;}
-  table.dados tbody td.num{text-align:right; font-family:"JetBrains Mono",monospace; font-size:12px;}
+  table.dados tbody td.num{text-align:right; font-family:"JetBrains Mono",monospace; font-size:12.5px; font-weight:600;}
   table.dados tbody tr:nth-child(even){background:color-mix(in oklch, var(--surface2) 55%, transparent);}
   table.dados tbody tr:hover{background:var(--surface3);}
   td.trunc{max-width:280px; overflow:hidden; text-overflow:ellipsis;}
-  td.mono-muted{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--muted);}
+  td.mono-muted{font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:600; color:var(--muted);}
+  table.dados mark{background:var(--gold); color:#241900; padding:0 2px; border-radius:3px; font-weight:700;}
   .pill{font:700 10.5px Barlow; letter-spacing:.06em; padding:3px 8px; border-radius:100px; white-space:nowrap; display:inline-block;}
   .pill.good{background:var(--good-soft); color:var(--good);}
   .pill.warn{background:var(--warn-soft); color:var(--warn);}
@@ -372,10 +390,78 @@ function lerCor(nome){
   return getComputedStyle(raiz).getPropertyValue("--"+nome).trim() || "#888";
 }
 
+/* ---------------- reacoes visuais (numeros animados, revelar ao rolar) ---------------- */
+var semMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var revealObs = (!semMovimento && "IntersectionObserver" in window) ? new IntersectionObserver(function(entradas){
+  entradas.forEach(function(en){
+    if(en.isIntersecting){ en.target.classList.add("in-view"); revealObs.unobserve(en.target); }
+  });
+}, {threshold:.12, rootMargin:"0px 0px -40px 0px"}) : null;
+function revelar(elemento, atraso){
+  elemento.classList.add("reveal");
+  if(atraso) elemento.style.transitionDelay = atraso+"ms";
+  if(revealObs) revealObs.observe(elemento); else elemento.classList.add("in-view");
+}
+
+/* Le um texto ja formatado (ex.: "R$ 12,3 mi", "45,2%", "1.204") e devolve
+   prefixo/sufixo literais + a grandeza numerica real (desfazendo mi/bi/mil),
+   para animar o valor de um KPI sem que cada pagina precise expor o numero cru. */
+function lerNumeroFormatado(txt){
+  if(txt == null) return null;
+  var s = String(txt);
+  var m = s.match(/^(.*?)(-?\d[\d.,]*)(.*)$/);
+  if(!m) return null;
+  var prefixo = m[1], bruto = m[2], sufixo = m[3];
+  var iVirg = bruto.lastIndexOf(",");
+  var casas = iVirg===-1 ? 0 : (bruto.length-iVirg-1);
+  var norm = bruto.replace(/\./g,"").replace(",",".");
+  var v = parseFloat(norm);
+  if(isNaN(v)) return null;
+  var abreviado = /\b(mi|bi|mil)\b/.test(sufixo);
+  var mult = /\bbi\b/.test(sufixo) ? 1e9 : /\bmi\b/.test(sufixo) ? 1e6 : /\bmil\b/.test(sufixo) ? 1e3 : 1;
+  return {prefixo:prefixo, sufixo:sufixo, casas:casas, abreviado:abreviado, grandeza:v*mult, texto:s};
+}
+function fmtCasas(n,casas){ return n.toLocaleString("pt-BR",{minimumFractionDigits:casas,maximumFractionDigits:casas}); }
+function reabreviarGrandeza(n){
+  var a = Math.abs(n);
+  if(a>=1e9) return fmtCasas(n/1e9,2)+" bi";
+  if(a>=1e6) return fmtCasas(n/1e6,1)+" mi";
+  if(a>=1e3) return fmtCasas(n/1e3,0)+" mil";
+  return fmtCasas(n,0);
+}
+/* Anima a troca de valor de um .kpi-value entre dois textos formatados. Quando
+   nao consegue interpretar algum dos dois (ex.: "—") ou o usuario pediu menos
+   movimento, apenas troca o texto na hora. */
+function animarKpiValor(elVal, anterior, novoTexto){
+  var alvo = lerNumeroFormatado(novoTexto);
+  if(!alvo || !anterior || anterior.grandeza==null || semMovimento || anterior.texto===novoTexto){
+    elVal.textContent = novoTexto;
+    return alvo;
+  }
+  var de = anterior.grandeza, para = alvo.grandeza;
+  var t0 = null, dur = 650;
+  function passo(agora){
+    if(t0==null) t0 = agora;
+    var p = Math.min(1, (agora-t0)/dur);
+    var facil = 1-Math.pow(1-p,3);
+    var atual = de + (para-de)*facil;
+    if(alvo.abreviado || anterior.abreviado){
+      elVal.textContent = alvo.prefixo.replace(/\s+$/,"") + " " + reabreviarGrandeza(atual);
+    } else {
+      elVal.textContent = alvo.prefixo + fmtCasas(atual, alvo.casas) + alvo.sufixo;
+    }
+    if(p<1) requestAnimationFrame(passo); else elVal.textContent = novoTexto;
+  }
+  requestAnimationFrame(passo);
+  return alvo;
+}
+
 /* KPIs */
 function montarKpis(destino, defs){
+  var anteriores = destino.__kpiAnteriores || [];
   destino.innerHTML = "";
-  defs.forEach(function(d){
+  var atuais = [];
+  defs.forEach(function(d,i){
     var t = el("div","kpi");
     var barra = el("div","kpi-bar"); barra.style.background = cor(d.cor||"ink");
     var lab = el("div","kpi-label"); lab.appendChild(document.createTextNode(d.label));
@@ -383,11 +469,16 @@ function montarKpis(destino, defs){
       var dot = el("span","info-dot","i"); dot.tabIndex = 0;
       var tip = el("span","tip", d.info); dot.appendChild(tip); lab.appendChild(dot);
     }
-    var val = el("div","kpi-value", d.valor); val.style.color = cor(d.cor||"ink");
+    var val = el("div","kpi-value"); val.style.color = cor(d.cor||"ink");
+    var infoAnterior = anteriores[i];
+    var lido = animarKpiValor(val, infoAnterior, d.valor);
+    if(infoAnterior && infoAnterior.texto !== d.valor) t.classList.add("mudou");
+    atuais.push(lido);
     var sub = el("div","kpi-sub", d.sub||"");
     t.appendChild(barra); t.appendChild(lab); t.appendChild(val); t.appendChild(sub);
     destino.appendChild(t);
   });
+  destino.__kpiAnteriores = atuais;
 }
 
 /* ranking horizontal */
@@ -395,18 +486,26 @@ function montarRanking(destino, itens, opts){
   opts = opts || {};
   destino.innerHTML = "";
   var max = itens.reduce(function(m,i){ return Math.max(m, Math.abs(i.valor)||0); }, 0) || 1;
+  var barras = [];
   itens.forEach(function(i){
     var linha = el("div","rank-row");
     linha.appendChild(el("div","rank-nome", i.nome));
     var trilho = el("div","rank-trilho");
     var barra = el("div","rank-barra");
-    barra.style.width = Math.max(1.5, Math.abs(i.valor)/max*100) + "%";
+    var alvo = Math.max(1.5, Math.abs(i.valor)/max*100) + "%";
+    barra.style.width = semMovimento ? alvo : "0%";
     barra.style.background = cor(i.cor || opts.cor || "blue");
     trilho.appendChild(barra);
     linha.appendChild(trilho);
     linha.appendChild(el("div","rank-val", i.rotulo));
     destino.appendChild(linha);
+    if(!semMovimento) barras.push([barra, alvo]);
   });
+  if(barras.length){
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      barras.forEach(function(b){ b[0].style.width = b[1]; });
+    }); });
+  }
 }
 
 /* donut */
@@ -424,18 +523,26 @@ function montarDonut(caixa, partes, leitura){
   fundo.setAttribute("cx",75); fundo.setAttribute("cy",75); fundo.setAttribute("r",r);
   fundo.setAttribute("fill","none"); fundo.setAttribute("stroke","var(--surface3)"); fundo.setAttribute("stroke-width",18);
   svg.appendChild(fundo);
+  var segs = [];
   partes.forEach(function(p){
     var len = circ*((p.valor||0)/total);
     var seg = document.createElementNS(ns,"circle");
     seg.setAttribute("cx",75); seg.setAttribute("cy",75); seg.setAttribute("r",r);
     seg.setAttribute("fill","none"); seg.setAttribute("stroke",cor(p.cor)); seg.setAttribute("stroke-width",18);
     seg.setAttribute("stroke-linecap","round");
-    seg.setAttribute("stroke-dasharray", Math.max(len-2,0)+" "+(circ-len+2));
+    var alvo = Math.max(len-2,0)+" "+(circ-len+2);
+    seg.setAttribute("stroke-dasharray", semMovimento ? alvo : ("0 "+circ));
     seg.setAttribute("stroke-dashoffset", -offset);
     seg.style.transition = "stroke-dasharray .9s cubic-bezier(.22,1,.36,1)";
     svg.appendChild(seg);
+    if(!semMovimento) segs.push([seg, alvo]);
     offset += len;
   });
+  if(segs.length){
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      segs.forEach(function(s){ s[0].setAttribute("stroke-dasharray", s[1]); });
+    }); });
+  }
   box.appendChild(svg);
   var centro = el("div","donut-center");
   var pct = el("span","donut-pct num", fPct((partes[0].valor||0)/total));
@@ -467,7 +574,8 @@ function montarColunas(caixa, dados, opts){
   var larguraCol = opts.larguraCol || 26;
   var L = Math.max(640, dados.length*larguraCol + 90);
   var A = opts.altura || 260;
-  var mE = 64, mD = opts.linha ? 52 : 14, mT = 16, mB = 34;
+  var mostrarValores = dados.length <= 16;
+  var mE = 64, mD = opts.linha ? 52 : 14, mT = mostrarValores ? 32 : 16, mB = 34;
   var pw = L-mE-mD, ph = A-mT-mB;
   var ns = "http://www.w3.org/2000/svg";
   var svg = document.createElementNS(ns,"svg");
@@ -489,29 +597,52 @@ function montarColunas(caixa, dados, opts){
   for(var i=0;i<=passos;i++){
     var y = mT + ph - (i*passo/topo)*ph;
     svg.appendChild(cria("line",{x1:mE,y1:y,x2:mE+pw,y2:y,stroke:"var(--grid)","stroke-width":1}));
-    var tx = cria("text",{x:mE-8,y:y+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});
+    var tx = cria("text",{x:mE-8,y:y+4,"text-anchor":"end","font-size":10.5,"font-weight":700,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});
     tx.textContent = opts.eixoFmt ? opts.eixoFmt(i*passo) : fInt(i*passo);
     svg.appendChild(tx);
   }
 
   var bw = Math.min(24, pw/dados.length*0.62);
+  var crescer = [];
+  var rotulosValor = [];
   dados.forEach(function(d,i){
     var cx = mE + (i+0.5)*(pw/dados.length);
     var h = Math.max(1, ((d.valor||0)/topo)*ph);
     var y = mT + ph - h;
+    var yBase = mT+ph, hBase = Math.min(h,4);
     var g = cria("g",{});
-    var barra = cria("rect",{x:cx-bw/2, y:y, width:bw, height:h, rx:4, fill: cor(d.cor||opts.cor||"blue")});
+    var barra = cria("rect",{x:cx-bw/2, y: semMovimento?y:yBase, width:bw, height: semMovimento?h:0, rx:4, fill: cor(d.cor||opts.cor||"blue")});
     barra.appendChild(cria("title",{})).textContent = d.rotulo + ": " + (opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor));
     g.appendChild(barra);
     // canto inferior reto
-    g.appendChild(cria("rect",{x:cx-bw/2, y:mT+ph-Math.min(h,4), width:bw, height:Math.min(h,4), fill:cor(d.cor||opts.cor||"blue")}));
+    var cantoY = mT+ph-hBase;
+    var canto = cria("rect",{x:cx-bw/2, y: semMovimento?cantoY:yBase, width:bw, height: semMovimento?hBase:0, fill:cor(d.cor||opts.cor||"blue")});
+    g.appendChild(canto);
     svg.appendChild(g);
+    if(!semMovimento){ crescer.push([barra,y,h],[canto,cantoY,hBase]); }
+    if(mostrarValores && (d.valor||0) > 0){
+      var val = cria("text",{x:cx, y:y-8,"text-anchor":"middle","font-size":10.5,"font-weight":700,
+        fill:"var(--ink)","font-family":"JetBrains Mono, monospace"});
+      val.textContent = opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor);
+      val.style.opacity = semMovimento ? 1 : 0;
+      val.style.transition = "opacity .35s ease";
+      svg.appendChild(val);
+      if(!semMovimento) rotulosValor.push(val);
+    }
     if(dados.length <= 40 || i % Math.ceil(dados.length/24) === 0){
-      var lb = cria("text",{x:cx, y:A-12,"text-anchor":"middle","font-size":9.5,fill:"var(--muted)"});
+      var lb = cria("text",{x:cx, y:A-12,"text-anchor":"middle","font-size":9.5,"font-weight":600,fill:"var(--muted)"});
       lb.textContent = d.rotulo;
       svg.appendChild(lb);
     }
   });
+  if(crescer.length){
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      crescer.forEach(function(c){ c[0].setAttribute("y",c[1]); c[0].setAttribute("height",c[2]); });
+    }); });
+  }
+  if(rotulosValor.length){
+    setTimeout(function(){ rotulosValor.forEach(function(t){ t.style.opacity = 1; }); }, 560);
+  }
 
   if(opts.linha){
     var maxL = Math.max.apply(null, opts.linha.map(function(v){ return v==null?0:v; })) || 1;
@@ -550,7 +681,23 @@ function Tabela(destino, cfg){
   this.tam = cfg.porPagina || 40;
   this.linhas = [];
 }
-Tabela.prototype.definir = function(linhas){ this.linhas = linhas; this.pagina = 1; this.desenhar(); };
+Tabela.prototype.definir = function(linhas, termo){ this.linhas = linhas; this.termo = termo||""; this.pagina = 1; this.desenhar(); };
+/* escreve texto num <td> destacando o trecho que bateu com a busca, sem usar innerHTML */
+function escreverComDestaque(container, texto, termo){
+  var s = texto==null ? "" : String(texto);
+  if(!termo){ container.textContent = s; return; }
+  var baixo = s.toLowerCase(), t = termo.toLowerCase(), pos = 0, i = baixo.indexOf(t);
+  if(i===-1){ container.textContent = s; return; }
+  while(i!==-1){
+    if(i>pos) container.appendChild(document.createTextNode(s.slice(pos,i)));
+    var mk = document.createElement("mark");
+    mk.textContent = s.slice(i, i+termo.length);
+    container.appendChild(mk);
+    pos = i+termo.length;
+    i = baixo.indexOf(t,pos);
+  }
+  if(pos<s.length) container.appendChild(document.createTextNode(s.slice(pos)));
+}
 Tabela.prototype.desenhar = function(){
   var self = this, cfg = this.cfg;
   var ordenadas = this.linhas.slice().sort(function(a,b){
@@ -596,7 +743,12 @@ Tabela.prototype.desenhar = function(){
         var sp = el("span","pill "+p.tom, p.texto);
         td.appendChild(sp);
       } else {
-        td.textContent = c.fmt ? c.fmt(v, linha) : (v==null ? "—" : v);
+        var texto = c.fmt ? c.fmt(v, linha) : (v==null ? "—" : v);
+        if(self.termo && (c.texto || c.classe==="mono-muted")){
+          escreverComDestaque(td, texto, self.termo);
+        } else {
+          td.textContent = texto;
+        }
         if(c.corTexto) td.style.color = c.corTexto(v, linha);
         if(c.classe === "trunc") td.title = String(v==null?"":v);
       }
@@ -681,10 +833,20 @@ function pagina(id, num, titulo, subtitulo, descricao, montar){
 function cabecalho(pg){
   var d = el("div");
   d.appendChild(el("div","module-eyebrow","Página "+pg.num+" · "+pg.titulo));
-  d.appendChild(el("h2","module-title",pg.subtitulo));
-  var p = el("p","module-desc");
-  p.innerHTML = pg.descricao;
-  d.appendChild(p);
+  var linha = el("div","module-title-row");
+  linha.appendChild(el("h2","module-title",pg.subtitulo));
+  if(pg.descricao){
+    var det = document.createElement("details");
+    det.className = "module-info";
+    var sum = document.createElement("summary");
+    sum.textContent = "Sobre esta página";
+    det.appendChild(sum);
+    var p = el("p","module-desc");
+    p.innerHTML = pg.descricao;
+    det.appendChild(p);
+    linha.appendChild(det);
+  }
+  d.appendChild(linha);
   return d;
 }
 function cartao(titulo, nota){
@@ -868,7 +1030,7 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
       cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(RUPT.length)+" produtos.";
-      tabela.definir(lista);
+      tabela.definir(lista, estado.busca);
     }
     render();
     return render;
@@ -955,7 +1117,7 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
       cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
-      tabela.definir(lista);
+      tabela.definir(lista, estado.busca);
     }
     render();
     return render;
@@ -1076,7 +1238,7 @@ pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertur
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
       cTab.querySelector(".card-note").textContent = "Ordenado por valor sugerido. Clique em qualquer coluna para reordenar.";
-      tabela.definir(lista);
+      tabela.definir(lista, estado.busca);
     }
     render();
     return render;
@@ -1172,13 +1334,13 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         montarRanking(boxRank, porFornec.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
           .map(function(f){ return {nome:f.nome, valor:f.valor, rotulo:fCurto(f.valor)}; }), {cor:"good"});
         tabProd.destino === boxTab && (boxTab.innerHTML = "");
-        tabFornec.definir(porFornec);
+        tabFornec.definir(porFornec, estado.busca);
         cTab.querySelector(".card-note").textContent = "Sugestão consolidada por fornecedor — estoque das filiais 1, 2, 7 e 8.";
       } else {
         montarRanking(boxRank, porProd.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
           .map(function(p){ return {nome:p.desc, valor:p.valor, rotulo:fCurto(p.valor)}; }), {cor:"blue"});
         boxTab.innerHTML = "";
-        tabProd.definir(porProd);
+        tabProd.definir(porProd, estado.busca);
         cTab.querySelector(".card-note").textContent = "Sugestão por produto e filial, baseada nos 3 meses fechados anteriores.";
       }
     }
@@ -1260,7 +1422,7 @@ pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro 
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
       cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(EXC.length)+" produtos com excesso.";
-      tabela.definir(lista);
+      tabela.definir(lista, estado.busca);
     }
     render();
     return render;
@@ -1531,7 +1693,7 @@ pagina("saldo_verba","08","Saldo verba","Crédito disponível com os fornecedore
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
       cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
-      tabela.definir(lista);
+      tabela.definir(lista, estado.busca);
     }
     render();
     return render;
@@ -1592,6 +1754,9 @@ function abrir(id){
       pg.container.appendChild(cabecalho(pg));
       renders[pg.id] = pg.montar(pg.container);
       pg.pronta = true;
+      Array.prototype.forEach.call(pg.container.children, function(filho, i){
+        revelar(filho, Math.min(i*70, 420));
+      });
     }
   });
   ativa = id;

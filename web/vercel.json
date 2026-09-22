@@ -2,7 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/dados.js": {
-      "memory": 512,
       "maxDuration": 30
     }
   },
