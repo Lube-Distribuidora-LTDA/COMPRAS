@@ -68,9 +68,17 @@
   .brand-title{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:19px; letter-spacing:-.01em; margin-top:5px;}
   .header-actions{margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
   .sync-pill{display:flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line); border-radius:100px; background:var(--surface);}
-  .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--good); animation:lubePulse 2.6s ease-in-out infinite; display:inline-block;}
-  .sync-pill .txt{font-size:12px; color:var(--ink2);}
-  .sync-pill strong{color:var(--ink); font-family:"JetBrains Mono",monospace; font-weight:500;}
+  .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--good); animation:lubePulse 2.6s ease-in-out infinite; display:inline-block; flex:0 0 auto;}
+  .sync-pill .txt{font-size:12px; color:var(--ink2); white-space:nowrap;}
+  .sync-pill strong{color:var(--ink); font-family:"JetBrains Mono",monospace; font-weight:600;}
+  .sync-div{width:1px; align-self:stretch; background:var(--line2);}
+  .refresh-btn{display:flex; align-items:center; gap:7px; cursor:pointer; border:1px solid var(--line); background:var(--surface); color:var(--ink2); font:600 12px Barlow; padding:6px 14px; border-radius:100px; white-space:nowrap; transition:border-color .15s ease, color .15s ease, transform .15s ease;}
+  .refresh-btn:hover{border-color:var(--blue); color:var(--ink);}
+  .refresh-btn:active{transform:scale(.95);}
+  .refresh-btn:disabled{opacity:.55; cursor:default; transform:none;}
+  .refresh-ico{display:inline-block; font-size:13px; line-height:1;}
+  .refresh-btn.carregando .refresh-ico{animation:lubeGirar .8s linear infinite;}
+  @keyframes lubeGirar{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
   .source-badge{padding:6px 12px; border-radius:100px; border:1px dashed var(--gold); font:700 10.5px/1.6 Barlow; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); white-space:nowrap;}
   .theme-toggle{display:flex; border:1px solid var(--line); border-radius:100px; overflow:hidden; background:var(--surface);}
   .theme-toggle button{border:0; cursor:pointer; font:600 12px Barlow; padding:7px 14px; background:transparent; color:var(--ink2);}
@@ -218,6 +226,10 @@
     border-radius:14px; padding:16px 18px; max-width:62ch; font-size:13px; line-height:1.6; text-align:left;}
   #carregando .erro code{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--ink2);
     display:block; margin-top:10px; word-break:break-word;}
+  #carregando .erro-retry{cursor:pointer; border:1px solid var(--blue); background:var(--blue); color:#fff;
+    font:600 13px Barlow; padding:9px 20px; border-radius:100px; transition:transform .15s ease;}
+  #carregando .erro-retry:hover{transform:translateY(-2px);}
+  #carregando .erro-retry:active{transform:scale(.95);}
   #raiz[hidden]{display:none;}
 </style>
 
@@ -244,7 +256,12 @@
         <div class="sync-pill">
           <span class="pulse-dot" aria-hidden="true"></span>
           <span class="txt">Última carga <strong id="lastSync">—</strong></span>
+          <span class="sync-div" aria-hidden="true"></span>
+          <span class="txt">Próxima <strong id="nextSync">—</strong></span>
         </div>
+        <button type="button" id="btnAtualizar" class="refresh-btn" title="Buscar a carga mais recente do banco">
+          <span class="refresh-ico" aria-hidden="true">↻</span> Atualizar
+        </button>
         <div class="source-badge">Compras · WinThor/Oracle</div>
         <div class="theme-toggle" role="group" aria-label="Tema">
           <button type="button" data-theme-btn="dark" class="active">Escuro</button>
@@ -377,6 +394,36 @@ document.querySelectorAll("[data-theme-btn]").forEach(function(b){
 
 document.getElementById("lastSync").textContent =
   D.geradoEm ? new Date(D.geradoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+
+/* O ETL roda 4x ao dia (00h, 08h, 12h e 18h, horário de Brasília) — calcula
+   daqui o proximo horario, sem precisar perguntar nada ao servidor. */
+function proximaAtualizacao(){
+  var HORAS = [0,8,12,18];
+  var partes = new Intl.DateTimeFormat("en-US",{timeZone:"America/Sao_Paulo",hour12:false,hour:"2-digit",minute:"2-digit"}).formatToParts(new Date());
+  var m = {}; partes.forEach(function(p){ m[p.type]=p.value; });
+  var minutosAgora = (+m.hour)*60 + (+m.minute);
+  var alvo, amanha = false;
+  for(var i=0;i<HORAS.length;i++){ if(HORAS[i]*60 > minutosAgora){ alvo = HORAS[i]; break; } }
+  if(alvo===undefined){ alvo = HORAS[0]; amanha = true; }
+  return (amanha ? "amanhã " : "hoje ") + String(alvo).padStart(2,"0")+":00";
+}
+function atualizarProximaCarga(){
+  var e = document.getElementById("nextSync");
+  if(e) e.textContent = proximaAtualizacao();
+}
+atualizarProximaCarga();
+setInterval(atualizarProximaCarga, 60000);
+
+/* botao "Atualizar": recarrega a pagina pedindo ao /api/dados pra ignorar
+   qualquer cache (do navegador e da borda da Vercel) e ir direto no banco. */
+var btnAtualizar = document.getElementById("btnAtualizar");
+if(btnAtualizar){
+  btnAtualizar.addEventListener("click", function(){
+    btnAtualizar.disabled = true;
+    btnAtualizar.classList.add("carregando");
+    location.href = location.pathname + "?atualizar=" + Date.now();
+  });
+}
 
 /* ---------------- helpers de DOM ---------------- */
 function el(tag, cls, txt){
@@ -1821,6 +1868,15 @@ abrir(PAGINAS.some(function(p){ return p.id===abaSalva; }) ? abaSalva : "compras
   var raiz  = document.getElementById("raiz");
   raiz.hidden = true;
 
+  /* o botao "Atualizar" recarrega com ?atualizar=<hora> na URL — quando
+     presente, pedimos ao navegador (cache:"no-store") e ao /api/dados
+     (query string diferente) pra ignorar qualquer cache e ir direto no
+     banco, mesmo que a carga anterior ainda esteja "fresca". */
+  var forcar = /[?&]atualizar=/.test(location.search);
+  var urlDados = forcar ? ("/api/dados?atualizar=" + Date.now()) : "/api/dados";
+  var opcoesFetch = {headers:{"Accept":"application/json"}};
+  if(forcar) opcoesFetch.cache = "no-store";
+
   function falhar(titulo, detalhe){
     caixa.classList.add("falhou");
     texto.textContent = titulo;
@@ -1828,26 +1884,40 @@ abrir(PAGINAS.some(function(p){ return p.id===abaSalva; }) ? abaSalva : "compras
     box.className = "erro";
     box.textContent = detalhe || "";
     caixa.appendChild(box);
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "erro-retry"; btn.textContent = "Tentar de novo";
+    btn.addEventListener("click", function(){ location.reload(); });
+    caixa.appendChild(btn);
   }
 
-  fetch("/api/dados", {headers:{"Accept":"application/json"}})
-    .then(function(r){
-      return r.json().then(function(corpo){
-        if(!r.ok) throw new Error((corpo && corpo.mensagem) || ("HTTP " + r.status));
-        return corpo;
-      }, function(){ throw new Error("A resposta do servidor não veio em JSON (HTTP " + r.status + ")."); });
-    })
-    .then(function(dados){
-      window.BI = dados;
-      iniciarPainel();
-      caixa.remove();
-      raiz.hidden = false;
-    })
-    .catch(function(e){
-      falhar("Não consegui carregar os dados.",
-             (e && e.message ? e.message : String(e)) +
-             "  ·  Se isto acabou de ser publicado, confira as variáveis de ambiente do projeto na Vercel.");
-    });
+  /* o pooler do banco pode ter uma falha passageira de conexao — antes de
+     mostrar erro pro usuario, tenta mais duas vezes com uma pequena pausa. */
+  function buscar(tentativasRestantes){
+    fetch(urlDados, opcoesFetch)
+      .then(function(r){
+        return r.json().then(function(corpo){
+          if(!r.ok) throw new Error((corpo && corpo.mensagem) || ("HTTP " + r.status));
+          return corpo;
+        }, function(){ throw new Error("A resposta do servidor não veio em JSON (HTTP " + r.status + ")."); });
+      })
+      .then(function(dados){
+        window.BI = dados;
+        iniciarPainel();
+        caixa.remove();
+        raiz.hidden = false;
+      })
+      .catch(function(e){
+        if(tentativasRestantes > 0){
+          texto.textContent = "A conexão com o banco oscilou, tentando de novo…";
+          setTimeout(function(){ buscar(tentativasRestantes-1); }, 1500);
+          return;
+        }
+        falhar("Não consegui carregar os dados.",
+               (e && e.message ? e.message : String(e)) +
+               "  ·  Se isto acabou de ser publicado, confira as variáveis de ambiente do projeto na Vercel.");
+      });
+  }
+  buscar(2);
 })();
 </script>
 
