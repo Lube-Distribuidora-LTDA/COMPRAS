@@ -280,7 +280,17 @@ function iniciarPainel(){
 "use strict";
 
 var D = window.BI || {};
-var COMPRADORES = D.compradores || {};
+/* Compradores que nao fazem mais parte da Lube — ficam de fora da lista
+   mesmo que ainda apareçam na carga (o ETL tambem ja para de trazê-los,
+   mas produto/fornecedor que o WinThor ainda nao reatribuiu continua
+   citando o codigo antigo). Sem entrada aqui, esse produto so perde o
+   nome do comprador (vira "—"); o estoque, a ruptura etc. continuam
+   aparecendo normalmente. */
+var COMPRADORES_EXCLUIDOS = {621:1, 278:1, 376:1, 375:1, 277:1, 178:1};
+var COMPRADORES = {};
+Object.keys(D.compradores || {}).forEach(function(k){
+  if(!COMPRADORES_EXCLUIDOS[+k]) COMPRADORES[k] = D.compradores[k];
+});
 var FORNEC = D.fornecedores || {};
 
 /* ---------------- formatadores ---------------- */
