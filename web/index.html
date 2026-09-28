@@ -962,7 +962,7 @@ function agruparPorComprador(lista, valorDe){
    PÁGINA 01 — COMPRAS (ruptura e cobertura)
    ========================================================================= */
 pagina("compras","01","Compras","Ruptura & cobertura de estoque",
-  "Ruptura compara a necessidade de 7 dias de venda com o estoque disponível. Cobertura usa 56 dias (8 semanas): acima disso o item entra como excesso. A verba vem da consulta oficial de saldo de verba, não mais da coluna da própria consulta de ruptura — por isso o valor mudou em relação às primeiras versões deste painel.",
+  "Ruptura compara a necessidade de 7 dias de venda com o estoque disponível — é a única definição de ruptura usada no painel (o Power BI original tinha uma segunda, calculada em DAX, com resultado ligeiramente diferente; ela não foi trazida). Cobertura usa 56 dias (8 semanas): acima disso o item entra como excesso. A verba vem da consulta oficial de saldo de verba, não mais da coluna da própria consulta de ruptura — por isso o valor mudou em relação às primeiras versões deste painel.",
   function(raiz){
     var estado = {comps:todosComps(), status:"todos", rup:"todos", cob:"todos", busca:""};
     var barra = el("div","filters"); raiz.appendChild(barra);
@@ -1124,7 +1124,7 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
    PÁGINA 02 — SALDO VERBA X AVARIA
    ========================================================================= */
 pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria acumulada",
-  "Para cada fornecedor principal, a verba é o saldo de movimentação de crédito e a avaria é o valor do estoque indenizado. O saldo é a diferença: quando fica negativo, a avaria já consumiu toda a verba negociada com aquele fornecedor. <strong>A avaria aqui soma todas as filiais</strong>, diferente da página Compras, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado.",
+  "Para cada fornecedor principal, a verba é o saldo de movimentação de crédito e a avaria é o valor do estoque indenizado. O saldo é a diferença: quando fica negativo, a avaria já consumiu toda a verba negociada com aquele fornecedor. <strong>A avaria aqui soma todas as filiais</strong> (o filtro de filial dessa consulta de origem nunca chega a ser aplicado) <strong>e fica restrita aos fornecedores principais que têm movimentação de verba</strong> — por isso é menor que a avaria total por produto da página Compras, que não tem essa restrição.",
   function(raiz){
     var estado = {comps:todosComps(), situacao:"todos", busca:""};
     var barra = el("div","filters"); raiz.appendChild(barra);
@@ -1183,7 +1183,7 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
 
       montarKpis(kpis,[
         {label:"Verba total", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação de crédito com fornecedores."},
-        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Considera todas as filiais."},
+        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Todas as filiais, só dos fornecedores com verba."},
         {label:"Saldo líquido", valor:fR$(verba-avaria), cor:(verba-avaria)>=0?"good":"crit", sub:"Verba menos avaria."},
         {label:"Fornecedores no vermelho", valor:fInt(negativos.length), cor:"crit",
          sub:"Avaria já maior que a verba — "+fPct(lista.length?negativos.length/lista.length:0)+" do total."},
@@ -1404,10 +1404,11 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
       montarKpis(kpis,[
         {label:"Valor sugerido", valor:fCurto(vCorrigido), cor:"good",
          sub:"Cada produto avaliado ao seu próprio preço."},
-        {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias."},
+        {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias. Filiais 1, 2, 7 e 8."},
         {label:"Produtos (30 dias)", valor:fInt(porProd.length), cor:"ink", sub:"Filiais 1, 7 e 12."},
         {label:"Valor por produto", valor:fCurto(vProd), cor:"blue",
-         sub:"Consulta de sugestão por produto, calculada à parte."}
+         sub:"Consulta separada, com filiais e critério próprios — não é o mesmo cálculo do valor sugerido acima.",
+         info:"\"Valor sugerido\" usa as filiais 1, 2, 7 e 8. \"Valor por produto\" usa 1, 7 e 12. São duas consultas diferentes, não o mesmo número quebrado em duas visões."}
       ]);
 
       if(estado.visao==="fornecedor"){
@@ -1792,10 +1793,10 @@ function blocoNotas(){
    "<strong>Origem:</strong> todas as páginas leem o projeto DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor. As consultas rápidas rodam 4x ao dia; o faturamento, 1x por dia de madrugada.",
    "<strong>Verba:</strong> o cartão de verba da página Compras agora usa a consulta oficial de saldo de verba (Consulta3/SALDOMOV). Nas primeiras versões deste painel ele somava a coluna de verba da própria consulta de ruptura, que é por fornecedor principal — o valor saía cerca do dobro do real.",
    "<strong>Status ATIVO/FORALINHA:</strong> a coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Até corrigirmos a origem, quem não é explicitamente FORALINHA é tratado como ativo.",
-   "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8. Na página Saldo verba x avaria ela soma todas as filiais, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado.",
+   "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8, para todos os produtos. Na página Saldo verba x avaria ela soma todas as filiais, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado — mas fica restrita aos fornecedores principais que têm movimentação de verba, por isso o total das duas páginas não bate.",
    "<strong>Sugestão por fornecedor:</strong> cada produto da carteira do fornecedor é avaliado ao seu próprio preço de venda, e a sugestão soma o valor de cada item individualmente.",
    "<strong>Margem do faturamento:</strong> a divisão é protegida contra venda zero, evitando distorções no cálculo quando não há venda no período.",
-   "<strong>Atualização:</strong> esta página guarda uma fotografia dos dados do momento em que foi publicada. Os números do banco continuam sendo atualizados pelo pipeline; peça uma republicação quando quiser a foto mais recente."
+   "<strong>Atualização:</strong> o painel busca o dado mais recente do DATA WAREHOUSE a cada carga — não é uma foto fixa do momento em que foi publicado. Por padrão fica em cache por até 10 minutos (pra não sobrecarregar o banco a cada acesso); o botão \"Atualizar\" no topo da página força uma busca nova, ignorando esse cache."
   ].forEach(function(t){ var li = document.createElement("li"); li.innerHTML = t; ul.appendChild(li); });
   d.appendChild(ul);
   return d;
@@ -1821,7 +1822,7 @@ PAGINAS.forEach(function(pg){
 });
 main.appendChild(blocoNotas());
 var rodape = el("div","foot-meta");
-rodape.appendChild(el("span","","Fotografia do DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor."));
+rodape.appendChild(el("span","","Dado ao vivo do DATA WAREHOUSE no Supabase, alimentado a partir do Oracle/WinThor."));
 rodape.appendChild(el("span","","Lube Distribuidora LTDA"));
 main.appendChild(rodape);
 
