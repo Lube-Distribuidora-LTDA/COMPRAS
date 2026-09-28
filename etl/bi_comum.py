@@ -38,7 +38,20 @@ log = logging.getLogger("bi")
 # ---------------------------------------------------------------------------
 
 def configurar_log(nome_arquivo: str) -> logging.Logger:
-    """Liga o log na tela e num arquivo ao lado do script que chamou."""
+    """Liga o log num arquivo ao lado do script e, quando houver tela, nela tambem.
+
+    Detalhe importante para o agendamento: a tarefa do Windows roda o script com
+    o `pythonw.exe`, que e a versao do Python sem janela de console — e assim o
+    ETL nao fica abrindo prompt na cara de quem estiver usando a maquina. So que
+    no pythonw o `sys.stdout` e o `sys.stderr` sao None, e qualquer `print` ou
+    handler de tela quebraria com AttributeError. Por isso, aqui: se nao houver
+    saida de tela, apontamos as duas para o vazio e o log vai so para o arquivo.
+    """
+    if sys.stdout is None:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+    if sys.stderr is None:
+        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+
     caminho = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), nome_arquivo)
     logging.basicConfig(
         level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -136,10 +149,23 @@ def conectar_oracle(cfg: OracleConfig):
 
 @contextmanager
 def conectar_supabase(cfg: SupabaseConfig):
+    """Abre a conexao com o Supabase com timeout e keepalive.
+
+    Sem isso, uma conexao que "morre" no meio do caminho (o pooler do
+    Supabase derruba ela silenciosamente, sem mandar FIN/RST) deixa o
+    psycopg2 esperando resposta para sempre — foi o que travou a carga na
+    VM por mais de 5 minutos sem nenhum erro aparecer. keepalives faz o
+    sistema operacional notar a conexao morta em ~30-40s; statement_timeout
+    evita que uma consulta trave o processo indefinidamente do lado do
+    banco; connect_timeout cobre a fase inicial de conexao.
+    """
     log.info("Conectando no Supabase %s:%s/%s como %s", cfg.host, cfg.port, cfg.dbname, cfg.user)
     conn = psycopg2.connect(
         host=cfg.host, port=cfg.port, dbname=cfg.dbname,
         user=cfg.user, password=cfg.password, sslmode="require",
+        connect_timeout=20,
+        keepalives=1, keepalives_idle=20, keepalives_interval=10, keepalives_count=3,
+        options="-c statement_timeout=120000",
     )
     try:
         yield conn
