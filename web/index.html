@@ -755,10 +755,25 @@ function montarColunas(caixa, dados, opts){
   opts = opts || {};
   caixa.innerHTML = "";
   if(!dados.length) return;
-  var larguraCol = opts.larguraCol || 26;
-  var L = Math.max(640, dados.length*larguraCol + 90);
   var A = opts.altura || 260;
   var mostrarValores = dados.length <= 16;
+
+  /* A largura da coluna precisa caber o rótulo de valor, senão um número
+     encosta no outro — era o que acontecia na evolução mensal, com dez
+     "R$ 12,6 mi" lado a lado. Em vez de um valor fixo, a largura mínima sai
+     do maior rótulo que será desenhado. A fonte é monoespaçada de 10,5px,
+     onde cada caractere ocupa ~6,3px; 6,8 dá a folga entre um e outro. */
+  var larguraCol = opts.larguraCol || 26;
+  if(mostrarValores){
+    var maiorRotulo = 0;
+    dados.forEach(function(d){
+      if(!((d.valor||0) > 0)) return;
+      var t = String(opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor));
+      if(t.length > maiorRotulo) maiorRotulo = t.length;
+    });
+    larguraCol = Math.max(larguraCol, maiorRotulo*6.8 + 16);
+  }
+  var L = Math.max(640, dados.length*larguraCol + 90);
   var mE = 64, mD = opts.linha ? 52 : 14, mT = mostrarValores ? 32 : 16, mB = 34;
   var pw = L-mE-mD, ph = A-mT-mB;
   var ns = "http://www.w3.org/2000/svg";
