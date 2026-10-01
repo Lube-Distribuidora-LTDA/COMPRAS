@@ -364,7 +364,18 @@ function iniciarPainel(){
 "use strict";
 
 var D = window.BI || {};
-var COMPRADORES = D.compradores || {};
+/* Compradores que não fazem mais parte da Lube. O ETL já para de trazê-los,
+   mas o filtro também vive aqui por dois motivos: o efeito é imediato (não
+   espera a próxima carga) e a tabela do cadastro é carregada por upsert, que
+   nunca apaga — o registro antigo continua lá.
+   Produto ou fornecedor que o WinThor ainda não reatribuiu perde só o NOME do
+   comprador (vira "—"); estoque, ruptura, avaria e venda seguem aparecendo.
+   Medido em 2026-10-01: atinge 58 dos 7.231 produtos (0,8%). */
+var COMPRADORES_EXCLUIDOS = {621:1, 278:1, 376:1, 375:1, 277:1, 178:1};
+var COMPRADORES = {};
+Object.keys(D.compradores || {}).forEach(function(k){
+  if(!COMPRADORES_EXCLUIDOS[+k]) COMPRADORES[k] = D.compradores[k];
+});
 var FORNEC = D.fornecedores || {};
 
 /* ---------------- formatadores ---------------- */

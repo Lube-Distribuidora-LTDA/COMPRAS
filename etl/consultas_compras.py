@@ -87,12 +87,31 @@ def _atualizar_views_faturamento(cur) -> None:
 # DIMENSOES (rodam primeiro; carga por upsert, nunca apagam cadastro)
 # ===========================================================================
 
-SQL_DIM_COMPRADOR = """
+# Matriculas de quem nao faz mais parte da Lube. Saem do cadastro de
+# compradores do painel (chips de filtro, coluna "Comprador", rankings).
+#   621  BRUNO CELSO IAMONDE TEIXEIRA      375  NORTON PAULINI
+#   278  FELIPE MIRANDA FERREIRA           277  WESLEY ALVES FRANCA
+#   376  GILSINEI MANENTI                  178  RICHARDSON STINGHEL
+#
+# Isto NAO apaga produto, fornecedor nem fato: so deixa de nomear o comprador.
+# O que ainda estiver no nome deles aparece com "—" ate a reatribuicao ser
+# feita no WinThor.
+#
+# Tamanho real desse "—" (medido em 2026-10-01, antes de aplicar):
+#   58 produtos de 7.231 e 20 fornecedores com produto ativo  -> 0,8%
+#   R$ 0,88 mi de R$ 108,9 mi de venda no ano                 -> 0,8%
+# O cadastro tem 1.009 fornecedores no nome deles, mas 989 sao cadastro
+# antigo, cujos produtos ja foram excluidos do WinThor — por isso o numero
+# de fornecedores assusta e o impacto no painel nao.
+COMPRADORES_EXCLUIDOS = (621, 278, 376, 375, 277, 178)
+
+SQL_DIM_COMPRADOR = f"""
 SELECT DISTINCT C.MATRICULA AS CODCOMPRADOR, C.NOME
   FROM PCPRODUT A, PCFORNEC B, PCEMPR C
  WHERE A.CODFORNEC = B.CODFORNEC
    AND B.CODCOMPRADOR = C.MATRICULA
    AND A.REVENDA = 'S'
+   AND C.MATRICULA NOT IN ({", ".join(str(c) for c in COMPRADORES_EXCLUIDOS)})
 """
 
 # Consulta8 do Power BI, acrescida de CODFORNECPRINC (que a original nao trazia
