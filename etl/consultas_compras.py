@@ -38,17 +38,33 @@ from bi_comum import Consulta, inteiro, num, status_produto, texto
 
 AGORA = lambda: datetime.now(timezone.utc)  # noqa: E731
 
-# Data inicial do fato de faturamento (Consulta10). Pode ser encurtada pelo ENV
-# se o banco do Supabase estiver apertado de espaco — sao ~1,6 milhao de linhas
-# desde 2021.
-_DATA_INICIAL_FATURAMENTO = os.environ.get("FATURAMENTO_DATA_INICIAL", "2021-01-01").strip()
+# Data inicial do fato de faturamento (Consulta10): 1o de janeiro do ano corrente.
+#
+# A limpeza anual acontece sozinha, sem rotina de expurgo: o fato e recarregado
+# inteiro a cada madrugada (TRUNCATE + INSERT), entao na primeira carga de
+# janeiro o ano anterior simplesmente nao e lido do Oracle e sai da tabela.
+#
+# Antes isto era fixo em 2021-01-01 e a tabela tinha 1,6 milhao de linhas
+# (387 MB, o segundo maior objeto do banco). Com o ano corrente sao ~250 mil.
+#
+# O preco disso esta nas paginas Performance e Metricas: em janeiro a base tem
+# poucos dias, e nao ha como comparar com o ano anterior. O painel se adapta —
+# as opcoes de periodo sao montadas a partir do que existe na base, em vez de
+# prometerem "24 meses" ou "desde 2021" que nao existem mais.
+#
+# Para um levantamento que precise de mais historico, de uma vez, basta por no
+# ENV da maquina que roda o ETL e rodar o grupo "pesadas":
+#     FATURAMENTO_DATA_INICIAL=2024-01-01
+_DATA_INICIAL_FATURAMENTO = os.environ.get("FATURAMENTO_DATA_INICIAL", "").strip()
 
 
 def _data_inicial() -> date:
-    try:
-        return date.fromisoformat(_DATA_INICIAL_FATURAMENTO)
-    except ValueError:
-        return date(2021, 1, 1)
+    if _DATA_INICIAL_FATURAMENTO:
+        try:
+            return date.fromisoformat(_DATA_INICIAL_FATURAMENTO)
+        except ValueError:
+            pass
+    return date(date.today().year, 1, 1)
 
 
 # Recortes do faturamento guardados prontos no banco. Sem eles, agregar o fato
@@ -861,7 +877,7 @@ CONSULTAS: list[Consulta] = [
     # ---------------- pesada (roda 1x por dia) ----------------
     Consulta(
         nome="faturamento",
-        descricao="Consulta10 — sell-out desde 2021 (a maior tabela do BI)",
+        descricao="Consulta10 — sell-out do ano corrente (a maior tabela do BI)",
         pagina="PERFORMANCE COMPRAS / METRICAS",
         sql=SQL_FATURAMENTO,
         destino="compras.fato_faturamento",
@@ -874,7 +890,10 @@ CONSULTAS: list[Consulta] = [
                           r["codsec"], texto(r["secao"]), inteiro(r["qtped"]),
                           inteiro(r["positivacao"]), r["venda"], r["cmv"],
                           r["valor_lucro"], r["margem"]),
-        linhas_esperadas=1615340,
+        # Sem referencia fixa: a janela agora e o ano corrente, entao a contagem
+        # cresce de janeiro a dezembro e zera na virada. Um numero fixo aqui
+        # dispararia aviso em toda carga.
+        linhas_esperadas=None,
         grupo="pesadas",
         streaming=True,
         binds={"data_inicial": _data_inicial()},

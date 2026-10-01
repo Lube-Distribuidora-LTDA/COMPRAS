@@ -190,7 +190,8 @@ WinThor (Oracle) → ETL em Python → DATA WAREHOUSE (Supabase) → este painel
 **sugestao_produto** — sugestão de 30 dias por produto e filial (~1.800). Filiais 1, 7 e 12.
 - filial, codprod, desc, comprador, fornecedor, volume, giro, disp, sug, preco, valor
 
-**faturamento_mes** — um registro por mês desde 2021: mes ("2026-09"), venda, cmv, lucro, pedidos, posit (positivação), margem (0 a 1)
+**faturamento_mes** — um registro por mês: mes ("2026-09"), venda, cmv, lucro, pedidos, posit (positivação), margem (0 a 1)
+O faturamento guarda **apenas o ano corrente** — a base recomeça na virada do ano. Se perguntarem sobre ano anterior ou comparação com o mesmo mês do ano passado, diga que esse histórico não está mais na base. Os campos v12/l12 ("últimos 12 meses") só são de fato 12 meses quando o ano já tem mais de 12 meses carregados; hoje equivalem ao acumulado do ano.
 **faturamento_comprador** — comprador, venda, lucro, pedidos, posit, v12 e l12 (venda e lucro dos últimos 12 meses), margem, margem12
 **faturamento_fornecedor** — fornecedor, venda, lucro, v12
 **faturamento_departamento** / **faturamento_secao** — nome, venda, lucro (departamento tem v12)

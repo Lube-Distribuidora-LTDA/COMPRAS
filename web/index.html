@@ -457,6 +457,35 @@ var FATUF = (FAT.estado||[]).map(function(r){ return {uf:r[0], venda:r[1], lucro
 var FATSUP = (FAT.superv||[]).map(function(r){ return {cod:r[0], nome:r[1], venda:r[2], lucro:r[3], v12:r[4]}; });
 var FATMESCOMP = FAT.mescomp || [];
 
+/* ---------------- período do faturamento ----------------
+   A base guarda só o ano corrente (o ETL recarrega do Oracle a partir de 1º de
+   janeiro, então a virada do ano limpa sozinha). Como a janela muda de tamanho
+   ao longo do ano, nenhum rótulo de período pode ser escrito à mão: "24 meses"
+   e "desde 2021" viravam mentira. Tudo abaixo sai da própria base. */
+function periodoDaBase(){
+  if(!FATMES.length) return "sem dados";
+  var ini = rotuloMes(FATMES[0].mes), fim = rotuloMes(FATMES[FATMES.length-1].mes);
+  return ini === fim ? ini : ini + " – " + fim;
+}
+/* Só oferece a janela que a base tem como honrar. Com 10 meses carregados,
+   "últimos 12 meses" devolveria 10 e diria 12. */
+function opcoesPeriodo(incluir24){
+  var n = FATMES.length, ops = [];
+  if(n > 12) ops.push({label:"Últimos 12 meses", valor:"12m"});
+  if(incluir24 && n > 24) ops.push({label:"Últimos 24 meses", valor:"24m"});
+  ops.push({label: ops.length ? "Base completa" : periodoDaBase(), valor:"tudo"});
+  return ops;
+}
+function periodoInicial(opcoes, preferida){
+  var tem = opcoes.some(function(o){ return o.valor === preferida; });
+  return tem ? preferida : opcoes[opcoes.length-1].valor;
+}
+function rotuloJanela(valor){
+  if(valor === "12m") return "Últimos 12 meses";
+  if(valor === "24m") return "Últimos 24 meses";
+  return periodoDaBase();
+}
+
 var COMP_LISTA = Object.keys(COMPRADORES).map(function(k){ return {cod:+k, nome:COMPRADORES[k]}; })
   .sort(function(a,b){ return a.nome.localeCompare(b.nome,"pt-BR"); });
 
@@ -1587,31 +1616,41 @@ pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro 
    PÁGINA 06 — PERFORMANCE COMPRAS
    ========================================================================= */
 pagina("performance","06","Performance compras","Resultado de venda por comprador e fornecedor",
-  "Venda (sell-out) desde janeiro de 2021, aberta por comprador, fornecedor, departamento e supervisor. Venda é quantidade × (preço − ST) nos pedidos de venda normal; a margem é o lucro sobre a venda. <strong>A divisão da margem é protegida contra venda zero</strong>, evitando distorções no cálculo.",
+  "Venda (sell-out) do ano corrente, aberta por comprador, fornecedor, departamento e supervisor. Venda é quantidade × (preço − ST) nos pedidos de venda normal; a margem é o lucro sobre a venda. <strong>A divisão da margem é protegida contra venda zero</strong>, evitando distorções no cálculo. <strong>A base guarda só o ano corrente</strong> — na virada do ano ela recomeça, e por isso não há comparação com o ano anterior.",
   function(raiz){
-    var estado = {periodo:"12m", corte:"comprador"};
+    var opcoesPer = opcoesPeriodo(false);
+    var estado = {periodo:periodoInicial(opcoesPer,"12m"), corte:"comprador"};
     var barra = el("div","filters"); raiz.appendChild(barra);
     var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
 
     var cRank = cartao("Ranking","");
     var boxRank = el("div","rank"); cRank.appendChild(boxRank); raiz.appendChild(cRank);
 
-    var cTab = cartao("Compradores","Total do período completo e dos últimos 12 meses, lado a lado.");
+    var cTab = cartao("Compradores","");
     var boxTab = el("div"); cTab.appendChild(boxTab); raiz.appendChild(cTab);
-    var tabela = new Tabela(boxTab,{
-      porPagina:20, ordemInicial:"v12", dirInicial:-1,
-      colunas:[
-        {titulo:"Comprador", campo:"nome", classe:"trunc", texto:true},
+    /* As colunas "12m" só existem quando a base tem mais de 12 meses. Com o ano
+       corrente apenas, elas repetiriam as colunas de total — mesmo número duas
+       vezes, lado a lado. */
+    var temJanela12 = FATMES.length > 12;
+    var colunasComprador = [{titulo:"Comprador", campo:"nome", classe:"trunc", texto:true}];
+    if(temJanela12){
+      colunasComprador.push(
         {titulo:"Venda 12m", campo:"v12", num:true, fmt:fCurto},
         {titulo:"Lucro 12m", campo:"l12", num:true, fmt:fCurto},
         {titulo:"Margem 12m", campo:"margem12", num:true, fmt:fPct,
-         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
-        {titulo:"Venda total", campo:"venda", num:true, fmt:fCurto},
-        {titulo:"Lucro total", campo:"lucro", num:true, fmt:fCurto},
-        {titulo:"Margem total", campo:"margem", num:true, fmt:fPct},
-        {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
-        {titulo:"Positivação", campo:"posit", num:true, fmt:fInt}
-      ]
+         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }});
+    }
+    colunasComprador.push(
+      {titulo:temJanela12?"Venda total":"Venda", campo:"venda", num:true, fmt:fCurto},
+      {titulo:temJanela12?"Lucro total":"Lucro", campo:"lucro", num:true, fmt:fCurto},
+      {titulo:temJanela12?"Margem total":"Margem", campo:"margem", num:true, fmt:fPct,
+       corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
+      {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
+      {titulo:"Positivação", campo:"posit", num:true, fmt:fInt});
+
+    var tabela = new Tabela(boxTab,{
+      porPagina:20, ordemInicial: temJanela12 ? "v12" : "venda", dirInicial:-1,
+      colunas: colunasComprador
     });
 
     function render(){
@@ -1624,19 +1663,22 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
         return (use12?b.margem12:b.margem) - (use12?a.margem12:a.margem); })[0];
 
       barra.innerHTML = "";
-      barra.appendChild(grupoChips("Período",[
-        {label:"Últimos 12 meses",valor:"12m"},{label:"Desde 2021",valor:"tudo"}
-      ], estado.periodo, function(v){ estado.periodo=v; render(); }));
+      /* Só mostra o seletor quando há mais de uma janela possível. */
+      if(opcoesPer.length > 1){
+        barra.appendChild(grupoChips("Período", opcoesPer, estado.periodo,
+          function(v){ estado.periodo=v; render(); }));
+      }
       barra.appendChild(grupoChips("Ranking por",[
         {label:"Comprador",valor:"comprador"},{label:"Fornecedor",valor:"fornecedor"},
         {label:"Departamento",valor:"departamento"},{label:"Supervisor",valor:"supervisor"}
       ], estado.corte, function(v){ estado.corte=v; render(); }));
 
       montarKpis(kpis,[
-        {label:use12?"Venda 12 meses":"Venda desde 2021", valor:fCurto(totalVenda), cor:"blue", sub:"Somente venda normal (condição 1)."},
+        {label:"Venda", valor:fCurto(totalVenda), cor:"blue",
+         sub:rotuloJanela(estado.periodo)+". Somente venda normal (condição 1)."},
         {label:"Lucro", valor:fCurto(totalLucro), cor:"good", sub:"Venda menos CMV."},
         {label:"Margem", valor:fPct(totalVenda?totalLucro/totalVenda:0), cor:"gold", sub:"Lucro sobre a venda do período."},
-        {label:"Pedidos", valor:fInt(pedidos), cor:"ink", sub:"Total acumulado desde 2021."},
+        {label:"Pedidos", valor:fInt(pedidos), cor:"ink", sub:"Acumulado de "+periodoDaBase()+"."},
         {label:"Positivação", valor:fInt(posit), cor:"ink", sub:"Clientes distintos atendidos, somados por dia."},
         {label:"Melhor margem", valor:melhor?fPct(use12?melhor.margem12:melhor.margem):"—", cor:"good",
          sub:melhor?nomeComprador(melhor.comp):"—"}
@@ -1661,6 +1703,9 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
       cRank.querySelector(".card-note").textContent = nota;
       montarRanking(boxRank, itens.map(function(i){ return {nome:i.nome, valor:i.valor, rotulo:fCurto(i.valor)}; }), {cor:corBarra});
 
+      cTab.querySelector(".card-note").textContent =
+        temJanela12 ? "Total do período completo e dos últimos 12 meses, lado a lado."
+                    : "Acumulado de " + periodoDaBase() + ".";
       tabela.definir(FATCOMP.map(function(c){
         var o = {}; for(var k in c) o[k]=c[k];
         o.nome = nomeComprador(c.comp);
@@ -1668,6 +1713,7 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
       }));
     }
     cRank.insertBefore(el("p","card-note",""), boxRank);
+    cTab.insertBefore(el("p","card-note",""), boxTab);
     render();
     return render;
   });
@@ -1676,9 +1722,10 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
    PÁGINA 07 — MÉTRICAS
    ========================================================================= */
 pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
-  "A mesma base de faturamento vista no tempo: venda mês a mês desde janeiro de 2021, com a margem sobrepostada em linha. Use o seletor de período para aproximar. O mês corrente costuma aparecer menor porque ainda está em curso.",
+  "A mesma base de faturamento vista no tempo: venda mês a mês, com a margem sobreposta em linha. O mês corrente costuma aparecer menor porque ainda está em curso. <strong>A base guarda só o ano corrente</strong>: ela recomeça na virada do ano, então não há comparação com o mesmo mês do ano passado.",
   function(raiz){
-    var estado = {janela:"24m", metrica:"venda"};
+    var opcoesPer = opcoesPeriodo(true);
+    var estado = {janela:periodoInicial(opcoesPer,"24m"), metrica:"venda"};
     var barra = el("div","filters"); raiz.appendChild(barra);
     var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
 
@@ -1688,7 +1735,7 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
     raiz.appendChild(cEvo);
 
     var linha = el("div","row-2col"); raiz.appendChild(linha);
-    var cDep = cartao("Departamentos","Venda acumulada desde 2021.");
+    var cDep = cartao("Departamentos","Venda acumulada de " + periodoDaBase() + ".");
     var boxDep = el("div","rank"); cDep.appendChild(boxDep); linha.appendChild(cDep);
     var cUf = cartao("Estados","Onde a venda acontece.");
     var boxUf = el("div","rank"); cUf.appendChild(boxUf); linha.appendChild(cUf);
@@ -1725,18 +1772,24 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
       var variacao = (ultFechado && anterior && anterior.venda) ? (ultFechado.venda/anterior.venda-1) : null;
 
       barra.innerHTML = "";
-      barra.appendChild(grupoChips("Período",[
-        {label:"12 meses",valor:"12m"},{label:"24 meses",valor:"24m"},{label:"Desde 2021",valor:"tudo"}
-      ], estado.janela, function(v){ estado.janela=v; render(); }));
+      if(opcoesPer.length > 1){
+        barra.appendChild(grupoChips("Período", opcoesPer, estado.janela,
+          function(v){ estado.janela=v; render(); }));
+      }
       barra.appendChild(grupoChips("Colunas",[
         {label:"Venda",valor:"venda"},{label:"Lucro",valor:"lucro"},{label:"Pedidos",valor:"pedidos"}
       ], estado.metrica, function(v){ estado.metrica=v; render(); }));
 
       montarKpis(kpis,[
-        {label:"Venda no período", valor:fCurto(venda), cor:"blue", sub:serie.length+" meses considerados."},
+        {label:"Venda no período", valor:fCurto(venda), cor:"blue",
+         sub:serie.length===1 ? "1 mês considerado." : serie.length+" meses considerados."},
         {label:"Lucro no período", valor:fCurto(lucro), cor:"good", sub:"Venda menos CMV."},
         {label:"Margem do período", valor:fPct(venda?lucro/venda:0), cor:"gold", sub:"Lucro sobre venda."},
-        {label:"Média mensal", valor:fCurto(mediaMes), cor:"ink", sub:"Só meses fechados — ignora o mês corrente."},
+        /* Em janeiro ainda não há mês fechado: "R$ 0" daria a entender que a
+           média é zero, quando na verdade ela não existe ainda. */
+        {label:"Média mensal", valor:fechados.length ? fCurto(mediaMes) : "—", cor:"ink",
+         sub:fechados.length ? "Só meses fechados — ignora o mês corrente."
+                             : "Ainda não há mês fechado no período."},
         {label:"Melhor mês", valor:melhor?fCurto(melhor.venda):"—", cor:"good", sub:melhor?rotuloMes(melhor.mes):"—"},
         {label:"Último mês fechado", valor:ultFechado?fCurto(ultFechado.venda):"—",
          cor: variacao==null ? "ink" : (variacao>=0?"good":"crit"),
@@ -1870,6 +1923,7 @@ function blocoNotas(){
    "<strong>Avaria:</strong> na página Compras ela considera as filiais 1, 2, 7 e 8, para todos os produtos. Na página Saldo verba x avaria ela soma todas as filiais, porque o filtro de filial dessa consulta de origem nunca chega a ser aplicado — mas fica restrita aos fornecedores principais que têm movimentação de verba, por isso o total das duas páginas não bate.",
    "<strong>Sugestão por fornecedor:</strong> cada produto da carteira do fornecedor é avaliado ao seu próprio preço de venda, e a sugestão soma o valor de cada item individualmente.",
    "<strong>Margem do faturamento:</strong> a divisão é protegida contra venda zero, evitando distorções no cálculo quando não há venda no período.",
+   "<strong>Janela do faturamento:</strong> a base guarda apenas o ano corrente — o ETL lê do Oracle a partir de 1º de janeiro, então a virada do ano limpa o ano anterior sozinha, sem rotina de expurgo. Isso mantém a maior tabela do banco em ~250 mil linhas em vez de 1,6 milhão, mas tem um preço: não há comparação com o ano anterior, e em janeiro o período é curto. As opções de período das páginas Performance e Métricas são montadas a partir do que existe na base, justamente para não prometerem janela que não existe.",
    "<strong>Atualização:</strong> o painel busca o dado mais recente do DATA WAREHOUSE a cada carga — não é uma foto fixa do momento em que foi publicado. Por padrão fica em cache por até 10 minutos (pra não sobrecarregar o banco a cada acesso); o botão \"Atualizar\" no topo da página força uma busca nova, ignorando esse cache."
   ].forEach(function(t){ var li = document.createElement("li"); li.innerHTML = t; ul.appendChild(li); });
   d.appendChild(ul);
