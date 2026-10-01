@@ -3,6 +3,9 @@
   "functions": {
     "api/dados.js": {
       "maxDuration": 30
+    },
+    "api/agente.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
