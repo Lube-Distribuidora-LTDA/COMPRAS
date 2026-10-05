@@ -526,13 +526,33 @@ document.querySelectorAll("[data-theme-btn]").forEach(function(b){
   b.addEventListener("click", function(){ aplicarTema(b.getAttribute("data-theme-btn")); });
 });
 
-document.getElementById("lastSync").textContent =
-  D.geradoEm ? new Date(D.geradoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+/* "Última carga" é a carga MAIS ANTIGA entre as que alimentam a tela, não a
+   mais recente: as consultas rodam em velocidades diferentes (o estoque 4x ao
+   dia, o faturamento 1x), e anunciar a mais recente faria o resto parecer mais
+   fresco do que é. Assim a frase "tudo o que você vê é ao menos desta hora"
+   continua verdadeira. O detalhe por grupo fica no título, ao passar o mouse. */
+function horaBR(iso){
+  return iso ? new Date(iso).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+}
+var elUltimaCarga = document.getElementById("lastSync");
+elUltimaCarga.textContent = horaBR(D.geradoEm);
+if(D.cargas){
+  var detalhe = [];
+  if(D.cargas.estoque) detalhe.push("Estoque, verba e sugestões: " + horaBR(D.cargas.estoque));
+  if(D.cargas.faturamento) detalhe.push("Faturamento: " + horaBR(D.cargas.faturamento));
+  if(detalhe.length){
+    var pill = elUltimaCarga.closest(".sync-pill");
+    if(pill) pill.title = detalhe.join("\n");
+  }
+}
 
-/* O ETL roda 4x ao dia (00h, 08h, 12h e 18h, horário de Brasília) — calcula
-   daqui o proximo horario, sem precisar perguntar nada ao servidor. */
+/* Horários em que o dado fica pronto, de Brasília. As tarefas da VM disparam
+   10 minutos antes (03:50, 11:50, 15:50 e 21:50), conferido em
+   compras.controle_carga — não são os horários que o instalador pretendia
+   (07:50/11:50/17:50/23:50), porque o agendamento da VM saiu deslocado.
+   Se o agendamento na VM for acertado, esta lista precisa acompanhar. */
 function proximaAtualizacao(){
-  var HORAS = [0,8,12,18];
+  var HORAS = [4,12,16,22];
   var partes = new Intl.DateTimeFormat("en-US",{timeZone:"America/Sao_Paulo",hour12:false,hour:"2-digit",minute:"2-digit"}).formatToParts(new Date());
   var m = {}; partes.forEach(function(p){ m[p.type]=p.value; });
   var minutosAgora = (+m.hour)*60 + (+m.minute);
