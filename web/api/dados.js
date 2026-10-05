@@ -92,10 +92,22 @@ module.exports = async function handler(req, res) {
     const painel = r.rows[0] && r.rows[0].painel;
     if (!painel) throw new Error("A consulta não devolveu dados.");
 
-    // O conteúdo muda no máximo 4x ao dia (o ETL roda às 08h, 12h, 18h e 00h),
-    // então vale guardar no CDN: só o primeiro acesso de cada janela toca o banco.
-    // O botão "Atualizar" do painel manda ?atualizar=<hora>, que ignora esse cache.
-    res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=3600");
+    // O conteúdo muda 5x ao dia (as cargas do ETL), então vale guardar no CDN.
+    //
+    // O que importa aqui é o stale-while-revalidate longo. Antes era 1 hora, e
+    // isso criava um buraco: depois de uma noite sem acesso, a cópia guardada
+    // expirava e QUEM ABRISSE PRIMEIRO DE MANHA esperava a função acordar, abrir
+    // conexão e consultar o banco — justamente a pessoa que abre o painel na
+    // frente da diretoria. Com 24 horas, a borda devolve na hora a última cópia
+    // boa e busca a nova por baixo: ninguém mais fica esperando o banco.
+    //
+    // Mostrar dado de alguns minutos atrás não é risco: o cabeçalho do painel
+    // exibe "Última carga" com o horário, e o botão "Atualizar" manda
+    // ?atualizar=<hora>, que ignora o cache e vai direto no banco.
+    // stale-if-error: se o banco estiver fora na hora de renovar, a borda
+    // continua entregando a última cópia boa em vez de uma tela de erro.
+    res.setHeader("Cache-Control",
+      "public, s-maxage=600, stale-while-revalidate=86400, stale-if-error=86400");
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.status(200).send(JSON.stringify(painel));
   } catch (e) {

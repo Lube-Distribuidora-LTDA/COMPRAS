@@ -18,5 +18,10 @@
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
+  ],
+  "_comentario_crons": "Aquece a cópia guardada na borda logo depois de cada carga do ETL, para quem abrir o painel nunca ser o primeiro a esperar o banco. Horários em UTC: 00:55, 06:55, 09:55, 14:55 e 18:55 correspondem a 21:55, 03:55, 06:55, 11:55 e 15:55 de Brasília — alguns minutos após cada carga terminar. O das 10:30 UTC (07:30 BRT) é a garantia antes do expediente começar.",
+  "crons": [
+    { "path": "/api/dados", "schedule": "55 0,6,9,14,18 * * *" },
+    { "path": "/api/dados", "schedule": "30 10 * * 1-5" }
   ]
 }

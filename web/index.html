@@ -6,9 +6,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Central Compras</title>
+<!-- As fontes vêm do Google, que é uma rede fora do nosso controle. Com um
+     <link rel="stylesheet"> normal, o navegador NÃO desenha nada na tela
+     enquanto esse arquivo não chegar — nem a mensagem de carregamento. Numa
+     manhã de rede congestionada isso vira tela branca, e foi o que acontecia.
+     Carregando como "print" e trocando para "all" no onload, a folha deixa de
+     bloquear: a página aparece na hora com a fonte do sistema e troca para a
+     definitiva quando ela chega. Se o Google estiver inacessível, o painel
+     funciona igual, só com a fonte de reserva. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"></noscript>
 <style>
   :root{
     --bg:#060A1A; --bg2:#0A1130; --veil:rgba(8,13,36,.72);
@@ -48,7 +58,7 @@
   }
   ::selection{background:var(--blue);color:#fff;}
   .num{font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; font-weight:600;}
-  h1,h2,h3{font-family:"Bricolage Grotesque", sans-serif; margin:0; text-wrap:balance;}
+  h1,h2,h3{font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif; margin:0; text-wrap:balance;}
   @keyframes lubeRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
   @keyframes lubePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.82);}}
   @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
@@ -65,7 +75,7 @@
   .logo-badge img{height:30px; width:auto; display:block;}
   .brand-div{width:1px; height:38px; background:linear-gradient(180deg,transparent,var(--line2),transparent);}
   .brand-eyebrow{font:700 10px/1 Barlow; letter-spacing:.2em; text-transform:uppercase; color:var(--gold);}
-  .brand-title{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:19px; letter-spacing:-.01em; margin-top:5px;}
+  .brand-title{font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight:700; font-size:19px; letter-spacing:-.01em; margin-top:5px;}
   .header-actions{margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
   .sync-pill{display:flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line); border-radius:100px; background:var(--surface);}
   .pulse-dot{width:7px; height:7px; border-radius:50%; background:var(--good); animation:lubePulse 2.6s ease-in-out infinite; display:inline-block; flex:0 0 auto;}
@@ -202,7 +212,7 @@
   .pager button:hover:not(:disabled){border-color:var(--line2);}
   .pager button:disabled{opacity:.35; cursor:default; color:var(--muted);}
 
-  details.notas summary{cursor:pointer; font-size:16.5px; font-weight:700; font-family:"Bricolage Grotesque",sans-serif; list-style:none; display:flex; align-items:center; gap:8px;}
+  details.notas summary{cursor:pointer; font-size:16.5px; font-weight:700; font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif; list-style:none; display:flex; align-items:center; gap:8px;}
   details.notas summary::-webkit-details-marker{display:none;}
   details.notas summary::before{content:"›"; display:inline-block; font-size:18px; color:var(--gold); transition:transform .15s;}
   details.notas[open] summary::before{transform:rotate(90deg);}
@@ -215,7 +225,7 @@
 <style>
   #carregando{position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
     justify-content:center; gap:18px; background:var(--bg); z-index:100; text-align:center; padding:24px;}
-  #carregando .marca{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:20px; color:var(--ink);}
+  #carregando .marca{font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight:700; font-size:20px; color:var(--ink);}
   #carregando .dizer{font-size:13.5px; color:var(--ink2); max-width:46ch; line-height:1.6;}
   #carregando .barra{width:220px; height:4px; border-radius:100px; background:var(--surface3); overflow:hidden;}
   #carregando .barra i{display:block; height:100%; width:40%; border-radius:100px; background:var(--blue);
@@ -258,7 +268,7 @@
 
   .ag-cab{display:flex; align-items:flex-start; gap:12px; padding:16px 18px 14px;
     border-bottom:1px solid var(--line); background:var(--surface);}
-  .ag-titulo{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:16px; color:var(--ink);}
+  .ag-titulo{font-family:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif; font-weight:700; font-size:16px; color:var(--ink);}
   .ag-sub{font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.4;}
   .ag-fechar{margin-left:auto; flex:0 0 auto; cursor:pointer; border:1px solid var(--line);
     background:var(--surface2); color:var(--ink2); width:28px; height:28px; border-radius:9px;
