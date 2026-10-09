@@ -547,12 +547,12 @@ if(D.cargas){
 }
 
 /* Horários em que o dado fica pronto, de Brasília. As tarefas da VM disparam
-   10 minutos antes (03:50, 11:50, 15:50 e 21:50), conferido em
-   compras.controle_carga — não são os horários que o instalador pretendia
-   (07:50/11:50/17:50/23:50), porque o agendamento da VM saiu deslocado.
-   Se o agendamento na VM for acertado, esta lista precisa acompanhar. */
+   10 minutos antes (07:50, 11:50, 17:50 e 23:50) — conferido em
+   compras.controle_carga. Se o agendamento na VM mudar, esta lista precisa
+   acompanhar. Em 2026-10 as tarefas estiveram 4h deslocadas por terem sido
+   criadas com o relógio da VM atrasado; foram recriadas em 2026-10-09. */
 function proximaAtualizacao(){
-  var HORAS = [4,12,16,22];
+  var HORAS = [0,8,12,18];
   var partes = new Intl.DateTimeFormat("en-US",{timeZone:"America/Sao_Paulo",hour12:false,hour:"2-digit",minute:"2-digit"}).formatToParts(new Date());
   var m = {}; partes.forEach(function(p){ m[p.type]=p.value; });
   var minutosAgora = (+m.hour)*60 + (+m.minute);
