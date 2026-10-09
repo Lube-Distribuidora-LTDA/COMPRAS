@@ -324,6 +324,81 @@
   }
   @media print{ .ag-fab, .ag-painel{display:none !important;} }
 </style>
+<style>
+  /* ---- clique que leva à planilha + pop-up dos gráficos -------------------- */
+  .clicavel{cursor:pointer;}
+  .clicavel:focus-visible{outline:2px solid var(--blue2); outline-offset:2px;}
+  section.card.piscar{animation:piscarCartao 1.5s ease-out;}
+  @keyframes piscarCartao{
+    0%{border-color:var(--blue); box-shadow:var(--shadow), 0 0 0 0 color-mix(in oklch, var(--blue) 60%, transparent);}
+    100%{box-shadow:var(--shadow), 0 0 0 22px color-mix(in oklch, var(--blue) 0%, transparent);}
+  }
+
+  .kpi.clicavel::after{content:"↗"; position:absolute; right:13px; top:12px; font:700 14px/1 Barlow; color:var(--muted);
+    opacity:.45; transition:opacity .2s ease, color .2s ease, transform .2s ease; pointer-events:none;}
+  .kpi.clicavel:hover::after, .kpi.clicavel:focus-visible::after{opacity:1; color:var(--blue2); transform:translate(2px,-2px);}
+  .kpi.clicavel:hover, .kpi.clicavel:focus-visible{border-color:var(--blue);}
+  .kpi.clicavel .kpi-label{padding-right:20px;}
+
+  .rank-row.clicavel:hover .rank-nome, .rank-row.clicavel:focus-visible .rank-nome{color:var(--ink);}
+  .rank-row.clicavel .rank-val::after{content:" ›"; color:var(--muted); font-weight:700;}
+  .rank-row.clicavel:hover .rank-val::after{color:var(--blue2);}
+
+  .legend-row.clicavel{padding:4px 6px; margin:-4px -6px; border-radius:8px; transition:background .15s ease;}
+  .legend-row.clicavel:hover{background:var(--surface2);}
+  .donut-center{pointer-events:none;}  /* o texto central cobre o anel inteiro e roubaria o mouse */
+  .donut-svg-box circle.seg{transition:stroke-dasharray .9s cubic-bezier(.22,1,.36,1), stroke-width .15s ease, filter .15s ease;}
+  .donut-svg-box circle.seg.clicavel:hover{stroke-width:22; filter:brightness(1.15);}
+
+  .chart-box svg rect.banda{fill:var(--surface3); opacity:0; transition:opacity .12s ease; filter:none; pointer-events:all;}
+  .chart-box svg g.col:hover rect.banda, .chart-box svg g.col:focus-visible rect.banda{opacity:.75;}
+  .chart-box svg rect.banda:hover{filter:none;}
+  .chart-box svg g.col:hover rect.barra{filter:brightness(1.25) saturate(1.1);}
+  .chart-box svg circle.pt{opacity:0; transition:opacity .12s ease; pointer-events:none;}
+  .chart-box svg g.col:hover circle.pt{opacity:1;}
+
+  td.clicavel:hover{background:var(--surface3); color:var(--ink);}
+  td.clicavel{text-decoration:underline dotted var(--line2); text-underline-offset:3px;}
+
+  table.dados tfoot td{padding:10px 12px; border-top:2px solid var(--line2); background:var(--surface2); font-weight:700; white-space:nowrap;}
+  table.dados tfoot td.num{text-align:right; font-family:"JetBrains Mono",monospace; font-size:12.5px;}
+  table.dados tfoot td:first-child{font:700 10.5px Barlow; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);}
+
+  .faixa-ativos{display:none; flex-wrap:wrap; align-items:center; gap:8px; margin:14px 0 2px;}
+  .faixa-ativos .rot{font:700 10px Barlow; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin-right:2px;}
+  .tag-ativa{display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:100px; font-size:12px; color:var(--ink);
+    border:1px solid var(--line); background:var(--surface2);}
+  .tag-ativa.removivel{padding-right:5px; border-color:color-mix(in oklch, var(--blue) 55%, transparent);
+    background:color-mix(in oklch, var(--blue) 16%, transparent);}
+  .tag-ativa .k{color:var(--muted); font-weight:600;}
+  .tag-ativa .n{font-weight:700;}
+  .tag-ativa button{border:0; cursor:pointer; width:18px; height:18px; border-radius:50%; background:var(--surface3); color:var(--ink2); font-size:10px; line-height:1; padding:0;}
+  .tag-ativa button:hover{background:var(--blue); color:#fff;}
+  .btn-voltar{cursor:pointer; border:1px solid var(--gold); background:color-mix(in oklch, var(--gold) 16%, transparent); color:var(--gold);
+    font:700 12px Barlow; padding:6px 14px; border-radius:100px; transition:transform .15s ease;}
+  .btn-voltar:hover{transform:translateX(-2px);}
+  .btn-voltar:active{transform:scale(.95);}
+
+  .dica{position:fixed; left:0; top:0; z-index:95; pointer-events:none; min-width:210px; max-width:340px;
+    padding:13px 15px 12px; border-radius:14px; background:var(--bg2); border:1px solid var(--line2);
+    box-shadow:0 26px 60px -20px rgba(0,0,0,.75), 0 0 0 1px var(--line);
+    opacity:0; transform:translateY(5px) scale(.97); transition:opacity .13s ease, transform .13s ease;}
+  .dica.on{opacity:1; transform:none;}
+  .dica::before{content:""; position:absolute; left:15px; right:15px; top:0; height:2px; border-radius:0 0 3px 3px;
+    background:linear-gradient(90deg,var(--blue),var(--gold) 55%,var(--red)); opacity:.9;}
+  .dica-cab{display:flex; align-items:baseline; justify-content:space-between; gap:14px; padding-bottom:8px; margin-bottom:7px; border-bottom:1px solid var(--line);}
+  .dica-titulo{font-family:"Bricolage Grotesque", system-ui, sans-serif; font-weight:700; font-size:14px; color:var(--ink); line-height:1.3; letter-spacing:-.01em;}
+  .dica-sub{font:700 9.5px Barlow; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); white-space:nowrap;}
+  .dica-linha{display:flex; align-items:center; gap:9px; padding:3px 0; font-size:12.5px; color:var(--ink2); font-weight:600;}
+  .dica-linha i{width:10px; height:10px; border-radius:3px; flex:none;}
+  .dica-linha .dica-nome{flex:1; min-width:0;}
+  .dica-linha b{font-family:"JetBrains Mono",monospace; font-weight:700; color:var(--ink); font-size:12.5px; white-space:nowrap;}
+  .dica-linha.total{margin-top:6px; padding-top:8px; border-top:1px dashed var(--line2);}
+  .dica-linha.total .dica-nome{color:var(--gold); font-weight:700;}
+  .dica-extra{font-size:11.5px; color:var(--muted); font-weight:600; padding-top:3px; line-height:1.45;}
+  .dica-clique{margin-top:9px; padding-top:8px; border-top:1px solid var(--line); font-size:11px; font-weight:700; color:var(--gold); line-height:1.4;}
+  @media print{ .dica{display:none !important;} }
+</style>
 
 </head>
 <body>
@@ -617,6 +692,79 @@ function revelar(elemento, atraso){
   if(revealObs) revealObs.observe(elemento); else elemento.classList.add("in-view");
 }
 
+/* ---------------- pop-up dos gráficos ----------------
+   Um único cartão, reaproveitado, que segue o mouse. Quem usa descreve o conteúdo
+   num objeto {titulo, sub, linhas:[{cor,nome,valor}], total:{nome,valor}, extra:[texto], clique}.
+   O conteúdo é pedido de novo a cada entrada do mouse (não ao desenhar o gráfico),
+   então sempre reflete o estado atual. pointer-events:none no CSS é essencial: o
+   cartão fica perto do cursor e, sem isso, piscaria sem parar. */
+var Dica = (function(){
+  var no = null;
+  function garantir(){
+    if(!no){
+      no = el("div","dica");
+      no.setAttribute("role","tooltip");
+      document.body.appendChild(no);
+    }
+    return no;
+  }
+  function linha(l, extraCls){
+    var li = el("div","dica-linha"+(extraCls?" "+extraCls:""));
+    var q = el("i");
+    if(l.cor) q.style.background = l.cor; else q.style.visibility = "hidden";
+    li.appendChild(q);
+    li.appendChild(el("span","dica-nome", l.nome));
+    li.appendChild(el("b",null, l.valor));
+    return li;
+  }
+  function montar(c){
+    var n = garantir();
+    n.innerHTML = "";
+    var cab = el("div","dica-cab");
+    cab.appendChild(el("div","dica-titulo", c.titulo));
+    if(c.sub) cab.appendChild(el("div","dica-sub", c.sub));
+    n.appendChild(cab);
+    (c.linhas||[]).forEach(function(l){ n.appendChild(linha(l)); });
+    if(c.total) n.appendChild(linha(c.total,"total"));
+    (c.extra||[]).forEach(function(t){ n.appendChild(el("div","dica-extra", t)); });
+    if(c.clique) n.appendChild(el("div","dica-clique","↗ "+c.clique));
+  }
+  function mover(e){
+    var n = garantir(), w = n.offsetWidth, h = n.offsetHeight;
+    var x = e.clientX + 18, y = e.clientY + 18;
+    if(x + w > window.innerWidth - 10) x = e.clientX - w - 18;
+    if(y + h > window.innerHeight - 10) y = e.clientY - h - 18;
+    n.style.left = Math.max(8, x) + "px";
+    n.style.top = Math.max(8, y) + "px";
+  }
+  function mostrar(c, e){ montar(c); garantir().classList.add("on"); mover(e); }
+  function esconder(){ if(no) no.classList.remove("on"); }
+  function anexar(alvo, fn){
+    alvo.addEventListener("mouseenter", function(e){ var c = fn(); if(c) mostrar(c, e); });
+    /* depois de rolar a página o cartão some; basta mexer o mouse para ele voltar */
+    alvo.addEventListener("mousemove", function(e){
+      if(no && no.classList.contains("on")){ mover(e); return; }
+      var c = fn(); if(c) mostrar(c, e);
+    });
+    alvo.addEventListener("mouseleave", esconder);
+  }
+  window.addEventListener("scroll", esconder, {passive:true});
+  return {anexar:anexar, esconder:esconder};
+})();
+
+/* Torna um elemento clicável também pelo teclado (Enter / Espaço). */
+function ligarClique(no, fn){
+  no.classList.add("clicavel");
+  no.setAttribute("tabindex","0");
+  no.setAttribute("role","button");
+  no.addEventListener("click", function(e){ fn(e); });
+  no.addEventListener("keydown", function(e){
+    if(e.target !== no) return;
+    if(e.key==="Enter" || e.key===" "){ e.preventDefault(); fn(e); }
+  });
+}
+var DICA_CLIQUE = "Clique para ver na planilha, já filtrado";
+
 /* Le um texto ja formatado (ex.: "R$ 12,3 mi", "45,2%", "1.204") e devolve
    prefixo/sufixo literais + a grandeza numerica real (desfazendo mi/bi/mil),
    para animar o valor de um KPI sem que cada pagina precise expor o numero cru. */
@@ -682,6 +830,8 @@ function montarKpis(destino, defs){
     if(d.info){
       var dot = el("span","info-dot","i"); dot.tabIndex = 0;
       var tip = el("span","tip", d.info); dot.appendChild(tip); lab.appendChild(dot);
+      /* o "i" só explica; não pode disparar o clique do cartão */
+      dot.addEventListener("click", function(e){ e.stopPropagation(); });
     }
     var val = el("div","kpi-value"); val.style.color = cor(d.cor||"ink");
     var infoAnterior = anteriores[i];
@@ -690,6 +840,7 @@ function montarKpis(destino, defs){
     atuais.push(lido);
     var sub = el("div","kpi-sub", d.sub||"");
     t.appendChild(barra); t.appendChild(lab); t.appendChild(val); t.appendChild(sub);
+    if(d.aoClicar) ligarClique(t, d.aoClicar);
     destino.appendChild(t);
   });
   destino.__kpiAnteriores = atuais;
@@ -698,11 +849,24 @@ function montarKpis(destino, defs){
 /* ranking horizontal */
 function montarRanking(destino, itens, opts){
   opts = opts || {};
+  Dica.esconder();   // o elemento sob o mouse vai sumir: o mouseleave dele nunca dispararia
   destino.innerHTML = "";
   var max = itens.reduce(function(m,i){ return Math.max(m, Math.abs(i.valor)||0); }, 0) || 1;
+  var somaTotal = itens.reduce(function(s,i){ return s+Math.abs(i.valor||0); }, 0);
   var barras = [];
   itens.forEach(function(i){
     var linha = el("div","rank-row");
+    if(i.aoClicar) ligarClique(linha, i.aoClicar);
+    /* o nome na tela é cortado com reticências; o pop-up mostra inteiro */
+    Dica.anexar(linha, function(){
+      var c = i.dica ? Object.assign({}, i.dica) : {
+        titulo:i.nome,
+        linhas:[{cor:cor(i.cor || opts.cor || "blue"), nome:opts.rotuloValor || "Valor", valor:i.rotulo}],
+        extra:(itens.length>1 && somaTotal>0) ? [fPct(Math.abs(i.valor||0)/somaTotal)+" da soma dos "+itens.length+" itens listados"] : []
+      };
+      if(i.aoClicar && !c.clique) c.clique = i.clique || DICA_CLIQUE;
+      return c;
+    });
     linha.appendChild(el("div","rank-nome", i.nome));
     var trilho = el("div","rank-trilho");
     var barra = el("div","rank-barra");
@@ -724,8 +888,19 @@ function montarRanking(destino, itens, opts){
 
 /* donut */
 function montarDonut(caixa, partes, leitura){
+  Dica.esconder();
   caixa.innerHTML = "";
   var total = partes.reduce(function(s,p){ return s+(p.valor||0); },0) || 1;
+  function fmtParte(p, v){ return p.fmt ? p.fmt(v) : fInt(v); }
+  function dicaDaParte(p){
+    var c = {
+      titulo:p.label,
+      linhas:[{cor:cor(p.cor), nome:p.unidade || "Quantidade", valor:fmtParte(p, p.valor)}],
+      extra:[fPct((p.valor||0)/total)+" do total ("+fmtParte(p, total)+")"]
+    };
+    if(p.aoClicar) c.clique = p.clique || DICA_CLIQUE;
+    return c;
+  }
   var env = el("div","donut-wrap");
   var box = el("div","donut-svg-box");
   var ns = "http://www.w3.org/2000/svg";
@@ -744,11 +919,15 @@ function montarDonut(caixa, partes, leitura){
     seg.setAttribute("cx",75); seg.setAttribute("cy",75); seg.setAttribute("r",r);
     seg.setAttribute("fill","none"); seg.setAttribute("stroke",cor(p.cor)); seg.setAttribute("stroke-width",18);
     seg.setAttribute("stroke-linecap","round");
+    seg.setAttribute("class","seg");
     var alvo = Math.max(len-2,0)+" "+(circ-len+2);
     seg.setAttribute("stroke-dasharray", semMovimento ? alvo : ("0 "+circ));
     seg.setAttribute("stroke-dashoffset", -offset);
-    seg.style.transition = "stroke-dasharray .9s cubic-bezier(.22,1,.36,1)";
     svg.appendChild(seg);
+    if((p.valor||0) > 0){
+      if(p.aoClicar) ligarClique(seg, p.aoClicar);
+      Dica.anexar(seg, function(){ return dicaDaParte(p); });
+    }
     if(!semMovimento) segs.push([seg, alvo]);
     offset += len;
   });
@@ -772,7 +951,9 @@ function montarDonut(caixa, partes, leitura){
     var sw = el("span","legend-swatch"); sw.style.background = cor(p.cor);
     l.appendChild(sw);
     l.appendChild(el("span","lbl", p.label));
-    l.appendChild(el("span","val num", fInt(p.valor)+" ("+fPct((p.valor||0)/total)+")"));
+    l.appendChild(el("span","val num", fmtParte(p, p.valor)+" ("+fPct((p.valor||0)/total)+")"));
+    if(p.aoClicar) ligarClique(l, p.aoClicar);
+    Dica.anexar(l, function(){ return dicaDaParte(p); });
     leg.appendChild(l);
   });
   if(leitura) leg.appendChild(el("p","donut-reading", leitura));
@@ -783,6 +964,7 @@ function montarDonut(caixa, partes, leitura){
 /* grafico de colunas com linha opcional */
 function montarColunas(caixa, dados, opts){
   opts = opts || {};
+  Dica.esconder();
   caixa.innerHTML = "";
   if(!dados.length) return;
   var A = opts.altura || 260;
@@ -834,15 +1016,37 @@ function montarColunas(caixa, dados, opts){
   var bw = Math.min(24, pw/dados.length*0.62);
   var crescer = [];
   var rotulosValor = [];
+  var grupos = [];
+  var somaTotal = dados.reduce(function(s,d){ return s+(d.valor||0); }, 0);
+  var slot = pw/dados.length;
+  function dicaDaColuna(d){
+    var c;
+    if(d.dica){
+      c = Object.assign({}, d.dica);
+    } else {
+      c = {
+        titulo:d.rotulo,
+        linhas:[{cor:cor(d.cor||opts.cor||"blue"), nome:opts.nomeSerie || "Valor", valor:opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor)}],
+        extra:(somaTotal>0 && dados.length>1) ? [fPct((d.valor||0)/somaTotal)+" "+(opts.textoTotal || "do total do gráfico")] : []
+      };
+    }
+    if(d.aoClicar && !c.clique) c.clique = d.clique || DICA_CLIQUE;
+    return c;
+  }
   dados.forEach(function(d,i){
-    var cx = mE + (i+0.5)*(pw/dados.length);
+    var cx = mE + (i+0.5)*slot;
     var h = Math.max(1, ((d.valor||0)/topo)*ph);
     var y = mT + ph - h;
     var yBase = mT+ph, hBase = Math.min(h,4);
-    var g = cria("g",{});
-    var barra = cria("rect",{x:cx-bw/2, y: semMovimento?y:yBase, width:bw, height: semMovimento?h:0, rx:4, fill: cor(d.cor||opts.cor||"blue")});
-    barra.appendChild(cria("title",{})).textContent = d.rotulo + ": " + (opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor));
+    var g = cria("g",{"class":"col"});
+    /* faixa clara atrás da coluna: mostra qual coluna o pop-up descreve e
+       aumenta a área que reage ao mouse (a barra sozinha é estreita). */
+    g.appendChild(cria("rect",{"class":"banda", x:mE+i*slot+1, y:2, width:Math.max(4,slot-2), height:mT+ph-2, rx:6}));
+    var barra = cria("rect",{"class":"barra", x:cx-bw/2, y: semMovimento?y:yBase, width:bw, height: semMovimento?h:0, rx:4, fill: cor(d.cor||opts.cor||"blue")});
     g.appendChild(barra);
+    grupos.push(g);
+    if(d.aoClicar) ligarClique(g, d.aoClicar);
+    Dica.anexar(g, function(){ return dicaDaColuna(d); });
     // canto inferior reto
     var cantoY = mT+ph-hBase;
     var canto = cria("rect",{x:cx-bw/2, y: semMovimento?cantoY:yBase, width:bw, height: semMovimento?hBase:0, fill:cor(d.cor||opts.cor||"blue")});
@@ -851,7 +1055,7 @@ function montarColunas(caixa, dados, opts){
     if(!semMovimento){ crescer.push([barra,y,h],[canto,cantoY,hBase]); }
     if(mostrarValores && (d.valor||0) > 0){
       var val = cria("text",{x:cx, y:y-8,"text-anchor":"middle","font-size":10.5,"font-weight":700,
-        fill:"var(--ink)","font-family":"JetBrains Mono, monospace"});
+        fill:"var(--ink)","font-family":"JetBrains Mono, monospace","pointer-events":"none"});
       val.textContent = opts.valorFmt ? opts.valorFmt(d.valor) : fInt(d.valor);
       val.style.opacity = semMovimento ? 1 : 0;
       val.style.transition = "opacity .35s ease";
@@ -859,7 +1063,7 @@ function montarColunas(caixa, dados, opts){
       if(!semMovimento) rotulosValor.push(val);
     }
     if(dados.length <= 40 || i % Math.ceil(dados.length/24) === 0){
-      var lb = cria("text",{x:cx, y:A-12,"text-anchor":"middle","font-size":9.5,"font-weight":600,fill:"var(--muted)"});
+      var lb = cria("text",{x:cx, y:A-12,"text-anchor":"middle","font-size":9.5,"font-weight":600,fill:"var(--muted)","pointer-events":"none"});
       lb.textContent = d.rotulo;
       svg.appendChild(lb);
     }
@@ -883,16 +1087,19 @@ function montarColunas(caixa, dados, opts){
       var cx = mE + (i+0.5)*(pw/dados.length);
       var y = mT + ph - ((v-minL)/faixa)*ph*0.82 - ph*0.09;
       pts.push([cx,y]);
+      /* ponto que acende quando o mouse está sobre a coluna */
+      if(grupos[i]) grupos[i].appendChild(cria("circle",{"class":"pt", cx:cx, cy:y, r:4, fill:cor(opts.linhaCor||"gold"),
+        stroke:"var(--bg)","stroke-width":2}));
     });
     if(pts.length){
       svg.appendChild(cria("polyline",{points:pts.map(function(p){return p.join(",");}).join(" "),
         fill:"none", stroke:cor(opts.linhaCor||"gold"), "stroke-width":2,
-        "stroke-linejoin":"round","stroke-linecap":"round"}));
+        "stroke-linejoin":"round","stroke-linecap":"round","pointer-events":"none"}));
       var ult = pts[pts.length-1];
       svg.appendChild(cria("circle",{cx:ult[0],cy:ult[1],r:4,fill:cor(opts.linhaCor||"gold"),
-        stroke:"var(--bg)","stroke-width":2}));
+        stroke:"var(--bg)","stroke-width":2,"pointer-events":"none"}));
       var rot = cria("text",{x:Math.min(ult[0]+9,L-4), y:ult[1]+4,"font-size":11,
-        fill:"var(--ink)","font-family":"JetBrains Mono, monospace","font-weight":600});
+        fill:"var(--ink)","font-family":"JetBrains Mono, monospace","font-weight":600,"pointer-events":"none"});
       rot.textContent = opts.linhaFmt ? opts.linhaFmt(opts.linha[opts.linha.length-1]) : "";
       svg.appendChild(rot);
     }
@@ -911,6 +1118,8 @@ function Tabela(destino, cfg){
   this.linhas = [];
 }
 Tabela.prototype.definir = function(linhas, termo){ this.linhas = linhas; this.termo = termo||""; this.pagina = 1; this.desenhar(); };
+/* ordena por uma coluna sem desenhar (quem chama já vai chamar definir) */
+Tabela.prototype.ordenarPor = function(campo, dir){ this.ordem = campo; this.dir = dir; };
 /* escreve texto num <td> destacando o trecho que bateu com a busca, sem usar innerHTML */
 function escreverComDestaque(container, texto, termo){
   var s = texto==null ? "" : String(texto);
@@ -929,8 +1138,11 @@ function escreverComDestaque(container, texto, termo){
 }
 Tabela.prototype.desenhar = function(){
   var self = this, cfg = this.cfg;
+  /* coluna pode ter um "get" (valor calculado, ex.: venda de uma semana) */
+  var lerOrdem = function(l){ return l[self.ordem]; };
+  cfg.colunas.forEach(function(c){ if(c.campo===self.ordem && c.get) lerOrdem = c.get; });
   var ordenadas = this.linhas.slice().sort(function(a,b){
-    var av = a[self.ordem], bv = b[self.ordem];
+    var av = lerOrdem(a), bv = lerOrdem(b);
     if(av==null && bv==null) return 0;
     if(av==null) return 1;
     if(bv==null) return -1;
@@ -966,7 +1178,7 @@ Tabela.prototype.desenhar = function(){
     var tr = el("tr");
     cfg.colunas.forEach(function(c){
       var td = el("td", c.num ? "num" : (c.classe||null));
-      var v = linha[c.campo];
+      var v = c.get ? c.get(linha) : linha[c.campo];
       if(c.pill){
         var p = c.pill(linha);
         var sp = el("span","pill "+p.tom, p.texto);
@@ -986,6 +1198,28 @@ Tabela.prototype.desenhar = function(){
     tbody.appendChild(tr);
   });
   tab.appendChild(tbody);
+  /* linha de total das colunas marcadas com soma:true — soma TODAS as linhas
+     do filtro (não só a página) e é o que permite conferir um número do painel
+     com a planilha. soma pode ser uma função que ajusta o valor (ex.: módulo). */
+  if(ordenadas.length && cfg.colunas.some(function(c){ return c.soma; })){
+    var tfoot = el("tfoot"), trf = el("tr");
+    cfg.colunas.forEach(function(c,i){
+      var td = el("td", c.num ? "num" : null);
+      if(c.soma){
+        var s = 0;
+        ordenadas.forEach(function(l){
+          var v = c.get ? c.get(l) : l[c.campo];
+          if(typeof c.soma === "function") v = c.soma(v,l);
+          s += (v||0);
+        });
+        td.textContent = c.fmt ? c.fmt(s, null) : fInt(s);
+      } else if(i===0){
+        td.textContent = "Total · "+fInt(ordenadas.length)+(ordenadas.length===1?" linha":" linhas");
+      }
+      trf.appendChild(td);
+    });
+    tfoot.appendChild(trf); tab.appendChild(tfoot);
+  }
   envolt.appendChild(tab);
   this.destino.appendChild(envolt);
 
@@ -1118,6 +1352,163 @@ function agruparPorComprador(lista, valorDe){
 }
 
 /* =========================================================================
+   DE UM NÚMERO À PLANILHA
+   Cada página tem um "kit": clicar num número, numa fatia, numa coluna ou numa
+   barra aplica os filtros correspondentes e leva até a planilha da própria
+   página (ou de outra, ex.: Verba → Saldo verba). O clique troca só o que foi
+   clicado e mantém o resto — assim o número da tela e o total da planilha batem.
+   "← Voltar" devolve os filtros e a posição de antes do clique.
+   ========================================================================= */
+var KITS = {};
+var VOLTAR = null;     // {origem, destino, estados:{id:foto}, y}
+
+function copiarEstado(e){
+  var o = {};
+  Object.keys(e).forEach(function(k){
+    var v = e[k];
+    o[k] = v instanceof Set ? new Set(v) : (Array.isArray(v) ? v.slice() : v);
+  });
+  return o;
+}
+/* "Comprador: X", "Ruptura: Sim"... dos filtros da barra que não estão no padrão */
+function descreverBase(estado, pares){
+  var out = [];
+  if(estado.comps && estado.comps.size < COMP_LISTA.length){
+    out.push(["Comprador", COMP_LISTA.filter(function(c){ return estado.comps.has(c.cod); })
+      .map(function(c){ return nomeCurto(c.cod); }).join(", ")]);
+  }
+  (pares||[]).forEach(function(p){ if(p[1]) out.push(p); });
+  if(estado.busca) out.push(["Busca", estado.busca]);
+  return out;
+}
+function tituloDaPagina(id){
+  var r = id;
+  PAGINAS.forEach(function(p){ if(p.id===id) r = p.titulo; });
+  return r;
+}
+
+/* cfg: {id, estado, cTab, boxTab, tabela:function()->Tabela atual} */
+function criarKit(cfg){
+  var estado = cfg.estado;
+  estado.extras = [];     // filtros vindos de um clique, sem controle próprio na barra: {k,rot,txt,fn}
+  var inicial = copiarEstado(estado);
+  var kit = {id:cfg.id, estado:estado, cTab:cfg.cTab, render:function(){}, descrever:null};
+  var faixa = el("div","faixa-ativos");
+
+  kit.add = function(k, rot, txt, fn){
+    estado.extras = estado.extras.filter(function(x){ return x.k !== k; }).concat([{k:k, rot:rot, txt:txt, fn:fn}]);
+  };
+  kit.passa = function(r){
+    for(var i=0;i<estado.extras.length;i++){ if(!estado.extras[i].fn(r)) return false; }
+    return true;
+  };
+  kit.foto = function(){ return copiarEstado(estado); };
+  kit.restaurar = function(f){
+    Object.keys(estado).forEach(function(k){ delete estado[k]; });
+    Object.assign(estado, copiarEstado(f));
+  };
+  /* volta aos filtros de abertura, no mesmo objeto (os handlers das páginas guardam a referência) */
+  kit.limpar = function(manter){
+    var m = {};
+    (manter||[]).forEach(function(k){ m[k] = estado[k]; });
+    kit.restaurar(inicial);
+    Object.assign(estado, m);
+    if(VOLTAR && VOLTAR.destino === kit.id) VOLTAR = null;
+  };
+  kit.vai = function(mudar, o){ return function(){ drill(kit, mudar, o); }; };
+
+  kit.desenharFaixa = function(){
+    cfg.cTab.insertBefore(faixa, cfg.boxTab);
+    faixa.innerHTML = "";
+    var fixos = kit.descrever ? kit.descrever() : [];
+    var temVoltar = !!(VOLTAR && VOLTAR.destino === kit.id);
+    if(!fixos.length && !estado.extras.length && !temVoltar){ faixa.style.display = "none"; return; }
+    faixa.style.display = "flex";
+    if(temVoltar){
+      var b = el("button","btn-voltar","← Voltar" + (VOLTAR.origem !== kit.id ? " para " + tituloDaPagina(VOLTAR.origem) : ""));
+      b.type = "button";
+      b.addEventListener("click", voltar);
+      faixa.appendChild(b);
+    }
+    if(fixos.length || estado.extras.length) faixa.appendChild(el("span","rot","Filtros na planilha"));
+    function tag(rot, txt, aoTirar){
+      var t = el("span","tag-ativa"+(aoTirar?" removivel":""));
+      t.appendChild(el("span","k", rot+":"));
+      t.appendChild(el("span","n", txt));
+      if(aoTirar){
+        var x = el("button",null,"✕"); x.type = "button"; x.title = "Tirar este filtro";
+        x.addEventListener("click", aoTirar);
+        t.appendChild(x);
+      }
+      faixa.appendChild(t);
+    }
+    fixos.forEach(function(p){ tag(p[0], p[1]); });
+    estado.extras.forEach(function(x){
+      tag(x.rot, x.txt, function(){
+        estado.extras = estado.extras.filter(function(y){ return y !== x; });
+        kit.render();
+      });
+    });
+  };
+  /* rola até a planilha e dá um pulso no cartão, para o olho achar onde chegou */
+  kit.rolar = function(){
+    Dica.esconder();
+    requestAnimationFrame(function(){
+      /* o cabeçalho é fixo e muda de altura (o menu quebra em duas linhas em tela estreita) */
+      var cab = document.querySelector("header");
+      var topo = cfg.cTab.getBoundingClientRect().top + window.pageYOffset - (cab ? cab.offsetHeight : 0) - 14;
+      window.scrollTo({top:Math.max(0, topo), behavior:semMovimento?"auto":"smooth"});
+      cfg.cTab.classList.remove("piscar");
+      void cfg.cTab.offsetWidth;
+      cfg.cTab.classList.add("piscar");
+    });
+  };
+  kit.tabela = cfg.tabela;
+  KITS[cfg.id] = kit;
+  return kit;
+}
+
+/* mudar(estadoDoAlvo, kitDoAlvo) altera só o que foi clicado.
+   o = {pagina: outra página como destino, ordem:[coluna, dir]} */
+function drill(origem, mudar, o){
+  o = o || {};
+  var destId = o.pagina || origem.id;
+  var foto = {origem:origem.id, destino:destId, estados:{}, y:window.scrollY};
+  foto.estados[origem.id] = origem.foto();
+  var alvo = origem;
+  if(destId !== origem.id){
+    abrir(destId, true);              // monta a página de destino se ainda não existe
+    alvo = KITS[destId];
+    foto.estados[destId] = alvo.foto();
+    alvo.limpar();                    // outra página parte do padrão dela...
+    if(origem.estado.comps && alvo.estado.comps) alvo.estado.comps = new Set(origem.estado.comps);   // ...mas leva o comprador
+  }
+  if(mudar) mudar(alvo.estado, alvo);
+  VOLTAR = foto;
+  var t = alvo.tabela && alvo.tabela();
+  if(o.ordem && t) t.ordenarPor(o.ordem[0], o.ordem[1]);
+  alvo.render();
+  if(alvo !== origem) origem.desenharFaixa();
+  alvo.rolar();
+}
+function voltar(){
+  var f = VOLTAR;
+  if(!f) return;
+  VOLTAR = null;
+  Object.keys(f.estados).forEach(function(id){ KITS[id].restaurar(f.estados[id]); });
+  abrir(f.origem, true);
+  Object.keys(f.estados).forEach(function(id){ KITS[id].render(); });
+  Dica.esconder();
+  requestAnimationFrame(function(){ window.scrollTo({top:f.y, behavior:"auto"}); });
+}
+/* ao trocar de aba pelo menu o "Voltar" perde o sentido */
+function limparVoltar(){
+  var antigo = VOLTAR;
+  VOLTAR = null;
+  if(antigo && KITS[antigo.destino]) KITS[antigo.destino].desenharFaixa();
+}
+
+/* =========================================================================
    PÁGINA 01 — COMPRAS (ruptura e cobertura)
    ========================================================================= */
 pagina("compras","01","Compras","Ruptura & cobertura de estoque",
@@ -1144,18 +1535,27 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
         {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
         {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
-        {titulo:"Est. disp. (CX)", campo:"estCx", num:true, fmt:function(v){ return fNum(v,1); }},
+        {titulo:"Est. disp. (CX)", campo:"estCx", num:true, fmt:function(v){ return fNum(v,1); }, soma:true},
         {titulo:"Giro/dia (CX)", campo:"giroCx", num:true, fmt:function(v){ return fNum(v,3); }},
         {titulo:"Dias de venda", campo:"dias", num:true, fmt:function(v){ return fNum(v,1); }},
         {titulo:"Status", campo:"ativo", pill:function(l){ return l.ativo ? {tom:"good",texto:"ATIVO"} : {tom:"crit",texto:"FORALINHA"}; }},
         {titulo:"Ruptura", campo:"ruptura", pill:function(l){ return l.ruptura ? {tom:"crit",texto:"Sim"} : {tom:"neutro",texto:"Não"}; }},
         {titulo:"Cobertura", campo:"cobertura", pill:function(l){ return l.cobertura ? {tom:"neutro",texto:"Dentro da meta"} : {tom:"warn",texto:"Excesso"}; }},
-        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2}
+        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2, soma:true}
       ]
     });
+    var kit = criarKit({id:"compras", estado:estado, cTab:cTab, boxTab:boxTab, tabela:function(){ return tabela; }});
+    kit.descrever = function(){
+      return descreverBase(estado, [
+        ["Status", {ativo:"Ativo", fora:"Fora de linha"}[estado.status]],
+        ["Ruptura", {sim:"Sim", nao:"Não"}[estado.rup]],
+        ["Cobertura", {excesso:"Excesso", ideal:"Dentro da meta"}[estado.cob]]
+      ]);
+    };
 
     function filtrar(){
       return RUPT.filter(function(r){
+        if(!kit.passa(r)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(r.comp)) return false;
         if(estado.status==="ativo" && !r.ativo) return false;
         if(estado.status==="fora" && r.ativo) return false;
@@ -1191,29 +1591,38 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
         grupoChips("Cobertura",[{label:"Todos",valor:"todos"},{label:"Excesso",valor:"excesso",tom:"warn"},{label:"Dentro da meta",valor:"ideal",tom:"good"}],
           estado.cob, function(v){ estado.cob=v; render(); }),
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado = {comps:todosComps(), status:"todos", rup:"todos", cob:"todos", busca:""}; render(); })
+          function(){ kit.limpar(); render(); })
       ]);
 
+      var soAvaria = function(r){ return (r.avaria||0) > 0; };
       montarKpis(kpis,[
-        {label:"Avaria", valor:fR$(avaria), cor:"crit", sub:"Estoque indenizado nas filiais 1, 2, 7 e 8."},
+        {label:"Avaria", valor:fR$(avaria), cor:"crit", sub:"Estoque indenizado nas filiais 1, 2, 7 e 8.",
+         aoClicar:kit.vai(function(e,k){ k.add("avaria","Avaria","maior que zero",soAvaria); }, {ordem:["avaria",-1]})},
         {label:"Total ativos", valor:fInt(ativos), cor:"ink", sub:"Itens que não estão marcados como fora de linha.",
-         info:"A coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Quem não é explicitamente FORALINHA entra como ativo."},
-        {label:"Total de itens", valor:fInt(total), cor:"ink", sub:"Produtos de revenda na carga atual."},
-        {label:"Itens c/ ruptura", valor:fInt(rup), cor:"crit", sub:"Menos de 7 dias de venda em estoque."},
+         info:"A coluna OBS2 do WinThor não distingue os dois valores em todos os produtos. Quem não é explicitamente FORALINHA entra como ativo.",
+         aoClicar:kit.vai(function(e){ e.status="ativo"; })},
+        {label:"Total de itens", valor:fInt(total), cor:"ink", sub:"Produtos de revenda na carga atual.",
+         aoClicar:kit.vai(null)},
+        {label:"Itens c/ ruptura", valor:fInt(rup), cor:"crit", sub:"Menos de 7 dias de venda em estoque.",
+         aoClicar:kit.vai(function(e){ e.rup="sim"; }, {ordem:["dias",1]})},
         {label:"Verba", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação por fornecedor principal.",
-         info:"Vem da consulta oficial de saldo de verba (Consulta3/SALDOMOV)."},
-        {label:"Cobertura excesso", valor:fInt(exc), cor:"warn", sub:"Estoque acima de 56 dias de venda."},
-        {label:"% excesso estoque", valor:fPct(total?exc/total:0), cor:"warn", sub:"Sobre os itens filtrados."},
-        {label:"% ruptura", valor:fPct(total?rup/total:0), cor:"crit", sub:"Sobre os itens filtrados."}
+         info:"Vem da consulta oficial de saldo de verba (Consulta3/SALDOMOV).",
+         aoClicar:kit.vai(null, {pagina:"saldo_verba", ordem:["verba",-1]})},
+        {label:"Cobertura excesso", valor:fInt(exc), cor:"warn", sub:"Estoque acima de 56 dias de venda.",
+         aoClicar:kit.vai(function(e){ e.cob="excesso"; }, {ordem:["dias",-1]})},
+        {label:"% excesso estoque", valor:fPct(total?exc/total:0), cor:"warn", sub:"Sobre os itens filtrados.",
+         aoClicar:kit.vai(function(e){ e.cob="excesso"; }, {ordem:["dias",-1]})},
+        {label:"% ruptura", valor:fPct(total?rup/total:0), cor:"crit", sub:"Sobre os itens filtrados.",
+         aoClicar:kit.vai(function(e){ e.rup="sim"; }, {ordem:["dias",1]})}
       ]);
 
       montarDonut(boxRup,[
-        {label:"Ruptura", valor:rup, cor:"crit"},
-        {label:"Sem ruptura", valor:total-rup, cor:"good"}
+        {label:"Ruptura", valor:rup, cor:"crit", unidade:"Itens", aoClicar:kit.vai(function(e){ e.rup="sim"; }, {ordem:["dias",1]})},
+        {label:"Sem ruptura", valor:total-rup, cor:"good", unidade:"Itens", aoClicar:kit.vai(function(e){ e.rup="nao"; })}
       ], total ? ("1 em cada "+Math.max(1,Math.round(total/Math.max(rup,1)))+" itens do filtro está em ruptura.") : "Sem itens no filtro.");
       montarDonut(boxCob,[
-        {label:"Excesso", valor:exc, cor:"warn"},
-        {label:"Dentro da meta", valor:total-exc, cor:"good"}
+        {label:"Excesso", valor:exc, cor:"warn", unidade:"Itens", aoClicar:kit.vai(function(e){ e.cob="excesso"; }, {ordem:["dias",-1]})},
+        {label:"Dentro da meta", valor:total-exc, cor:"good", unidade:"Itens", aoClicar:kit.vai(function(e){ e.cob="ideal"; })}
       ], total ? (fInt(exc)+" itens passam de 56 dias de cobertura e podem estar parados.") : "Sem itens no filtro.");
 
       // matriz por comprador
@@ -1231,7 +1640,7 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
       });
       var linhas = Array.from(porComp.entries()).map(function(e){
         var vb = verbaPorComp.get(e[0]) || 0;
-        return {nome:nomeComprador(e[0]), itens:e[1].itens,
+        return {cod:e[0], nome:nomeComprador(e[0]), itens:e[1].itens,
                 pctExc:e[1].itens?e[1].exc/e[1].itens:0, pctRup:e[1].itens?e[1].rup/e[1].itens:0,
                 avaria:e[1].avaria, verba:vb, saldo:vb-e[1].avaria};
       }).sort(function(a,b){ return b.itens-a.itens; });
@@ -1250,10 +1659,17 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
       var tb = el("tbody");
       linhas.forEach(function(l){
         var r = el("tr");
+        /* cada célula leva à planilha com aquele comprador já filtrado */
+        var soEle = function(e){ e.comps = new Set([l.cod]); };
         var td0 = el("td",null,l.nome); td0.style.fontWeight="600"; r.appendChild(td0);
-        r.appendChild(el("td","num",fInt(l.itens)));
+        ligarClique(td0, kit.vai(soEle));
+        var tdIt = el("td","num",fInt(l.itens)); r.appendChild(tdIt);
+        ligarClique(tdIt, kit.vai(soEle));
         [["pctExc","warn"],["pctRup","crit"]].forEach(function(par){
           var td = el("td");
+          ligarClique(td, par[0]==="pctExc"
+            ? kit.vai(function(e){ soEle(e); e.cob="excesso"; }, {ordem:["dias",-1]})
+            : kit.vai(function(e){ soEle(e); e.rup="sim"; }, {ordem:["dias",1]}));
           var wrap = el("div"); wrap.style.cssText="display:flex;align-items:center;gap:9px;";
           var trilho = el("div"); trilho.style.cssText="flex:1 1 auto;min-width:60px;height:7px;border-radius:100px;background:var(--surface3);overflow:hidden;";
           var f = el("div"); f.style.cssText="height:100%;border-radius:100px;width:"+Math.round(l[par[0]]*100)+"%;background:"+cor(par[1])+";";
@@ -1261,20 +1677,25 @@ pagina("compras","01","Compras","Ruptura & cobertura de estoque",
           var n = el("span","num",fPct(l[par[0]])); n.style.cssText="font-size:12px;width:48px;text-align:right;flex:0 0 auto;";
           wrap.appendChild(trilho); wrap.appendChild(n); td.appendChild(wrap); r.appendChild(td);
         });
-        r.appendChild(el("td","num",fR$2(l.avaria)));
-        r.appendChild(el("td","num",fR$2(l.verba)));
+        var tdAv = el("td","num",fR$2(l.avaria)); r.appendChild(tdAv);
+        ligarClique(tdAv, kit.vai(function(e,k){ soEle(e); k.add("avaria","Avaria","maior que zero",soAvaria); }, {ordem:["avaria",-1]}));
+        var tdVb = el("td","num",fR$2(l.verba)); r.appendChild(tdVb);
+        ligarClique(tdVb, kit.vai(soEle, {pagina:"saldo_verba", ordem:["verba",-1]}));
         var ts = el("td","num",fR$2(l.saldo));
         ts.style.color = l.saldo>=0 ? cor("good") : cor("crit");
         ts.style.fontWeight = "700";
         r.appendChild(ts);
+        ligarClique(ts, kit.vai(soEle, {pagina:"verba_avaria", ordem:["saldo",1]}));
         tb.appendChild(r);
       });
       t.appendChild(tb); env.appendChild(t); boxMatriz.appendChild(env);
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(RUPT.length)+" produtos.";
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(RUPT.length)+" produtos. Clique nos números e gráficos acima para filtrar esta planilha.";
       tabela.definir(lista, estado.busca);
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1300,18 +1721,25 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
         {titulo:"Código", campo:"cod", num:true, classe:"mono-muted"},
         {titulo:"Fornecedor principal", campo:"nome", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return v==null?"—":nomeComprador(v); }},
-        {titulo:"Verba (saldo mov.)", campo:"verba", num:true, fmt:fR$2},
-        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2},
-        {titulo:"Saldo", campo:"saldo", num:true, fmt:fR$2,
+        {titulo:"Verba (saldo mov.)", campo:"verba", num:true, fmt:fR$2, soma:true},
+        {titulo:"Avaria", campo:"avaria", num:true, fmt:fR$2, soma:true},
+        {titulo:"Saldo", campo:"saldo", num:true, fmt:fR$2, soma:true,
          corTexto:function(v){ return v>=0 ? cor("good") : cor("crit"); }},
-        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2},
-        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2},
-        {titulo:"Itens c/ avaria", campo:"itens", num:true, fmt:fInt}
+        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2, soma:true},
+        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2, soma:true},
+        {titulo:"Itens c/ avaria", campo:"itens", num:true, fmt:fInt, soma:true}
       ]
     });
+    var kit = criarKit({id:"verba_avaria", estado:estado, cTab:cTab, boxTab:boxTab, tabela:function(){ return tabela; }});
+    kit.descrever = function(){
+      return descreverBase(estado, [
+        ["Situação", {negativo:"Saldo negativo", positivo:"Saldo positivo", vencida:"Com verba vencida"}[estado.situacao]]
+      ]);
+    };
 
     function filtrar(){
       return VERBA.filter(function(v){
+        if(!kit.passa(v)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(v.comp)) return false;
         if(estado.situacao==="negativo" && v.saldo >= 0) return false;
         if(estado.situacao==="positivo" && v.saldo < 0) return false;
@@ -1337,21 +1765,35 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
           {label:"Com verba vencida",valor:"vencida",tom:"warn"}
         ], estado.situacao, function(v){ estado.situacao=v; render(); }),
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado={comps:todosComps(),situacao:"todos",busca:""}; render(); })
+          function(){ kit.limpar(); render(); })
       ]);
 
       montarKpis(kpis,[
-        {label:"Verba total", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação de crédito com fornecedores."},
-        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Todas as filiais, só dos fornecedores com verba."},
-        {label:"Saldo líquido", valor:fR$(verba-avaria), cor:(verba-avaria)>=0?"good":"crit", sub:"Verba menos avaria."},
+        {label:"Verba total", valor:fR$(verba), cor:"good", sub:"Saldo de movimentação de crédito com fornecedores.",
+         aoClicar:kit.vai(null, {ordem:["verba",-1]})},
+        {label:"Avaria total", valor:fR$(avaria), cor:"crit", sub:"Todas as filiais, só dos fornecedores com verba.",
+         aoClicar:kit.vai(null, {ordem:["avaria",-1]})},
+        {label:"Saldo líquido", valor:fR$(verba-avaria), cor:(verba-avaria)>=0?"good":"crit", sub:"Verba menos avaria.",
+         aoClicar:kit.vai(null, {ordem:["saldo",1]})},
         {label:"Fornecedores no vermelho", valor:fInt(negativos.length), cor:"crit",
-         sub:"Avaria já maior que a verba — "+fPct(lista.length?negativos.length/lista.length:0)+" do total."},
-        {label:"Verba vencida", valor:fR$(vencidas), cor:"warn", sub:"Crédito com vencimento já passado."},
-        {label:"Verba a vencer", valor:fR$(avencer), cor:"blue", sub:"Ainda dentro do prazo."}
+         sub:"Avaria já maior que a verba — "+fPct(lista.length?negativos.length/lista.length:0)+" do total.",
+         aoClicar:kit.vai(function(e){ e.situacao="negativo"; }, {ordem:["saldo",1]})},
+        {label:"Verba vencida", valor:fR$(vencidas), cor:"warn", sub:"Crédito com vencimento já passado.",
+         aoClicar:kit.vai(function(e){ e.situacao="vencida"; }, {ordem:["vencidas",-1]})},
+        {label:"Verba a vencer", valor:fR$(avencer), cor:"blue", sub:"Ainda dentro do prazo.",
+         aoClicar:kit.vai(function(e,k){ k.add("avencer","A vencer","maior que zero",function(r){ return (r.avencer||0)>0; }); }, {ordem:["avencer",-1]})}
       ]);
 
       montarRanking(boxRank, negativos.slice().sort(function(a,b){ return a.saldo-b.saldo; }).slice(0,15)
-        .map(function(v){ return {nome:v.nome, valor:Math.abs(v.saldo), rotulo:fR$(v.saldo), cor:"crit"}; }),
+        .map(function(v){
+          return {nome:v.nome, valor:Math.abs(v.saldo), rotulo:fR$(v.saldo), cor:"crit",
+            dica:{titulo:v.nome, sub:nomeComprador(v.comp),
+              linhas:[{cor:cor("good"), nome:"Verba", valor:fR$(v.verba)},
+                      {cor:cor("crit"), nome:"Avaria", valor:fR$(v.avaria)}],
+              total:{nome:"Saldo", valor:fR$(v.saldo)},
+              extra:[fInt(v.itens)+" itens com avaria"]},
+            aoClicar:kit.vai(function(e,k){ k.add("forn","Fornecedor",v.nome,function(r){ return r.cod===v.cod; }); })};
+        }),
         {cor:"crit"});
       if(!negativos.length){
         boxRank.innerHTML = "";
@@ -1359,9 +1801,11 @@ pagina("verba_avaria","02","Saldo verba x avaria","Verba negociada contra avaria
       }
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais. Clique nos números e gráficos acima para filtrar esta planilha.";
       tabela.definir(lista, estado.busca);
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1393,19 +1837,30 @@ pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertur
         {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
         {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
-        {titulo:"Est. disp.", campo:"disp", num:true, fmt:function(v){ return fInt(v); }},
-        {titulo:"Venda 9 sem.", campo:"vendaTot", num:true, fmt:function(v){ return fInt(v); }},
+        {titulo:"Est. disp.", campo:"disp", num:true, fmt:function(v){ return fInt(v); }, soma:true},
+        {titulo:"Venda 9 sem.", campo:"vendaTot", num:true, fmt:function(v){ return fInt(v); }, soma:true},
         {titulo:"Média aparada", campo:"media", num:true, fmt:function(v){ return fNum(v,1); }},
         {titulo:"Cobertura (sem.)", campo:"cob", num:true, fmt:function(v){ return v==null?"—":fNum(v,1); },
          corTexto:function(v){ return v==null ? "" : (v<2 ? cor("crit") : (v>8 ? cor("warn") : cor("good"))); }},
-        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:function(v){ return v==null?"—":fInt(v); }},
-        {titulo:"Valor sugerido", campo:"valorSug", num:true, fmt:function(v){ return v?fR$(v):"—"; }},
-        {titulo:"Pendente", campo:"pendente", num:true, fmt:function(v){ return v?fInt(v):"—"; }}
-      ]
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:function(v){ return v==null?"—":fInt(v); }, soma:true},
+        {titulo:"Valor sugerido", campo:"valorSug", num:true, fmt:function(v){ return v?fR$(v):"—"; }, soma:true},
+        {titulo:"Pendente", campo:"pendente", num:true, fmt:function(v){ return v?fInt(v):"—"; }, soma:true}
+      ].concat([8,7,6,5,4,3,2,1,0].map(function(idx){
+        /* uma coluna por semana: é o que permite abrir a planilha a partir de uma coluna do gráfico */
+        return {titulo: idx===0 ? "Sem. atual" : "Sem. -"+idx, campo:"sem"+idx, num:true,
+                get:function(r){ return r.semanas[idx]; }, fmt:function(v){ return fInt(v); }, soma:true};
+      }))
     });
+    var kit = criarKit({id:"estoque_venda", estado:estado, cTab:cTab, boxTab:boxTab, tabela:function(){ return tabela; }});
+    kit.descrever = function(){
+      return descreverBase(estado, [
+        ["Foco", {sugestao:"Com sugestão", curta:"Cobertura < 2 sem.", longa:"Cobertura > 8 sem.", sem_venda:"Sem venda 9 sem."}[estado.foco]]
+      ]);
+    };
 
     function filtrar(){
       return EV.filter(function(r){
+        if(!kit.passa(r)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(r.comp)) return false;
         if(estado.foco==="sugestao" && !(r.sug>0)) return false;
         if(estado.foco==="curta" && !(r.cob!=null && r.cob<2)) return false;
@@ -1436,29 +1891,49 @@ pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertur
           {label:"Sem venda 9 sem.",valor:"sem_venda"}
         ], estado.foco, function(v){ estado.foco=v; render(); }),
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado={comps:todosComps(),foco:"todos",busca:""}; render(); })
+          function(){ kit.limpar(); render(); })
       ]);
 
+      var temCob = function(r){ return r.cob!=null; };
       montarKpis(kpis,[
-        {label:"Produtos no filtro", valor:fInt(lista.length), cor:"ink", sub:"De "+fInt(EV.length)+" na carga completa."},
-        {label:"Venda 9 semanas", valor:fInt(vendaTot), cor:"blue", sub:"Unidades movimentadas nas filiais 1, 7 e 10."},
+        {label:"Produtos no filtro", valor:fInt(lista.length), cor:"ink", sub:"De "+fInt(EV.length)+" na carga completa.",
+         aoClicar:kit.vai(null)},
+        {label:"Venda 9 semanas", valor:fInt(vendaTot), cor:"blue", sub:"Unidades movimentadas nas filiais 1, 7 e 10.",
+         aoClicar:kit.vai(null, {ordem:["vendaTot",-1]})},
         {label:"Com cobertura calculada", valor:fInt(comCob.length), cor:"ink",
          sub:fPct(lista.length?comCob.length/lista.length:0)+" dos itens têm venda suficiente para o cálculo.",
-         info:"A média aparada exige pelo menos 3 semanas com venda: descarta a melhor e a pior e divide pelo resto."},
+         info:"A média aparada exige pelo menos 3 semanas com venda: descarta a melhor e a pior e divide pelo resto.",
+         aoClicar:kit.vai(function(e,k){ k.add("comcob","Cobertura","calculada",temCob); }, {ordem:["cob",1]})},
         {label:"Cobertura média", valor:cobMedia==null?"—":fNum(cobMedia,1)+" sem", cor:cobMedia>8?"warn":"good",
-         sub:"A meta de compra do BI é 8 semanas."},
-        {label:"Itens com sugestão", valor:fInt(comSug.length), cor:"good", sub:"Estoque abaixo da necessidade de 8 semanas."},
-        {label:"Valor sugerido", valor:fCurto(valorSug), cor:"good", sub:"Sugestão avaliada ao preço de venda."},
-        {label:"Sem venda em 9 sem.", valor:fInt(semVenda.length), cor:"warn", sub:"Candidatos a revisão de mix."},
+         sub:"A meta de compra do BI é 8 semanas.",
+         aoClicar:kit.vai(function(e,k){ k.add("comcob","Cobertura","calculada",temCob); }, {ordem:["cob",1]})},
+        {label:"Itens com sugestão", valor:fInt(comSug.length), cor:"good", sub:"Estoque abaixo da necessidade de 8 semanas.",
+         aoClicar:kit.vai(function(e){ e.foco="sugestao"; }, {ordem:["valorSug",-1]})},
+        {label:"Valor sugerido", valor:fCurto(valorSug), cor:"good", sub:"Sugestão avaliada ao preço de venda.",
+         aoClicar:kit.vai(function(e){ e.foco="sugestao"; }, {ordem:["valorSug",-1]})},
+        {label:"Sem venda em 9 sem.", valor:fInt(semVenda.length), cor:"warn", sub:"Candidatos a revisão de mix.",
+         aoClicar:kit.vai(function(e){ e.foco="sem_venda"; }, {ordem:["disp",-1]})},
         {label:"Cobertura > 8 sem.", valor:fInt(comCob.filter(function(r){return r.cob>8;}).length), cor:"warn",
-         sub:"Estoque acima da meta de compra."}
+         sub:"Estoque acima da meta de compra.",
+         aoClicar:kit.vai(function(e){ e.foco="longa"; }, {ordem:["cob",-1]})}
       ]);
 
       var somaSem = [0,0,0,0,0,0,0,0,0];
       lista.forEach(function(r){ r.semanas.forEach(function(v,i){ somaSem[i] += (v||0); }); });
+      var totalSem = somaSem.reduce(function(s,v){ return s+v; }, 0);
       montarColunas(boxSem, somaSem.slice().reverse().map(function(v,i){
         var idx = 8-i;
-        return {rotulo: idx===0 ? "atual" : ("-"+idx), valor:v, cor: idx===0 ? "muted" : "blue"};
+        var rot = idx===0 ? "atual" : ("-"+idx);
+        var anterior = i>0 ? somaSem[idx+1] : null;       // a semana imediatamente mais antiga
+        var extra = [totalSem ? fPct(v/totalSem)+" das 9 semanas" : "—"];
+        if(anterior!=null && anterior>0) extra.push((v>=anterior?"▲ ":"▼ ")+fPct(Math.abs(v/anterior-1))+" contra a semana anterior");
+        return {rotulo:rot, valor:v, cor: idx===0 ? "muted" : "blue",
+          dica:{titulo: idx===0 ? "Semana atual" : "Há "+idx+(idx===1?" semana":" semanas"), sub: idx===0 ? "em curso" : "",
+                linhas:[{cor: cor(idx===0?"muted":"blue"), nome:"Unidades vendidas", valor:fInt(v)+" un"}], extra:extra},
+          clique:"Clique para ver os produtos que venderam nesta semana",
+          aoClicar:kit.vai(function(e,k){
+            k.add("sem","Semana", idx===0?"atual":"-"+idx, function(r){ return (r.semanas[idx]||0)>0; });
+          }, {ordem:["sem"+idx,-1]})};
       }), {altura:230, larguraCol:56, valorFmt:function(v){ return fInt(v)+" un"; },
            eixoFmt:function(v){ return v>=1000 ? Math.round(v/1000)+"k" : fInt(v); },
            aria:"Venda por semana"});
@@ -1470,19 +1945,31 @@ pagina("estoque_venda","03","Estoque x venda","Histórico de 9 semanas, cobertur
         {rotulo:"8–16", min:8, max:16, cor:"warn"},
         {rotulo:"16+", min:16, max:1e9, cor:"crit"}
       ].map(function(f){
-        return {rotulo:f.rotulo, cor:f.cor,
-                valor: comCob.filter(function(r){ return r.cob>=f.min && r.cob<f.max; }).length};
+        var qtd = comCob.filter(function(r){ return r.cob>=f.min && r.cob<f.max; }).length;
+        return {rotulo:f.rotulo, cor:f.cor, valor:qtd,
+          dica:{titulo:"Cobertura de "+f.rotulo+" semanas",
+                linhas:[{cor:cor(f.cor), nome:"Produtos", valor:fInt(qtd)}],
+                extra:[comCob.length ? fPct(qtd/comCob.length)+" dos produtos com cobertura calculada" : "—"]},
+          clique:"Clique para ver estes produtos na planilha",
+          aoClicar:kit.vai(function(e,k){
+            k.add("cob","Cobertura", f.rotulo+" semanas", function(r){ return r.cob!=null && r.cob>=f.min && r.cob<f.max; });
+          }, {ordem:["cob",1]})};
       });
       montarColunas(boxFaixa, faixas, {altura:230, larguraCol:74,
         valorFmt:function(v){ return fInt(v)+" produtos"; }, aria:"Distribuição de cobertura"});
 
       montarRanking(boxRank, agruparPorComprador(comSug, function(r){ return r.valorSug; }).slice(0,12)
-        .map(function(c){ return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor)}; }), {cor:"good"});
+        .map(function(c){
+          return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor),
+            aoClicar:kit.vai(function(e){ e.comps = new Set([c.cod]); e.foco="sugestao"; }, {ordem:["valorSug",-1]})};
+        }), {cor:"good", rotuloValor:"Valor sugerido"});
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Ordenado por valor sugerido. Clique em qualquer coluna para reordenar.";
+      cTab.querySelector(".card-note").textContent = "Ordenado por valor sugerido. Clique em qualquer coluna para reordenar, ou nos números e gráficos acima para filtrar.";
       tabela.definir(lista, estado.busca);
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1510,9 +1997,9 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         {titulo:"Fornecedor", campo:"nome", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
         {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,2); }},
-        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
-        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt},
-        {titulo:"Valor sugerido", campo:"valor", num:true, fmt:fR$}
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt, soma:true},
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt, soma:true},
+        {titulo:"Valor sugerido", campo:"valor", num:true, fmt:fR$, soma:true}
       ]
     });
     var tabProd = new Tabela(boxTab,{
@@ -1522,17 +2009,23 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         {titulo:"Código", campo:"codprod", num:true, classe:"mono-muted"},
         {titulo:"Descrição", campo:"desc", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
-        {titulo:"Volume líq. 3m", campo:"volume", num:true, fmt:fInt},
+        {titulo:"Volume líq. 3m", campo:"volume", num:true, fmt:fInt, soma:true},
         {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,3); }},
-        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
-        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt},
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt, soma:true},
+        {titulo:"Sugestão (un)", campo:"sug", num:true, fmt:fInt, soma:true},
         {titulo:"Preço", campo:"preco", num:true, fmt:fR$2},
-        {titulo:"Valor", campo:"valor", num:true, fmt:fR$}
+        {titulo:"Valor", campo:"valor", num:true, fmt:fR$, soma:true}
       ]
     });
+    var kit = criarKit({id:"sugestao", estado:estado, cTab:cTab, boxTab:boxTab,
+      tabela:function(){ return estado.visao==="fornecedor" ? tabFornec : tabProd; }});
+    kit.descrever = function(){ return descreverBase(estado, []); };
+    /* o fornecedor aparece como "cod" na visão por fornecedor e como "fornec" na por produto */
+    var codFornecDe = function(r){ return r.fornec != null ? r.fornec : r.cod; };
 
     function render(){
       var porFornec = SUGF.filter(function(f){
+        if(!kit.passa(f)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(f.comp)) return false;
         if(estado.busca){
           var h = (f.nome+" "+f.cod).toLowerCase();
@@ -1541,6 +2034,7 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
         return true;
       });
       var porProd = SUGP.filter(function(p){
+        if(!kit.passa(p)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(p.comp)) return false;
         if(estado.busca){
           var h = (p.desc+" "+p.codprod).toLowerCase();
@@ -1557,34 +2051,59 @@ pagina("sugestao","04","Sugestão fornecedor x produto","Quanto comprar, por for
           {label:"Por produto",valor:"produto"}
         ], estado.visao, function(v){ estado.visao=v; render(); }),
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado={comps:todosComps(),visao:estado.visao,busca:""}; render(); })
+          function(){ kit.limpar(["visao"]); render(); })
       ]);
 
       montarKpis(kpis,[
         {label:"Valor sugerido", valor:fCurto(vCorrigido), cor:"good",
-         sub:"Cada produto avaliado ao seu próprio preço."},
-        {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias. Filiais 1, 2, 7 e 8."},
-        {label:"Produtos (30 dias)", valor:fInt(porProd.length), cor:"ink", sub:"Filiais 1, 7 e 12."},
+         sub:"Cada produto avaliado ao seu próprio preço.",
+         aoClicar:kit.vai(function(e){ e.visao="fornecedor"; }, {ordem:["valor",-1]})},
+        {label:"Fornecedores", valor:fInt(porFornec.length), cor:"ink", sub:"Com sugestão positiva em 30 dias. Filiais 1, 2, 7 e 8.",
+         aoClicar:kit.vai(function(e){ e.visao="fornecedor"; }, {ordem:["valor",-1]})},
+        {label:"Produtos (30 dias)", valor:fInt(porProd.length), cor:"ink", sub:"Filiais 1, 7 e 12.",
+         aoClicar:kit.vai(function(e){ e.visao="produto"; }, {ordem:["valor",-1]})},
         {label:"Valor por produto", valor:fCurto(vProd), cor:"blue",
          sub:"Consulta separada, com filiais e critério próprios — não é o mesmo cálculo do valor sugerido acima.",
-         info:"\"Valor sugerido\" usa as filiais 1, 2, 7 e 8. \"Valor por produto\" usa 1, 7 e 12. São duas consultas diferentes, não o mesmo número quebrado em duas visões."}
+         info:"\"Valor sugerido\" usa as filiais 1, 2, 7 e 8. \"Valor por produto\" usa 1, 7 e 12. São duas consultas diferentes, não o mesmo número quebrado em duas visões.",
+         aoClicar:kit.vai(function(e){ e.visao="produto"; }, {ordem:["valor",-1]})}
       ]);
 
       if(estado.visao==="fornecedor"){
         montarRanking(boxRank, porFornec.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
-          .map(function(f){ return {nome:f.nome, valor:f.valor, rotulo:fCurto(f.valor)}; }), {cor:"good"});
+          .map(function(f){
+            return {nome:f.nome, valor:f.valor, rotulo:fCurto(f.valor),
+              dica:{titulo:f.nome, sub:nomeComprador(f.comp),
+                linhas:[{cor:cor("good"), nome:"Valor sugerido", valor:fR$(f.valor)}],
+                extra:[fInt(f.sug)+" un sugeridas · giro "+fNum(f.giro,2)+"/dia · disponível "+fInt(f.disp)],
+                clique:"Clique para ver os produtos deste fornecedor (consulta por produto: filiais 1, 7 e 12)"},
+              aoClicar:kit.vai(function(e,k){
+                e.visao="produto";
+                k.add("forn","Fornecedor",f.nome,function(r){ return codFornecDe(r)===f.cod; });
+              }, {ordem:["valor",-1]})};
+          }), {cor:"good", rotuloValor:"Valor sugerido"});
         tabProd.destino === boxTab && (boxTab.innerHTML = "");
         tabFornec.definir(porFornec, estado.busca);
-        cTab.querySelector(".card-note").textContent = "Sugestão consolidada por fornecedor — estoque das filiais 1, 2, 7 e 8.";
+        cTab.querySelector(".card-note").textContent = "Sugestão consolidada por fornecedor — estoque das filiais 1, 2, 7 e 8. Clique nos números e gráficos acima para filtrar.";
       } else {
         montarRanking(boxRank, porProd.slice().sort(function(a,b){ return b.valor-a.valor; }).slice(0,15)
-          .map(function(p){ return {nome:p.desc, valor:p.valor, rotulo:fCurto(p.valor)}; }), {cor:"blue"});
+          .map(function(p){
+            return {nome:p.desc, valor:p.valor, rotulo:fCurto(p.valor),
+              dica:{titulo:p.desc, sub:"filial "+p.filial,
+                linhas:[{cor:cor("blue"), nome:"Valor", valor:fR$(p.valor)}],
+                extra:[fInt(p.sug)+" un sugeridas · disponível "+fInt(p.disp)+" · "+nomeFornec(p.fornec)]},
+              aoClicar:kit.vai(function(e,k){
+                /* a visão por fornecedor não tem produto: linha sem codprod não é barrada */
+                k.add("prod","Produto",p.desc,function(r){ return r.codprod===undefined || r.codprod===p.codprod; });
+              }, {ordem:["valor",-1]})};
+          }), {cor:"blue", rotuloValor:"Valor"});
         boxTab.innerHTML = "";
         tabProd.definir(porProd, estado.busca);
-        cTab.querySelector(".card-note").textContent = "Sugestão por produto e filial, baseada nos 3 meses fechados anteriores.";
+        cTab.querySelector(".card-note").textContent = "Sugestão por produto e filial, baseada nos 3 meses fechados anteriores. Clique nos números e gráficos acima para filtrar.";
       }
+      kit.desenharFaixa();
     }
     cTab.insertBefore(el("p","card-note",""), boxTab);
+    kit.render = render;
     render();
     return render;
   });
@@ -1615,16 +2134,20 @@ pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro 
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return nomeComprador(v); }},
         {titulo:"Fornecedor", campo:"fornec", classe:"trunc", texto:true, fmt:function(v){ return nomeFornec(v); }},
         {titulo:"Giro/dia", campo:"giro", num:true, fmt:function(v){ return fNum(v,3); }},
-        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt},
-        {titulo:"Excedente (un)", campo:"sug", num:true, fmt:function(v){ return fInt(Math.abs(v)); }},
+        {titulo:"Disponível", campo:"disp", num:true, fmt:fInt, soma:true},
+        {titulo:"Excedente (un)", campo:"sug", num:true, fmt:function(v){ return fInt(Math.abs(v)); },
+         soma:function(v){ return Math.abs(v||0); }},
         {titulo:"Preço", campo:"preco", num:true, fmt:fR$2},
-        {titulo:"Capital parado", campo:"valor", num:true, fmt:fR$,
+        {titulo:"Capital parado", campo:"valor", num:true, fmt:fR$, soma:true,
          corTexto:function(){ return cor("warn"); }}
       ]
     });
+    var kit = criarKit({id:"excesso", estado:estado, cTab:cTab, boxTab:boxTab, tabela:function(){ return tabela; }});
+    kit.descrever = function(){ return descreverBase(estado, []); };
 
     function render(){
       var lista = EXC.filter(function(e){
+        if(!kit.passa(e)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(e.comp)) return false;
         if(estado.busca){
           var h = (e.desc+" "+nomeFornec(e.fornec)+" "+e.codprod).toLowerCase();
@@ -1640,30 +2163,52 @@ pagina("excesso","05","Excesso de estoque","Capital parado em produtos com giro 
 
       filtroComprador(barra, estado, function(){ render(); }, [
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado={comps:todosComps(),busca:""}; render(); })
+          function(){ kit.limpar(); render(); })
       ]);
 
+      /* o grupo dos 20% mais pesados é identificado pelo próprio objeto da linha */
+      var pesados = new Set(top20);
+      var soItem = function(item){
+        return kit.vai(function(e,k){ k.add("prod","Produto",item.desc,function(r){ return r===item; }); }, {ordem:["valor",-1]});
+      };
       montarKpis(kpis,[
-        {label:"Capital parado", valor:fCurto(total), cor:"warn", sub:"Excedente avaliado ao preço de tabela."},
-        {label:"Produtos em excesso", valor:fInt(lista.length), cor:"ink", sub:"Sugestão negativa em 60 dias."},
-        {label:"Valor médio por item", valor:fR$(lista.length?total/lista.length:0), cor:"ink", sub:"Quanto cada item carrega, em média."},
+        {label:"Capital parado", valor:fCurto(total), cor:"warn", sub:"Excedente avaliado ao preço de tabela.",
+         aoClicar:kit.vai(null, {ordem:["valor",-1]})},
+        {label:"Produtos em excesso", valor:fInt(lista.length), cor:"ink", sub:"Sugestão negativa em 60 dias.",
+         aoClicar:kit.vai(null, {ordem:["valor",-1]})},
+        {label:"Valor médio por item", valor:fR$(lista.length?total/lista.length:0), cor:"ink", sub:"Quanto cada item carrega, em média.",
+         aoClicar:kit.vai(null, {ordem:["valor",-1]})},
         {label:"Sem giro cadastrado", valor:fInt(semGiro.length), cor:"crit",
-         sub:"Giro/dia zerado — o excesso é todo o estoque."},
+         sub:"Giro/dia zerado — o excesso é todo o estoque.",
+         aoClicar:kit.vai(function(e,k){ k.add("semgiro","Giro","zerado",function(r){ return !(r.giro>0); }); }, {ordem:["valor",-1]})},
         {label:"Concentração", valor:fPct(conc), cor:"blue",
-         sub:"Parcela do capital parado nos 20% de produtos mais pesados."},
+         sub:"Parcela do capital parado nos 20% de produtos mais pesados.",
+         aoClicar:kit.vai(function(e,k){ k.add("pesados","Concentração","20% mais pesados",function(r){ return pesados.has(r); }); }, {ordem:["valor",-1]})},
         {label:"Pior item", valor:ordenado.length?fCurto(ordenado[0].valor):"—", cor:"warn",
-         sub:ordenado.length?ordenado[0].desc:"—"}
+         sub:ordenado.length?ordenado[0].desc:"—",
+         aoClicar:ordenado.length ? soItem(ordenado[0]) : null}
       ]);
 
       montarRanking(boxRank, agruparPorComprador(lista, function(e){ return e.valor; })
-        .map(function(c){ return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor)}; }), {cor:"warn"});
+        .map(function(c){
+          return {nome:c.nome, valor:c.valor, rotulo:fCurto(c.valor),
+            aoClicar:kit.vai(function(e){ e.comps = new Set([c.cod]); }, {ordem:["valor",-1]})};
+        }), {cor:"warn", rotuloValor:"Capital parado"});
       montarRanking(boxTop, ordenado.slice(0,12)
-        .map(function(e){ return {nome:e.desc, valor:e.valor, rotulo:fCurto(e.valor)}; }), {cor:"warn"});
+        .map(function(e){
+          return {nome:e.desc, valor:e.valor, rotulo:fCurto(e.valor),
+            dica:{titulo:e.desc, sub:nomeComprador(e.comp),
+              linhas:[{cor:cor("warn"), nome:"Capital parado", valor:fR$(e.valor)}],
+              extra:[fInt(Math.abs(e.sug))+" un excedentes · disponível "+fInt(e.disp)+" · "+nomeFornec(e.fornec)]},
+            aoClicar:soItem(e)};
+        }), {cor:"warn", rotuloValor:"Capital parado"});
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(EXC.length)+" produtos com excesso.";
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(EXC.length)+" produtos com excesso. Clique nos números e gráficos acima para filtrar esta planilha.";
       tabela.definir(lista, estado.busca);
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1689,25 +2234,49 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
        vezes, lado a lado. */
     var temJanela12 = FATMES.length > 12;
     var colunasComprador = [{titulo:"Comprador", campo:"nome", classe:"trunc", texto:true}];
+    var corMargem = function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); };
     if(temJanela12){
       colunasComprador.push(
-        {titulo:"Venda 12m", campo:"v12", num:true, fmt:fCurto},
-        {titulo:"Lucro 12m", campo:"l12", num:true, fmt:fCurto},
-        {titulo:"Margem 12m", campo:"margem12", num:true, fmt:fPct,
-         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }});
+        {titulo:"Venda 12m", campo:"v12", num:true, fmt:fCurto, soma:true},
+        {titulo:"Lucro 12m", campo:"l12", num:true, fmt:fCurto, soma:true},
+        {titulo:"Margem 12m", campo:"margem12", num:true, fmt:fPct, corTexto:corMargem});
     }
     colunasComprador.push(
-      {titulo:temJanela12?"Venda total":"Venda", campo:"venda", num:true, fmt:fCurto},
-      {titulo:temJanela12?"Lucro total":"Lucro", campo:"lucro", num:true, fmt:fCurto},
-      {titulo:temJanela12?"Margem total":"Margem", campo:"margem", num:true, fmt:fPct,
-       corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
-      {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
-      {titulo:"Positivação", campo:"posit", num:true, fmt:fInt});
+      {titulo:temJanela12?"Venda total":"Venda", campo:"venda", num:true, fmt:fCurto, soma:true},
+      {titulo:temJanela12?"Lucro total":"Lucro", campo:"lucro", num:true, fmt:fCurto, soma:true},
+      {titulo:temJanela12?"Margem total":"Margem", campo:"margem", num:true, fmt:fPct, corTexto:corMargem},
+      {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt, soma:true},
+      {titulo:"Positivação", campo:"posit", num:true, fmt:fInt, soma:true});
 
     var tabela = new Tabela(boxTab,{
       porPagina:20, ordemInicial: temJanela12 ? "v12" : "venda", dirInicial:-1,
       colunas: colunasComprador
     });
+    /* fornecedor, departamento e supervisor têm a mesma planilha enxuta */
+    var colunasDim = [{titulo:"Nome", campo:"nome", classe:"trunc", texto:true}];
+    if(temJanela12) colunasDim.push({titulo:"Venda 12m", campo:"v12", num:true, fmt:fCurto, soma:true});
+    colunasDim.push(
+      {titulo:temJanela12?"Venda total":"Venda", campo:"venda", num:true, fmt:fCurto, soma:true},
+      {titulo:temJanela12?"Lucro total":"Lucro", campo:"lucro", num:true, fmt:fCurto, soma:true},
+      {titulo:temJanela12?"Margem total":"Margem", campo:"margem", num:true, fmt:fPct, corTexto:corMargem});
+    var tabDim = new Tabela(boxTab,{
+      porPagina:20, ordemInicial: temJanela12 ? "v12" : "venda", dirInicial:-1,
+      colunas: colunasDim
+    });
+    var ROT_CORTE = {comprador:"Comprador", fornecedor:"Fornecedor", departamento:"Departamento", supervisor:"Supervisor"};
+    var TIT_CORTE = {comprador:"Compradores", fornecedor:"Fornecedores", departamento:"Departamentos", supervisor:"Supervisores"};
+    var kit = criarKit({id:"performance", estado:estado, cTab:cTab, boxTab:boxTab,
+      tabela:function(){ return estado.corte==="comprador" ? tabela : tabDim; }});
+    kit.descrever = function(){
+      return estado.corte==="comprador" ? [] : [["Planilha", TIT_CORTE[estado.corte]]];
+    };
+    function linhasDim(){
+      var fonte = estado.corte==="fornecedor" ? FATFORN : (estado.corte==="departamento" ? FATDEPTO : FATSUP);
+      return fonte.map(function(f){
+        return {cod:f.cod, venda:f.venda, lucro:f.lucro, v12:f.v12, margem:f.venda ? f.lucro/f.venda : null,
+                nome: estado.corte==="fornecedor" ? nomeFornec(f.cod) : f.nome};
+      });
+    }
 
     function render(){
       var use12 = estado.periodo==="12m";
@@ -1727,49 +2296,80 @@ pagina("performance","06","Performance compras","Resultado de venda por comprado
       barra.appendChild(grupoChips("Ranking por",[
         {label:"Comprador",valor:"comprador"},{label:"Fornecedor",valor:"fornecedor"},
         {label:"Departamento",valor:"departamento"},{label:"Supervisor",valor:"supervisor"}
-      ], estado.corte, function(v){ estado.corte=v; render(); }));
+      ], estado.corte, function(v){ estado.corte=v; estado.extras=[]; render(); }));
 
+      /* os números do topo são sempre dos compradores: clicar leva à planilha de compradores */
+      var colVenda = use12 ? "v12" : "venda", colLucro = use12 ? "l12" : "lucro", colMargem = use12 ? "margem12" : "margem";
+      var paraCompradores = function(ordem){
+        return kit.vai(function(e){ e.corte="comprador"; e.extras=[]; }, {ordem:ordem});
+      };
       montarKpis(kpis,[
         {label:"Venda", valor:fCurto(totalVenda), cor:"blue",
-         sub:rotuloJanela(estado.periodo)+". Somente venda normal (condição 1)."},
-        {label:"Lucro", valor:fCurto(totalLucro), cor:"good", sub:"Venda menos CMV."},
-        {label:"Margem", valor:fPct(totalVenda?totalLucro/totalVenda:0), cor:"gold", sub:"Lucro sobre a venda do período."},
-        {label:"Pedidos", valor:fInt(pedidos), cor:"ink", sub:"Acumulado de "+periodoDaBase()+"."},
-        {label:"Positivação", valor:fInt(posit), cor:"ink", sub:"Clientes distintos atendidos, somados por dia."},
+         sub:rotuloJanela(estado.periodo)+". Somente venda normal (condição 1).",
+         aoClicar:paraCompradores([colVenda,-1])},
+        {label:"Lucro", valor:fCurto(totalLucro), cor:"good", sub:"Venda menos CMV.",
+         aoClicar:paraCompradores([colLucro,-1])},
+        {label:"Margem", valor:fPct(totalVenda?totalLucro/totalVenda:0), cor:"gold", sub:"Lucro sobre a venda do período.",
+         aoClicar:paraCompradores([colMargem,-1])},
+        {label:"Pedidos", valor:fInt(pedidos), cor:"ink", sub:"Acumulado de "+periodoDaBase()+".",
+         aoClicar:paraCompradores(["pedidos",-1])},
+        {label:"Positivação", valor:fInt(posit), cor:"ink", sub:"Clientes distintos atendidos, somados por dia.",
+         aoClicar:paraCompradores(["posit",-1])},
         {label:"Melhor margem", valor:melhor?fPct(use12?melhor.margem12:melhor.margem):"—", cor:"good",
-         sub:melhor?nomeComprador(melhor.comp):"—"}
+         sub:melhor?nomeComprador(melhor.comp):"—",
+         aoClicar:paraCompradores([colMargem,-1])}
       ]);
 
       var itens, titulo, nota, corBarra;
       if(estado.corte==="comprador"){
-        itens = FATCOMP.map(function(c){ return {nome:nomeComprador(c.comp), valor:use12?c.v12:c.venda}; });
+        itens = FATCOMP.map(function(c){ return {nome:nomeComprador(c.comp), valor:use12?c.v12:c.venda, lucro:use12?c.l12:c.lucro}; });
         titulo = "Venda por comprador"; nota = "Cada comprador responde pela carteira de fornecedores sob sua gestão."; corBarra="blue";
       } else if(estado.corte==="fornecedor"){
-        itens = FATFORN.slice(0,20).map(function(f){ return {nome:nomeFornec(f.cod), valor:use12?f.v12:f.venda}; });
+        itens = FATFORN.slice(0,20).map(function(f){ return {nome:nomeFornec(f.cod), valor:use12?f.v12:f.venda, lucro:use12?null:f.lucro}; });
         titulo = "Top 20 fornecedores"; nota = "Ordenado pela venda do período selecionado."; corBarra="blue";
       } else if(estado.corte==="departamento"){
-        itens = FATDEPTO.map(function(d){ return {nome:d.nome, valor:use12?d.v12:d.venda}; });
+        itens = FATDEPTO.map(function(d){ return {nome:d.nome, valor:use12?d.v12:d.venda, lucro:use12?null:d.lucro}; });
         titulo = "Venda por departamento"; nota = "Classificação de produto do WinThor."; corBarra="gold";
       } else {
-        itens = FATSUP.map(function(s){ return {nome:s.nome, valor:use12?s.v12:s.venda}; });
+        itens = FATSUP.map(function(s){ return {nome:s.nome, valor:use12?s.v12:s.venda, lucro:use12?null:s.lucro}; });
         titulo = "Venda por supervisor"; nota = "Equipe comercial responsável pelo pedido."; corBarra="gold";
       }
       itens = itens.filter(function(i){ return i.valor>0; }).sort(function(a,b){ return b.valor-a.valor; }).slice(0,20);
       cRank.querySelector(".card-title").textContent = titulo;
       cRank.querySelector(".card-note").textContent = nota;
-      montarRanking(boxRank, itens.map(function(i){ return {nome:i.nome, valor:i.valor, rotulo:fCurto(i.valor)}; }), {cor:corBarra});
+      montarRanking(boxRank, itens.map(function(i){
+        var linhas = [{cor:cor(corBarra), nome:"Venda", valor:fR$(i.valor)}];
+        var extra = [];
+        if(i.lucro!=null){
+          linhas.push({cor:cor("good"), nome:"Lucro", valor:fR$(i.lucro)});
+          extra.push("Margem de "+fPct(i.valor ? i.lucro/i.valor : null));
+        }
+        return {nome:i.nome, valor:i.valor, rotulo:fCurto(i.valor),
+          dica:{titulo:i.nome, sub:rotuloJanela(estado.periodo), linhas:linhas, extra:extra},
+          aoClicar:kit.vai(function(e,k){
+            k.add("item", ROT_CORTE[e.corte], i.nome, function(r){ return r.nome===i.nome; });
+          }, {ordem:[colVenda,-1]})};
+      }), {cor:corBarra, rotuloValor:"Venda"});
 
+      cTab.querySelector(".card-title").textContent = TIT_CORTE[estado.corte];
       cTab.querySelector(".card-note").textContent =
-        temJanela12 ? "Total do período completo e dos últimos 12 meses, lado a lado."
-                    : "Acumulado de " + periodoDaBase() + ".";
-      tabela.definir(FATCOMP.map(function(c){
-        var o = {}; for(var k in c) o[k]=c[k];
-        o.nome = nomeComprador(c.comp);
-        return o;
-      }));
+        (temJanela12 ? "Total do período completo e dos últimos 12 meses, lado a lado."
+                     : "Acumulado de " + periodoDaBase() + ".") + " Clique nos números e gráficos acima para filtrar.";
+      boxTab.innerHTML = "";
+      if(estado.corte==="comprador"){
+        tabela.definir(FATCOMP.map(function(c){
+          var o = {}; for(var k in c) o[k]=c[k];
+          o.nome = nomeComprador(c.comp);
+          return o;
+        }).filter(kit.passa));
+      } else {
+        tabDim.definir(linhasDim().filter(kit.passa));
+      }
+      kit.desenharFaixa();
     }
     cRank.insertBefore(el("p","card-note",""), boxRank);
     cTab.insertBefore(el("p","card-note",""), boxTab);
+    kit.render = render;
     render();
     return render;
   });
@@ -1781,7 +2381,7 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
   "A mesma base de faturamento vista no tempo: venda mês a mês, com a margem sobreposta em linha. O mês corrente costuma aparecer menor porque ainda está em curso. <strong>A base guarda só o ano corrente</strong>: ela recomeça na virada do ano, então não há comparação com o mesmo mês do ano passado.",
   function(raiz){
     var opcoesPer = opcoesPeriodo(true);
-    var estado = {janela:periodoInicial(opcoesPer,"24m"), metrica:"venda"};
+    var estado = {janela:periodoInicial(opcoesPer,"24m"), metrica:"venda", visao:"meses"};
     var barra = el("div","filters"); raiz.appendChild(barra);
     var kpis = el("div","kpi-grid"); raiz.appendChild(kpis);
 
@@ -1805,15 +2405,41 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
       porPagina:24, ordemInicial:"mes", dirInicial:-1,
       colunas:[
         {titulo:"Mês", campo:"mes", texto:true, fmt:function(v){ return rotuloMes(v); }},
-        {titulo:"Venda", campo:"venda", num:true, fmt:fCurto},
-        {titulo:"CMV", campo:"cmv", num:true, fmt:fCurto},
-        {titulo:"Lucro", campo:"lucro", num:true, fmt:fCurto},
+        {titulo:"Venda", campo:"venda", num:true, fmt:fCurto, soma:true},
+        {titulo:"CMV", campo:"cmv", num:true, fmt:fCurto, soma:true},
+        {titulo:"Lucro", campo:"lucro", num:true, fmt:fCurto, soma:true},
         {titulo:"Margem", campo:"margem", num:true, fmt:fPct,
          corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }},
-        {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt},
-        {titulo:"Positivação", campo:"posit", num:true, fmt:fInt}
+        {titulo:"Pedidos", campo:"pedidos", num:true, fmt:fInt, soma:true},
+        {titulo:"Positivação", campo:"posit", num:true, fmt:fInt, soma:true}
       ]
     });
+    /* departamento, estado e seção: planilha enxuta, escolhida pela "Planilha" da barra
+       ou pelo clique no ranking correspondente */
+    var tabDim = new Tabela(boxTab,{
+      porPagina:24, ordemInicial:"venda", dirInicial:-1,
+      colunas:[
+        {titulo:"Nome", campo:"nome", classe:"trunc", texto:true},
+        {titulo:"Venda", campo:"venda", num:true, fmt:fCurto, soma:true},
+        {titulo:"Lucro", campo:"lucro", num:true, fmt:fCurto, soma:true},
+        {titulo:"Margem", campo:"margem", num:true, fmt:fPct,
+         corTexto:function(v){ return v==null?"":(v<0.15?cor("crit"):(v>0.25?cor("good"):cor("warn"))); }}
+      ]
+    });
+    var TIT_VISAO = {meses:"Mês a mês", departamento:"Departamentos", estado:"Estados", secao:"Seções"};
+    var kit = criarKit({id:"metricas", estado:estado, cTab:cTab, boxTab:boxTab,
+      tabela:function(){ return estado.visao==="meses" ? tabela : tabDim; }});
+    kit.descrever = function(){
+      return estado.visao==="meses" ? [] : [["Planilha", TIT_VISAO[estado.visao]]];
+    };
+    function linhasDim(){
+      var fonte = estado.visao==="departamento" ? FATDEPTO : (estado.visao==="secao" ? FATSEC : FATUF);
+      return fonte.map(function(f){
+        return {nome: f.uf!==undefined ? f.uf : f.nome, venda:f.venda, lucro:f.lucro, margem:f.venda ? f.lucro/f.venda : null};
+      });
+    }
+    var hoje = new Date();
+    var mesAtual = hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0");
 
     function render(){
       var n = estado.janela==="12m" ? 12 : (estado.janela==="24m" ? 24 : FATMES.length);
@@ -1835,26 +2461,61 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
       barra.appendChild(grupoChips("Colunas",[
         {label:"Venda",valor:"venda"},{label:"Lucro",valor:"lucro"},{label:"Pedidos",valor:"pedidos"}
       ], estado.metrica, function(v){ estado.metrica=v; render(); }));
+      barra.appendChild(grupoChips("Planilha",[
+        {label:"Mês a mês",valor:"meses"},{label:"Departamentos",valor:"departamento"},
+        {label:"Estados",valor:"estado"},{label:"Seções",valor:"secao"}
+      ], estado.visao, function(v){ estado.visao=v; estado.extras=[]; render(); }));
 
+      /* a planilha de meses mostra a mesma janela dos números do topo */
+      var mesesNaJanela = new Set(serie.map(function(m){ return m.mes; }));
+      var mesesFechados = new Set(fechados.map(function(m){ return m.mes; }));
+      var soMeses = function(e){ e.visao="meses"; e.extras=[]; };
+      var umMes = function(mes){
+        return kit.vai(function(e,k){
+          e.visao="meses"; e.extras=[];
+          k.add("mes","Mês",rotuloMes(mes),function(r){ return r.mes===mes; });
+        });
+      };
       montarKpis(kpis,[
         {label:"Venda no período", valor:fCurto(venda), cor:"blue",
-         sub:serie.length===1 ? "1 mês considerado." : serie.length+" meses considerados."},
-        {label:"Lucro no período", valor:fCurto(lucro), cor:"good", sub:"Venda menos CMV."},
-        {label:"Margem do período", valor:fPct(venda?lucro/venda:0), cor:"gold", sub:"Lucro sobre venda."},
+         sub:serie.length===1 ? "1 mês considerado." : serie.length+" meses considerados.",
+         aoClicar:kit.vai(soMeses, {ordem:["mes",-1]})},
+        {label:"Lucro no período", valor:fCurto(lucro), cor:"good", sub:"Venda menos CMV.",
+         aoClicar:kit.vai(soMeses, {ordem:["lucro",-1]})},
+        {label:"Margem do período", valor:fPct(venda?lucro/venda:0), cor:"gold", sub:"Lucro sobre venda.",
+         aoClicar:kit.vai(soMeses, {ordem:["margem",-1]})},
         /* Em janeiro ainda não há mês fechado: "R$ 0" daria a entender que a
            média é zero, quando na verdade ela não existe ainda. */
         {label:"Média mensal", valor:fechados.length ? fCurto(mediaMes) : "—", cor:"ink",
          sub:fechados.length ? "Só meses fechados — ignora o mês corrente."
-                             : "Ainda não há mês fechado no período."},
-        {label:"Melhor mês", valor:melhor?fCurto(melhor.venda):"—", cor:"good", sub:melhor?rotuloMes(melhor.mes):"—"},
+                             : "Ainda não há mês fechado no período.",
+         aoClicar:fechados.length ? kit.vai(function(e,k){
+           e.visao="meses"; e.extras=[];
+           k.add("fechados","Meses","só os fechados",function(r){ return mesesFechados.has(r.mes); });
+         }, {ordem:["mes",-1]}) : null},
+        {label:"Melhor mês", valor:melhor?fCurto(melhor.venda):"—", cor:"good", sub:melhor?rotuloMes(melhor.mes):"—",
+         aoClicar:melhor ? umMes(melhor.mes) : null},
         {label:"Último mês fechado", valor:ultFechado?fCurto(ultFechado.venda):"—",
          cor: variacao==null ? "ink" : (variacao>=0?"good":"crit"),
-         sub: variacao==null ? "—" : ((variacao>=0?"+":"")+fPct(variacao)+" contra o mês anterior")}
+         sub: variacao==null ? "—" : ((variacao>=0?"+":"")+fPct(variacao)+" contra o mês anterior"),
+         aoClicar:ultFechado ? umMes(ultFechado.mes) : null}
       ]);
 
       var campo = estado.metrica;
+      var rotMetrica = campo==="venda" ? "Venda" : (campo==="lucro" ? "Lucro" : "Pedidos");
+      var fMetrica = campo==="pedidos" ? fInt : fR$;
+      var totalMetrica = serie.reduce(function(s,m){ return s+(m[campo]||0); }, 0);
       montarColunas(boxEvo, serie.map(function(m){
-        return {rotulo:rotuloMes(m.mes), valor:m[campo]||0, cor:"blue"};
+        var emCurso = m.mes===mesAtual;
+        var extra = ["Margem de "+fPct(m.margem)];
+        if(totalMetrica>0) extra.push(fPct((m[campo]||0)/totalMetrica)+" do total do período");
+        return {rotulo:rotuloMes(m.mes), valor:m[campo]||0, cor:"blue",
+          dica:{titulo:rotuloMes(m.mes), sub:emCurso ? "mês em curso" : "",
+            linhas:[{cor:cor("blue"), nome:"Venda", valor:fR$(m.venda)},
+                    {cor:cor("good"), nome:"Lucro", valor:fR$(m.lucro)},
+                    {cor:cor("muted"), nome:"Pedidos", valor:fInt(m.pedidos)}],
+            extra:extra, clique:"Clique para ver este mês na planilha"},
+          aoClicar:umMes(m.mes)};
       }), {
         altura:300, larguraCol:Math.max(20, Math.min(46, 900/serie.length)),
         linha: serie.map(function(m){ return m.margem; }),
@@ -1870,17 +2531,38 @@ pagina("metricas","07","Métricas","Evolução mensal de venda, lucro e margem",
       k2.appendChild(i2); k2.appendChild(document.createTextNode("Margem do mês (escala própria)"));
       legenda.appendChild(k1); legenda.appendChild(k2);
 
+      /* cada barra abre a planilha da própria dimensão, só com aquele item */
+      function itemDim(visao, rot, nome, venda, lucro, corBarra){
+        return {nome:nome, valor:venda, rotulo:fCurto(venda),
+          dica:{titulo:nome, sub:periodoDaBase(),
+            linhas:[{cor:cor(corBarra), nome:"Venda", valor:fR$(venda)}, {cor:cor("good"), nome:"Lucro", valor:fR$(lucro)}],
+            extra:["Margem de "+fPct(venda ? lucro/venda : null)]},
+          aoClicar:kit.vai(function(e,k){
+            e.visao=visao; e.extras=[];
+            k.add("item",rot,nome,function(r){ return r.nome===nome; });
+          }, {ordem:["venda",-1]})};
+      }
       montarRanking(boxDep, FATDEPTO.slice().sort(function(a,b){ return b.venda-a.venda; })
-        .map(function(d){ return {nome:d.nome, valor:d.venda, rotulo:fCurto(d.venda)}; }), {cor:"gold"});
+        .map(function(d){ return itemDim("departamento","Departamento",d.nome,d.venda,d.lucro,"gold"); }), {cor:"gold", rotuloValor:"Venda"});
       montarRanking(boxUf, FATUF.slice().sort(function(a,b){ return b.venda-a.venda; })
-        .map(function(u){ return {nome:u.uf, valor:u.venda, rotulo:fCurto(u.venda)}; }), {cor:"blue"});
+        .map(function(u){ return itemDim("estado","Estado",u.uf,u.venda,u.lucro,"blue"); }), {cor:"blue", rotuloValor:"Venda"});
       montarRanking(boxSec, FATSEC.slice(0,20)
-        .map(function(s){ return {nome:s.nome, valor:s.venda, rotulo:fCurto(s.venda)}; }), {cor:"blue"});
+        .map(function(s){ return itemDim("secao","Seção",s.nome,s.venda,s.lucro,"blue"); }), {cor:"blue", rotuloValor:"Venda"});
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Todos os "+FATMES.length+" meses da base, do mais recente para o mais antigo.";
-      tabela.definir(FATMES);
+      cTab.querySelector(".card-title").textContent = TIT_VISAO[estado.visao];
+      cTab.querySelector(".card-note").textContent = (estado.visao==="meses"
+        ? (serie.length===1 ? "1 mês do período" : serie.length+" meses do período")+", do mais recente para o mais antigo."
+        : "Venda acumulada de "+periodoDaBase()+".") + " Clique nos números e gráficos acima para filtrar.";
+      boxTab.innerHTML = "";
+      if(estado.visao==="meses"){
+        tabela.definir(serie.filter(kit.passa));
+      } else {
+        tabDim.definir(linhasDim().filter(kit.passa));
+      }
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1909,17 +2591,21 @@ pagina("saldo_verba","08","Saldo verba","Crédito disponível com os fornecedore
         {titulo:"Código", campo:"cod", num:true, classe:"mono-muted"},
         {titulo:"Fornecedor principal", campo:"nome", classe:"trunc", texto:true},
         {titulo:"Comprador", campo:"comp", texto:true, fmt:function(v){ return v==null?"—":nomeComprador(v); }},
-        {titulo:"Entrada", campo:"entrada", num:true, fmt:fR$2},
-        {titulo:"Saída", campo:"saida", num:true, fmt:fR$2, corTexto:function(){ return cor("muted"); }},
-        {titulo:"Saldo mov.", campo:"verba", num:true, fmt:fR$2,
+        {titulo:"Entrada", campo:"entrada", num:true, fmt:fR$2, soma:true},
+        {titulo:"Saída", campo:"saida", num:true, fmt:fR$2, corTexto:function(){ return cor("muted"); },
+         soma:function(v){ return Math.abs(v||0); }},
+        {titulo:"Saldo mov.", campo:"verba", num:true, fmt:fR$2, soma:true,
          corTexto:function(v){ return v>=0?cor("good"):cor("crit"); }},
-        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2},
-        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2}
+        {titulo:"Vencidas", campo:"vencidas", num:true, fmt:fR$2, soma:true},
+        {titulo:"A vencer", campo:"avencer", num:true, fmt:fR$2, soma:true}
       ]
     });
+    var kit = criarKit({id:"saldo_verba", estado:estado, cTab:cTab, boxTab:boxTab, tabela:function(){ return tabela; }});
+    kit.descrever = function(){ return descreverBase(estado, []); };
 
     function render(){
       var lista = VERBA.filter(function(v){
+        if(!kit.passa(v)) return false;
         if(estado.comps.size < COMP_LISTA.length && !estado.comps.has(v.comp)) return false;
         if(estado.busca && String(v.nome).toLowerCase().indexOf(estado.busca)===-1
            && String(v.cod).indexOf(estado.busca)===-1) return false;
@@ -1934,31 +2620,49 @@ pagina("saldo_verba","08","Saldo verba","Crédito disponível com os fornecedore
 
       filtroComprador(barra, estado, function(){ render(); }, [
         blocoBusca(estado.busca, function(v){ estado.busca=v; render(); },
-          function(){ estado={comps:todosComps(),busca:""}; render(); })
+          function(){ kit.limpar(); render(); })
       ]);
 
+      var comVencida = function(r){ return (r.vencidas||0) > 0; };
+      var comAVencer = function(r){ return (r.avencer||0) > 0; };
+      var soVencidas = kit.vai(function(e,k){ k.add("vencidas","Vencidas","maior que zero",comVencida); }, {ordem:["vencidas",-1]});
+      var soAVencer = kit.vai(function(e,k){ k.add("avencer","A vencer","maior que zero",comAVencer); }, {ordem:["avencer",-1]});
       montarKpis(kpis,[
-        {label:"Saldo de verba", valor:fR$(saldo), cor:"good", sub:"Entrada menos saída de crédito."},
-        {label:"Crédito concedido", valor:fR$(entrada), cor:"blue", sub:"Total lançado a favor da empresa."},
-        {label:"Crédito consumido", valor:fR$(saida), cor:"muted", sub:"Já utilizado em abatimentos."},
+        {label:"Saldo de verba", valor:fR$(saldo), cor:"good", sub:"Entrada menos saída de crédito.",
+         aoClicar:kit.vai(null, {ordem:["verba",-1]})},
+        {label:"Crédito concedido", valor:fR$(entrada), cor:"blue", sub:"Total lançado a favor da empresa.",
+         aoClicar:kit.vai(null, {ordem:["entrada",-1]})},
+        {label:"Crédito consumido", valor:fR$(saida), cor:"muted", sub:"Já utilizado em abatimentos.",
+         aoClicar:kit.vai(null, {ordem:["saida",1]})},
         {label:"Fornecedores com saldo", valor:fInt(comSaldo.length), cor:"ink",
-         sub:"De "+fInt(lista.length)+" no filtro atual."},
-        {label:"Vencidas", valor:fR$(vencidas), cor:"warn", sub:"Verba com vencimento já passado."},
-        {label:"A vencer", valor:fR$(avencer), cor:"good", sub:"Ainda dentro do prazo."}
+         sub:"De "+fInt(lista.length)+" no filtro atual.",
+         aoClicar:kit.vai(function(e,k){ k.add("comsaldo","Saldo","maior que zero",function(r){ return (r.verba||0) > 0; }); }, {ordem:["verba",-1]})},
+        {label:"Vencidas", valor:fR$(vencidas), cor:"warn", sub:"Verba com vencimento já passado.", aoClicar:soVencidas},
+        {label:"A vencer", valor:fR$(avencer), cor:"good", sub:"Ainda dentro do prazo.", aoClicar:soAVencer}
       ]);
 
       montarRanking(boxRank, lista.slice().sort(function(a,b){ return b.verba-a.verba; }).slice(0,15)
-        .map(function(v){ return {nome:v.nome, valor:v.verba, rotulo:fR$(v.verba)}; }), {cor:"good"});
+        .map(function(v){
+          return {nome:v.nome, valor:v.verba, rotulo:fR$(v.verba),
+            dica:{titulo:v.nome, sub:v.comp==null ? "" : nomeComprador(v.comp),
+              linhas:[{cor:cor("blue"), nome:"Entrada", valor:fR$(v.entrada)},
+                      {cor:cor("muted"), nome:"Saída", valor:fR$(Math.abs(v.saida||0))}],
+              total:{nome:"Saldo", valor:fR$(v.verba)},
+              extra:["Vencidas "+fR$(v.vencidas)+" · a vencer "+fR$(v.avencer)]},
+            aoClicar:kit.vai(function(e,k){ k.add("forn","Fornecedor",v.nome,function(r){ return r.cod===v.cod; }); })};
+        }), {cor:"good", rotuloValor:"Saldo"});
 
       montarDonut(boxPrazo,[
-        {label:"Vencidas", valor:Math.max(0,vencidas), cor:"warn"},
-        {label:"A vencer", valor:Math.max(0,avencer), cor:"good"}
+        {label:"Vencidas", valor:Math.max(0,vencidas), cor:"warn", fmt:fR$, unidade:"Valor", aoClicar:soVencidas},
+        {label:"A vencer", valor:Math.max(0,avencer), cor:"good", fmt:fR$, unidade:"Valor", aoClicar:soAVencer}
       ], (vencidas+avencer) ? ("Do crédito com prazo registrado, "+fPct(vencidas/(vencidas+avencer))+" já passou do vencimento.") : "Sem prazo registrado no filtro atual.");
 
       cTab.querySelector(".card-note") || cTab.insertBefore(el("p","card-note",""), boxTab);
-      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais.";
+      cTab.querySelector(".card-note").textContent = "Base completa: "+fInt(VERBA.length)+" fornecedores principais. Clique nos números e gráficos acima para filtrar esta planilha.";
       tabela.definir(lista, estado.busca);
+      kit.desenharFaixa();
     }
+    kit.render = render;
     render();
     return render;
   });
@@ -1995,7 +2699,7 @@ PAGINAS.forEach(function(pg){
   var n = el("span","tnum", pg.num);
   b.appendChild(n); b.appendChild(document.createTextNode(pg.titulo));
   b.type = "button";
-  b.addEventListener("click", function(){ abrir(pg.id); });
+  b.addEventListener("click", function(){ limparVoltar(); abrir(pg.id); });
   pg.botao = b;
   navTabs.appendChild(b);
 
@@ -2010,7 +2714,7 @@ rodape.appendChild(el("span","","Dado ao vivo do DATA WAREHOUSE no Supabase, ali
 rodape.appendChild(el("span","","Lube Distribuidora LTDA"));
 main.appendChild(rodape);
 
-function abrir(id){
+function abrir(id, semRolar){
   PAGINAS.forEach(function(pg){
     var e = pg.id === id;
     pg.botao.classList.toggle("active", e);
@@ -2039,7 +2743,7 @@ function abrir(id){
   });
   ativa = id;
   try{ localStorage.setItem("bi_aba", id); }catch(e){}
-  window.scrollTo({top:0, behavior:"smooth"});
+  if(!semRolar) window.scrollTo({top:0, behavior:"smooth"});
 }
 function redesenhar(){ if(ativa && renders[ativa]) renders[ativa](); }
 
