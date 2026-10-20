@@ -1,0 +1,58 @@
+/* =============================================================================
+   Central Compras — o que este painel acrescenta à base (base.css, a mesma da Gestão Comercial,
+   do Trade, do Movimentação de Inventário e da Gestão Fiscal): a faixa de visão, o "Voltar" depois
+   de um clique que leva à planilha, a ficha do produto e os miúdos das tabelas.
+   ========================================================================== */
+#conteudo { position: relative; }
+
+/* ------------------------------ visão (segmentos logo abaixo dos filtros) ------------------------------ */
+.barra-visao { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 16px; }
+.barra-visao .fx-rot { margin-right: 0; }
+
+/* ------------------------------ "Voltar" da faixa de filtros ------------------------------ */
+.btn-voltar {
+  display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px 0 8px; border-radius: 99px; cursor: pointer;
+  border: 1px solid var(--ouro-linha); background: var(--ouro-dim); color: var(--ouro-forte); font: 700 12px var(--f-txt);
+  transition: transform .15s, background .15s;
+}
+.btn-voltar svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.btn-voltar:hover { transform: translateX(-2px); background: color-mix(in srgb, var(--ouro) 24%, transparent); }
+.btn-voltar:active { transform: scale(.96); }
+.pilula.fora { opacity: .45; filter: grayscale(.6); }
+.pop mark, .pop-item mark { background: var(--ouro-dim); color: var(--ouro-forte); border-radius: 3px; padding: 0 1px; }
+
+/* o painel da planilha pulsa quando um clique leva até ele */
+.painel.piscar { animation: piscar-painel 1.5s ease-out; }
+@keyframes piscar-painel {
+  0% { border-color: var(--ouro); box-shadow: var(--sombra), 0 0 0 0 color-mix(in srgb, var(--ouro) 55%, transparent); }
+  100% { box-shadow: var(--sombra), 0 0 0 22px color-mix(in srgb, var(--ouro) 0%, transparent); }
+}
+
+/* ------------------------------ células das tabelas ------------------------------ */
+.tabela td.atn, .tabela .atn { color: var(--atencao); }
+.tabela td.mudo { color: var(--t3); }
+.vazio.grande { padding: 70px 18px 24px; font-size: 14px; }
+.vazio.grande b { font-size: 18px; margin-bottom: 8px; }
+#dica .dica-sub { margin-top: 6px; font: 500 11.5px/1.4 var(--f-txt); color: var(--t3); max-width: 320px; white-space: normal; }
+.tag.sit { text-transform: none; letter-spacing: .01em; font-size: 11px; white-space: nowrap; }
+
+/* ------------------------------ ficha do produto (relatório) ------------------------------ */
+.ficha { display: grid; gap: 2px; }
+.ficha-l { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 4px; border-bottom: 1px solid var(--linha); font: 500 13px var(--f-txt); color: var(--t2); }
+.ficha-l:last-child { border-bottom: 0; }
+.ficha-l b { font: 700 13px var(--f-num); color: var(--t1); text-align: right; }
+
+/* ------------------------------ notas ------------------------------ */
+.notas-lista { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 12px; font: 500 13.5px/1.6 var(--f-txt); color: var(--t2); }
+.notas-lista strong { color: var(--t1); }
+
+/* ------------------------------ cartões: seis a oito numa linha sem cortar o número ------------------------------ */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.kpis > .kpi, .kpis > .kpi.heroi { flex: none; min-width: 0; }
+.kpi { padding: 15px 15px 13px; }
+.kpi.click { text-align: left; }
+.kpi .leg span { overflow-wrap: anywhere; }
+
+/* o assistente fica no canto e não tampa o rodapé da tabela nem o botão de relatório */
+.ag-fab { bottom: 18px; right: 18px; }
+@media print { .ag-fab, .ag-painel { display: none !important; } }

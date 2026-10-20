@@ -32,10 +32,25 @@ Site estático mais uma função serverless, sem framework. A Vercel serve o
 
 | Caminho | O que é |
 |---|---|
-| `index.html` | O painel inteiro: 8 páginas, CSS e JS num arquivo só. |
+| `index.html` | A casca do painel (menu, faixa de filtros, relatório). O conteúdo está em `js/` e `css/`. |
+| `js/` | A base dos painéis da Lube (`nucleo`, `graficos`, `tabela`, `componentes`, `filtros`) mais `dados` (o motor: pacote, cópia no navegador, filtros e somas), `comum`, `dossie` (o relatório) e uma `pag-*` por tela. |
+| `css/` | `base.css` (o tema da Lube), `compras.css` e `agente.css` (o assistente). |
+| `fonts/` | Archivo, IBM Plex Sans e JetBrains Mono, hospedadas aqui. |
 | `api/dados.js` | Função serverless que consulta o Supabase e devolve o JSON. |
 | `db/README.md` | Os objetos de banco que o painel usa e por que existem. |
 | `vercel.json` | Memória e duração da função, mais cabeçalhos de segurança. |
+
+**Desenho do painel (2026-10-20)** — o mesmo dos últimos sistemas (Gestão Comercial, Trade, Movimentação
+de Inventário e Gestão Fiscal): menu lateral, faixa de **filtros de múltipla escolha com busca** (conjunto
+vazio = tudo; pílulas com ✕; "Limpar filtros"; o link da visão leva os filtros junto), cartões com ícone,
+gráficos SVG com rótulo de dado e pop-up em cartão, tabelas com faixa de totais e Excel, tema claro/escuro,
+modo apresentação (tecla F), busca global (tecla /) e tela de espera com o caminhão da Lube. O painel abre na
+hora com a cópia guardada no navegador (IndexedDB) e confere por trás se há carga mais nova — quando há, o
+botão Atualizar acende. **Todo clique leva ao dado:** número, rosca ou barra de situação aplica o filtro e
+rola até a planilha (ou abre outra tela, ex.: Verba → Saldo verba), com **"← Voltar"** que devolve os filtros e a
+posição; barra, ponto ou linha de comprador, fornecedor, produto, mês, departamento, seção ou estado abre o
+**relatório** daquele item (Ctrl+clique aplica como filtro). Os números são os mesmos do painel anterior
+(conferidos KPI a KPI); só a forma de mexer mudou.
 
 O navegador **nunca** fala com o banco: ele chama `/api/dados`, e é a função,
 rodando no servidor da Vercel, que consulta o Supabase com credencial guardada
