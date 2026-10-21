@@ -114,6 +114,14 @@ function conferirPorTras(versaoCopia) {
   }).catch(function () { L.ORIGEM = "offline"; L.emitir("origem"); L.toast("Sem conexão com o servidor agora: mostrando os dados guardados neste computador", "erro"); });
 }
 
+/* Lista dos produtos que têm foto (api/fotos). Chega por trás, sem segurar a tela: enquanto não chega, as
+   miniaturas tentam a foto mesmo assim e caem no quadradinho cinza se não houver. */
+L.carregarFotos = function () {
+  return fetch("api/fotos").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (j && Array.isArray(j.cods)) { L.FOTOS = new Set(j.cods.map(Number)); L.emitir("fotos"); }
+  }).catch(function () { /* sem a lista, valem as tentativas com queda para o quadradinho */ });
+};
+
 /* ------------------------------ preparo das estruturas ------------------------------ */
 function preparar(J, versao) {
   var D = L.D = J;
@@ -170,6 +178,8 @@ function preparar(J, versao) {
   C.fatDepto = (FAT.depto || []).map(function (r) { return { cod: r[0], nome: r[1], venda: r[2], lucro: r[3], v12: r[4] }; });
   C.fatSec = (FAT.secao || []).map(function (r) { return { cod: r[0], nome: r[1], venda: r[2], lucro: r[3] }; });
   C.fatUf = (FAT.estado || []).map(function (r) { return { uf: r[0], nome: r[0], venda: r[1], lucro: r[2] }; });
+  C.fatMesComp = (FAT.mescomp || []).map(function (r) { return { mes: r[0], comp: r[1], venda: r[2], lucro: r[3] }; });
+  C.fatMesDepto = (FAT.mesdepto || []).map(function (r) { return { mes: r[0], cod: r[1], venda: r[2], lucro: r[3] }; });
   C.fatSup = (FAT.superv || []).map(function (r) { return { cod: r[0], nome: r[1], venda: r[2], lucro: r[3], v12: r[4] }; });
 
   /* ---- cadastro único de produto, juntando o que cada consulta sabe dele (relatório do produto) */

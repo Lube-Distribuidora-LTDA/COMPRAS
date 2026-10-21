@@ -38,6 +38,9 @@ L.ordemTabela = function (padrao) {
   return o ? { id: o[0], desc: o[1] !== 1 } : padrao;
 };
 
+/* texto que o clique pediu na busca da tabela (uma vez só): usado onde o item não tem filtro próprio */
+L.buscaTabela = function () { var b = L.estado.busca; L.estado.busca = null; return b || ""; };
+
 /* ------------------------------ planilha já filtrada, com Voltar ------------------------------ */
 function copiar(o) { return JSON.parse(JSON.stringify(o || {})); }
 L.fotoDaTela = function () { return { pagina: L.estado.pagina, filtros: copiar(L.estado.filtros), opt: copiar(L.estado.opt), y: window.pageYOffset }; };
@@ -57,6 +60,7 @@ L.irTabela = function (mudar, o) {
   if (mudar) mudar(L.estado.filtros, L.estado.opt);
   L.estado.voltar = antes;
   L.estado.ordem = o.ordem || null;
+  L.estado.busca = o.busca || null;
   L.estado.rolarPara = "tabela-principal";
   L.dica.esconder();
   if (destino !== L.estado.pagina) L.irPara(destino); else { L.sincronizarHash(); L.atualizarFaixa(); L.emitir("filtros"); }
@@ -65,7 +69,7 @@ L.voltar = function () {
   var v = L.estado.voltar; if (!v) return;
   L.estado.voltar = null;
   L.estado.filtros = copiar(v.filtros); L.estado.opt = copiar(v.opt);
-  L.estado.rolarY = v.y; L.estado.rolarPara = null; L.estado.ordem = null;
+  L.estado.rolarY = v.y; L.estado.rolarPara = null; L.estado.ordem = null; L.estado.busca = null;
   L.dica.esconder();
   if (v.pagina !== L.estado.pagina) L.irPara(v.pagina); else { L.sincronizarHash(); L.atualizarFaixa(); L.emitir("filtros"); }
 };

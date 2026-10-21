@@ -139,7 +139,7 @@ function iniciarBusca() {
         var b = L.h("button", { class: "pop-item", type: "button", onclick: function () {
           fechar(); inp.value = ""; inp.blur();
           L.abrirDossie({ dim: g[0][0], id: x.id });
-        } }, tx, x.s ? L.h("span", { class: "cn", text: x.s.length > 26 ? x.s.slice(0, 25) + "…" : x.s }) : null);
+        } }, g[0][0] === "produto" ? L.fotoMini(x.id) : null, tx, x.s ? L.h("span", { class: "cn", text: x.s.length > 26 ? x.s.slice(0, 25) + "…" : x.s }) : null);
         if (!primeiro) primeiro = b;
         lista.appendChild(b);
       });
@@ -240,6 +240,7 @@ function iniciar() {
   var aviso = function (t) { var x = espera.querySelector(".espera-txt div"); if (x) x.textContent = t; };
   L.carregarTudo(aviso).then(function () {
     construirMenu(); iniciarBusca();
+    L.carregarFotos();                       // a lista de quem tem foto chega por trás
     var h = lerHash(), salva = null;
     try { salva = localStorage.getItem("compras-aba"); } catch (e) {}
     L.estado.pagina = h.pagina && L.paginas[h.pagina] ? h.pagina : (salva && L.paginas[salva] ? salva : L.ordemPaginas[0]);

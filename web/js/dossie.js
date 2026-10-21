@@ -22,6 +22,12 @@ function escopo(ent) {
   return { f: f };
 }
 function nomeEnt(ent) { return ent.titulo || (ent.dim ? L.nomeDe(ent.dim, ent.id) : "Seleção"); }
+/* todo cartão do relatório leva ao dado: fecha o relatório e abre a tela de origem já filtrada por este item
+   (com "Voltar" na faixa de filtros). mudar(filtros, opt) acrescenta o que o cartão pede. */
+function irPara(pagina, dim, id, mudar, ordem, busca) {
+  L.fecharDossie();
+  L.irTabela(function (f, opt) { if (dim != null) f[dim] = [+id]; if (mudar) mudar(f, opt); }, { pagina: pagina, ordem: ordem, busca: busca });
+}
 var ROT = { comprador: "Comprador", fornecedor: "Fornecedor", produto: "Produto", mes: "Mês", depto: "Departamento", secao: "Seção", uf: "Estado", superv: "Supervisor" };
 
 /* ------------------------------ abrir / fechar ------------------------------ */
@@ -100,8 +106,13 @@ function cabecalho(ent) {
   if (ent.dim && filtraveis.indexOf(ent.dim) >= 0) acoes.appendChild(L.h("button", { class: "btn ouro", type: "button", html: L.ic("filtro") + " Filtrar o painel por isso", onclick: function () { L.setFiltro(ent.dim, [ent.id]); L.fecharDossie(); L.toast("Painel filtrado: " + nomeEnt(ent), "ok"); } }));
   acoes.appendChild(L.h("button", { class: "btn", type: "button", html: L.ic("baixar") + " Imprimir / PDF", onclick: imprimir }));
   acoes.appendChild(L.h("button", { class: "btn-ic", type: "button", title: "Fechar (Esc)", html: L.ic("x"), onclick: L.fecharDossie }));
-  var rotTipo = ROT[ent.dim] || "Recorte";
-  return L.h("div", { class: "dos-cab" },
+  var rotTipo = ROT[ent.dim] || "Recorte", foto = null;
+  if (ent.dim === "produto" && L.temFoto(ent.id)) {
+    var im = L.h("img", { src: L.urlFoto(ent.id), alt: "", loading: "lazy" });
+    im.addEventListener("error", function () { if (foto) foto.remove(); });
+    foto = L.h("div", { class: "dos-foto" }, im);
+  }
+  return L.h("div", { class: "dos-cab" }, foto,
     L.h("div", { style: { minWidth: 0 } },
       L.h("div", { class: "olho", html: L.ic(ent.dim && L.DIM[ent.dim] ? L.DIM[ent.dim].icone : "estrela").replace("<svg", '<svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2"') + "<span>Relatório · " + L.esc(rotTipo) + " · Central Compras</span>" }),
       L.h("h2", { text: nomeEnt(ent) }), L.h("div", { class: "sub" }, subs)),
@@ -133,16 +144,16 @@ function resumo(ent, es) {
 
 function resumoCarteira(ent, es, raiz) {
   var k = kpisCarteira(es, ent.dim, ent.id), C = L.cores(), n = k.rup.length;
-  var vai = function (id) { return function () { aba = id; desenhar(); }; };
+  var D = ent.dim, ID = ent.id, ir = function (pag, mudar, ordem) { return function () { irPara(pag, D, ID, mudar, ordem); }; };
   raiz.appendChild(L.kpis(
-    L.kpi({ icone: "caixa", rot: "Produtos", valor: n, fmt: L.fInt, classe: "heroi", aoClicar: vai("produtos"), leg: L.h("span", { text: "ruptura e cobertura · clique para listar" }) }),
-    L.kpi({ icone: "alerta", rot: "Em ruptura", valor: k.nRup, fmt: L.fInt, classe: k.nRup ? "perigo" : "zero", leg: L.h("span", { text: L.fPct(L.pct(k.nRup, n), 1) + " dos produtos" }), aoClicar: vai("produtos") }),
-    L.kpi({ icone: "armazem", rot: "Cobertura em excesso", valor: k.nExc, fmt: L.fInt, classe: k.nExc ? "atencao" : "zero", leg: L.h("span", { text: L.fPct(L.pct(k.nExc, n), 1) + " dos produtos" }), aoClicar: vai("produtos") }),
-    L.kpi({ icone: "devolucao", rot: "Avaria", valor: k.avaria, fmt: L.fRc, fmtTitulo: L.fR2, classe: k.avaria ? "atencao" : "zero", leg: L.h("span", { text: "filiais 1, 2, 7 e 8" }) }),
-    L.kpi({ icone: "carteira", rot: "Verba", valor: k.verba, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: L.h("span", { text: "saldo de movimentação" }), aoClicar: vai("verba") }),
-    L.kpi({ icone: "armazem", rot: "Capital parado", valor: k.capital, fmt: L.fRc, fmtTitulo: L.fR2, classe: k.capital ? "atencao" : "zero", leg: L.h("span", { text: L.fInt(k.ex.length) + " produtos com excesso em 60 dias" }) }),
-    L.kpi({ icone: "dinheiro", rot: "Valor sugerido", valor: k.vSug, fmt: L.fRc, fmtTitulo: L.fR2, leg: L.h("span", { text: "compra para 8 semanas" }) }),
-    L.kpi({ icone: "barras", rot: "Venda do ano", valor: k.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "violeta", leg: L.h("span", { text: k.margem == null ? "sem venda no ano" : "margem de " + L.fPct(k.margem, 1) }) })));
+    L.kpi({ icone: "caixa", rot: "Produtos", aoClicar: ir("compras", null, ["est", -1]), valor: n, fmt: L.fInt, classe: "heroi", leg: L.h("span", { text: "ruptura e cobertura · clique para listar" }) }),
+    L.kpi({ icone: "alerta", rot: "Em ruptura", aoClicar: ir("compras", function (f) { f.ruptura = [1]; }, ["dias", 1]), valor: k.nRup, fmt: L.fInt, classe: k.nRup ? "perigo" : "zero", leg: L.h("span", { text: L.fPct(L.pct(k.nRup, n), 1) + " dos produtos" }) }),
+    L.kpi({ icone: "armazem", rot: "Cobertura em excesso", aoClicar: ir("compras", function (f) { f.coberturaOk = [0]; }, ["dias", -1]), valor: k.nExc, fmt: L.fInt, classe: k.nExc ? "atencao" : "zero", leg: L.h("span", { text: L.fPct(L.pct(k.nExc, n), 1) + " dos produtos" }) }),
+    L.kpi({ icone: "devolucao", rot: "Avaria", aoClicar: ir("compras", function (f) { f.comAvaria = [1]; }, ["avaria", -1]), valor: k.avaria, fmt: L.fRc, fmtTitulo: L.fR2, classe: k.avaria ? "atencao" : "zero", leg: L.h("span", { text: "filiais 1, 2, 7 e 8" }) }),
+    L.kpi({ icone: "carteira", rot: "Verba", aoClicar: ir("saldo_verba", null, ["verba", -1]), valor: k.verba, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: L.h("span", { text: "saldo de movimentação" }) }),
+    L.kpi({ icone: "armazem", rot: "Capital parado", aoClicar: ir("excesso", null, ["valor", -1]), valor: k.capital, fmt: L.fRc, fmtTitulo: L.fR2, classe: k.capital ? "atencao" : "zero", leg: L.h("span", { text: L.fInt(k.ex.length) + " produtos com excesso em 60 dias" }) }),
+    L.kpi({ icone: "dinheiro", rot: "Valor sugerido", aoClicar: ir("estoque_venda", function (f) { f.sugestao = [1]; }, ["valorSug", -1]), valor: k.vSug, fmt: L.fRc, fmtTitulo: L.fR2, leg: L.h("span", { text: "compra para 8 semanas" }) }),
+    L.kpi({ icone: "barras", rot: "Venda do ano", aoClicar: ir("performance", function (f, opt) { L.defOpt(opt, "performance", "corte", D === "comprador" ? "comprador" : "fornecedor"); }, ["venda", -1]), valor: k.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "violeta", leg: L.h("span", { text: k.margem == null ? "sem venda no ano" : "margem de " + L.fPct(k.margem, 1) }) })));
   if (!n && !k.vb.length) { raiz.appendChild(L.estadoVazio("Nada neste recorte", "Este item não tem produto nem verba na carga atual.")); return raiz; }
 
   var g = L.h("div", { class: "grade" });
@@ -158,6 +169,7 @@ function resumoCarteira(ent, es, raiz) {
   raiz.appendChild(g);
 
   if (ent.dim === "comprador") {
+    raiz.appendChild(L.h("div", { class: "grade", style: { marginTop: "16px" } }, painelVendaMes("Venda do comprador mês a mês", L.C.fatMesComp.filter(function (x) { return L.compAtivo(x.comp) === +ent.id; }))));
     var porF = fornecedoresDe(es), top = porF.slice().sort(function (a, b) { return b.avaria - a.avaria; }).filter(function (x) { return x.avaria > 0; }).slice(0, 10);
     var g2 = L.h("div", { class: "grade", style: { marginTop: "16px" } });
     var pAv = L.painel({ titulo: "Avaria por fornecedor", sub: "estoque indenizado nas filiais 1, 2, 7 e 8 · clique para abrir o relatório do fornecedor", classe: "c-6" });
@@ -188,13 +200,14 @@ function resumoProduto(ent, raiz) {
   var p = L.PM.get(+ent.id), C = L.cores();
   if (!p) { raiz.appendChild(L.estadoVazio("Produto fora do painel", "Este produto não consta nas consultas da carga atual.")); return raiz; }
   var r = p.rup, ev = p.ev, ex = p.exc;
+  var ir = function (pag, mudar, ordem) { return function () { irPara(pag, "produto", p.cod, mudar, ordem); }; };
   raiz.appendChild(L.kpis(
-    L.kpi({ icone: "armazem", rot: "Estoque disponível", valor: r ? r.estCx : null, fmt: function (v) { return L.fNum(v, 1) + " CX"; }, classe: "heroi", leg: L.h("span", { text: r ? "giro de " + L.fNum(r.giroCx, 3) + " CX/dia" : "fora da consulta de ruptura" }) }),
-    L.kpi({ icone: "alerta", rot: "Dias de venda", valor: r ? r.dias : null, fmt: function (v) { return L.fNum(v, 1); }, classe: r && r.ruptura ? "perigo" : "ok", leg: L.h("span", { text: r ? (r.ruptura ? "em ruptura (menos de 7 dias)" : "sem ruptura") : "—" }) }),
-    L.kpi({ icone: "medidor", rot: "Cobertura", valor: ev ? ev.cob : null, fmt: function (v) { return L.fNum(v, 1) + " sem"; }, classe: ev && ev.cob > 8 ? "atencao" : "ok", leg: L.h("span", { text: ev ? (ev.cob == null ? "sem venda suficiente para calcular" : "meta de compra: 8 semanas") : "fora da consulta de estoque x venda" }) }),
-    L.kpi({ icone: "carteira", rot: "Sugestão de compra", valor: ev && ev.sug > 0 ? ev.valorSug : 0, fmt: L.fRc, fmtTitulo: L.fR2, classe: ev && ev.sug > 0 ? "ok" : "zero", leg: L.h("span", { text: ev && ev.sug > 0 ? L.fInt(ev.sug) + " un · 8 semanas" : "sem sugestão" }) }),
-    L.kpi({ icone: "armazem", rot: "Capital parado", valor: ex ? ex.valor : 0, fmt: L.fRc, fmtTitulo: L.fR2, classe: ex ? "atencao" : "zero", leg: L.h("span", { text: ex ? L.fInt(Math.abs(ex.sug)) + " un acima de 60 dias" : "sem excesso em 60 dias" }) }),
-    L.kpi({ icone: "devolucao", rot: "Avaria", valor: r ? r.avaria : p.avaria, fmt: L.fRc, fmtTitulo: L.fR2, classe: (r ? r.avaria : p.avaria) ? "atencao" : "zero", leg: L.h("span", { text: "filiais 1, 2, 7 e 8" }) })));
+    L.kpi({ icone: "armazem", rot: "Estoque disponível", aoClicar: ir("compras", null, ["est", -1]), valor: r ? r.estCx : null, fmt: function (v) { return L.fNum(v, 1) + " CX"; }, classe: "heroi", leg: L.h("span", { text: r ? "giro de " + L.fNum(r.giroCx, 3) + " CX/dia" : "fora da consulta de ruptura" }) }),
+    L.kpi({ icone: "alerta", rot: "Dias de venda", aoClicar: ir("compras", null, ["dias", 1]), valor: r ? r.dias : null, fmt: function (v) { return L.fNum(v, 1); }, classe: r && r.ruptura ? "perigo" : "ok", leg: L.h("span", { text: r ? (r.ruptura ? "em ruptura (menos de 7 dias)" : "sem ruptura") : "—" }) }),
+    L.kpi({ icone: "medidor", rot: "Cobertura", aoClicar: ir("estoque_venda", null, ["cob", 1]), valor: ev ? ev.cob : null, fmt: function (v) { return L.fNum(v, 1) + " sem"; }, classe: ev && ev.cob > 8 ? "atencao" : "ok", leg: L.h("span", { text: ev ? (ev.cob == null ? "sem venda suficiente para calcular" : "meta de compra: 8 semanas") : "fora da consulta de estoque x venda" }) }),
+    L.kpi({ icone: "carteira", rot: "Sugestão de compra", aoClicar: ir("sugestao", function (f, opt) { L.defOpt(opt, "sugestao", "visao", "produto"); }, ["valor", -1]), valor: ev && ev.sug > 0 ? ev.valorSug : 0, fmt: L.fRc, fmtTitulo: L.fR2, classe: ev && ev.sug > 0 ? "ok" : "zero", leg: L.h("span", { text: ev && ev.sug > 0 ? L.fInt(ev.sug) + " un · 8 semanas" : "sem sugestão" }) }),
+    L.kpi({ icone: "armazem", rot: "Capital parado", aoClicar: ir("excesso", null, ["valor", -1]), valor: ex ? ex.valor : 0, fmt: L.fRc, fmtTitulo: L.fR2, classe: ex ? "atencao" : "zero", leg: L.h("span", { text: ex ? L.fInt(Math.abs(ex.sug)) + " un acima de 60 dias" : "sem excesso em 60 dias" }) }),
+    L.kpi({ icone: "devolucao", rot: "Avaria", aoClicar: ir("compras", null, ["avaria", -1]), valor: r ? r.avaria : p.avaria, fmt: L.fRc, fmtTitulo: L.fR2, classe: (r ? r.avaria : p.avaria) ? "atencao" : "zero", leg: L.h("span", { text: "filiais 1, 2, 7 e 8" }) })));
   var g = L.h("div", { class: "grade" });
   var pSem = L.painel({ titulo: "Venda das últimas 9 semanas", sub: "unidades por semana · a atual está em curso", classe: "c-6" }), bSem = L.h("div");
   pSem.corpo.appendChild(bSem);
@@ -243,13 +256,14 @@ function resumoFaturamento(ent, raiz) {
     var s = String(ent.id), ym = s.slice(0, 4) + "-" + s.slice(4);
     var i = F.fatMes.findIndex(function (m) { return m.mes === ym; }), m = F.fatMes[i], ant = i > 0 ? F.fatMes[i - 1] : null;
     if (!m) { raiz.appendChild(L.estadoVazio("Mês fora da base", "Esse mês não consta no faturamento da carga atual.")); return raiz; }
+    var irM = function () { irPara("metricas", "mes", ent.id, function (f, opt) { L.defOpt(opt, "metricas", "visao", "meses"); }, ["mes", -1]); };
     raiz.appendChild(L.kpis(
-      L.kpi({ icone: "dinheiro", rot: "Venda", valor: m.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "heroi", leg: [L.delta({ atual: m.venda, base: ant && ant.venda }), L.h("span", { text: ant ? "contra " + L.fMesLongo(ant.mes) : "primeiro mês da base" })] }),
-      L.kpi({ icone: "barras", rot: "Lucro", valor: m.lucro, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: [L.delta({ atual: m.lucro, base: ant && ant.lucro }), L.h("span", { text: "venda menos CMV" })] }),
-      L.kpi({ icone: "percent", rot: "Margem", valor: m.margem, fmt: function (v) { return L.fPct(v, 1); }, classe: "violeta", leg: [L.delta({ atual: m.margem, base: ant && ant.margem, pp: true }), L.h("span", { text: "pontos percentuais" })] }),
-      L.kpi({ icone: "caixa", rot: "Pedidos", valor: m.pedidos, fmt: L.fInt, leg: [L.delta({ atual: m.pedidos, base: ant && ant.pedidos }), L.h("span", { text: "pedidos de venda normal" })] }),
-      L.kpi({ icone: "pessoas", rot: "Positivação", valor: m.posit, fmt: L.fInt, leg: [L.delta({ atual: m.posit, base: ant && ant.posit }), L.h("span", { text: "clientes somados por dia" })] }),
-      L.kpi({ icone: "relogio", rot: "Custo da mercadoria", valor: m.cmv, fmt: L.fRc, fmtTitulo: L.fR2, leg: L.h("span", { text: "CMV do mês" }) })));
+      L.kpi({ icone: "dinheiro", rot: "Venda", aoClicar: irM, valor: m.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "heroi", leg: [L.delta({ atual: m.venda, base: ant && ant.venda }), L.h("span", { text: ant ? "contra " + L.fMesLongo(ant.mes) : "primeiro mês da base" })] }),
+      L.kpi({ icone: "barras", rot: "Lucro", aoClicar: irM, valor: m.lucro, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: [L.delta({ atual: m.lucro, base: ant && ant.lucro }), L.h("span", { text: "venda menos CMV" })] }),
+      L.kpi({ icone: "percent", rot: "Margem", aoClicar: irM, valor: m.margem, fmt: function (v) { return L.fPct(v, 1); }, classe: "violeta", leg: [L.delta({ atual: m.margem, base: ant && ant.margem, pp: true }), L.h("span", { text: "pontos percentuais" })] }),
+      L.kpi({ icone: "caixa", rot: "Pedidos", aoClicar: irM, valor: m.pedidos, fmt: L.fInt, leg: [L.delta({ atual: m.pedidos, base: ant && ant.pedidos }), L.h("span", { text: "pedidos de venda normal" })] }),
+      L.kpi({ icone: "pessoas", rot: "Positivação", aoClicar: irM, valor: m.posit, fmt: L.fInt, leg: [L.delta({ atual: m.posit, base: ant && ant.posit }), L.h("span", { text: "clientes somados por dia" })] }),
+      L.kpi({ icone: "relogio", rot: "Custo da mercadoria", aoClicar: irM, valor: m.cmv, fmt: L.fRc, fmtTitulo: L.fR2, leg: L.h("span", { text: "CMV do mês" }) })));
     var p = L.painel({ titulo: "O ano, mês a mês", sub: "a coluna em ouro é o mês deste relatório · clique para abrir outro mês", classe: "c-12" }), b = L.h("div");
     p.corpo.appendChild(b);
     L.graf.colunas(b, { categorias: F.fatMes.map(function (x) { return { rot: L.fMesAno(x.mes) }; }), altura: 260, fmt: L.fRc, tipo: "moeda",
@@ -265,18 +279,40 @@ function resumoFaturamento(ent, raiz) {
   var ordenado = fonte.slice().sort(function (a, b) { return b.venda - a.venda; });
   var pos = ordenado.findIndex(function (y) { return y.cod === +ent.id; }), me = ordenado[pos];
   if (!me) { raiz.appendChild(L.estadoVazio("Fora da base", "Este item não consta no faturamento da carga atual.")); return raiz; }
+  var nomeItem = nomeEnt(ent);
+  var irD = function (ordem) {
+    return function () {
+      if (ent.dim === "superv") irPara("performance", null, null, function (f, opt) { L.defOpt(opt, "performance", "corte", "supervisor"); }, ordem, nomeItem);
+      else irPara("metricas", null, null, function (f, opt) { L.defOpt(opt, "metricas", "visao", ent.dim === "depto" ? "departamento" : ent.dim === "secao" ? "secao" : "estado"); }, ordem, nomeItem);
+    };
+  };
   var totalV = L.soma(fonte, "venda"), totalL = L.soma(fonte, "lucro");
   raiz.appendChild(L.kpis(
-    L.kpi({ icone: "dinheiro", rot: "Venda", valor: me.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "heroi", leg: L.h("span", { text: L.fPct(L.pct(me.venda, totalV), 1) + " da venda de " + periodo() }) }),
-    L.kpi({ icone: "barras", rot: "Lucro", valor: me.lucro, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: L.h("span", { text: L.fPct(L.pct(me.lucro, totalL), 1) + " do lucro" }) }),
-    L.kpi({ icone: "percent", rot: "Margem", valor: me.venda ? me.lucro / me.venda : null, fmt: function (v) { return L.fPct(v, 1); }, classe: "violeta", leg: L.h("span", { text: "média geral: " + L.fPct(L.pct(totalL, totalV), 1) }) }),
-    L.kpi({ icone: "estrela", rot: "Posição", valor: pos + 1, fmt: function (v) { return v + "º"; }, leg: L.h("span", { text: "de " + ordenado.length + " por venda" }) })));
+    L.kpi({ icone: "dinheiro", rot: "Venda", aoClicar: irD(["venda", -1]), valor: me.venda, fmt: L.fRc, fmtTitulo: L.fR2, classe: "heroi", leg: L.h("span", { text: L.fPct(L.pct(me.venda, totalV), 1) + " da venda de " + periodo() }) }),
+    L.kpi({ icone: "barras", rot: "Lucro", aoClicar: irD(["lucro", -1]), valor: me.lucro, fmt: L.fRc, fmtTitulo: L.fR2, classe: "ok", leg: L.h("span", { text: L.fPct(L.pct(me.lucro, totalL), 1) + " do lucro" }) }),
+    L.kpi({ icone: "percent", rot: "Margem", aoClicar: irD(["margem", -1]), valor: me.venda ? me.lucro / me.venda : null, fmt: function (v) { return L.fPct(v, 1); }, classe: "violeta", leg: L.h("span", { text: "média geral: " + L.fPct(L.pct(totalL, totalV), 1) }) }),
+    L.kpi({ icone: "estrela", rot: "Posição", aoClicar: irD(["venda", -1]), valor: pos + 1, fmt: function (v) { return v + "º"; }, leg: L.h("span", { text: "de " + ordenado.length + " por venda" }) })));
   var pr = L.painel({ titulo: "Onde está entre os demais", sub: "venda do período · o item deste relatório em ouro · clique para abrir outro", classe: "c-12" });
   L.rankingDim(pr.corpo, ent.dim, ordenado.slice(0, 20).map(function (y) { return { k: y.cod, rot: nomeDe(y), valor: y.venda, y: y }; }), { fmt: L.fRc, fmtCheio: L.fR2, total: totalV, rotulo: "Venda", cor: function (i, x) { return x.rot === nomeDe(me) ? L.cores().ouro : L.cores().d[0]; },
     dica: function (x) { return { titulo: x.rot, linhas: [{ rot: "Venda", val: L.fR2(x.valor) }, { rot: "Lucro", val: L.fR2(x.y.lucro) }], extra: '<div class="dica-sub">Margem de ' + L.esc(L.fPct(L.pct(x.y.lucro, x.y.venda), 1)) + "</div>" }; },
     aoClicar: function (x) { L.abrirDossie({ dim: ent.dim, id: x.k }, true); } });
   raiz.appendChild(L.grade(pr));
+  if (ent.dim === "depto") raiz.appendChild(L.h("div", { class: "grade", style: { marginTop: "16px" } }, painelVendaMes("Venda do departamento mês a mês", L.C.fatMesDepto.filter(function (x) { return x.cod === +ent.id; }))));
   return raiz;
+}
+/* as colunas de venda mês a mês de um recorte (comprador ou departamento): clicar abre o relatório do mês */
+function painelVendaMes(titulo, linhas) {
+  var porMes = new Map(), C = L.cores();
+  linhas.forEach(function (x) { var g = porMes.get(x.mes) || { mes: x.mes, venda: 0, lucro: 0 }; g.venda += x.venda || 0; g.lucro += x.lucro || 0; porMes.set(x.mes, g); });
+  var serie = Array.from(porMes.values()).sort(function (a, b) { return a.mes < b.mes ? -1 : 1; });
+  var p = L.painel({ titulo: titulo, sub: "venda de cada mês do ano · clique na coluna para abrir o relatório do mês", classe: "c-12" }), b = L.h("div");
+  p.corpo.appendChild(b);
+  if (!serie.length) { b.appendChild(L.h("div", { class: "vazio", html: "<b>Sem venda no ano</b>Este item não tem venda mês a mês na carga atual." })); return p; }
+  L.graf.colunas(b, { categorias: serie.map(function (m) { return { rot: L.fMesAno(m.mes) }; }), altura: 240, fmt: L.fRc, tipo: "moeda",
+    series: [{ nome: "Venda", valores: serie.map(function (m) { return m.venda; }), cor: C.d[0] }],
+    dica: function (c) { var m = serie[c]; return { titulo: L.fMesLongo(m.mes), linhas: [{ rot: "Venda", val: L.fR2(m.venda), cor: C.d[0] }, { rot: "Lucro", val: L.fR2(m.lucro), cor: C.ok }], extra: '<div class="dica-sub">Margem de ' + L.esc(L.fPct(L.pct(m.lucro, m.venda), 1)) + "</div>" }; },
+    aoClicar: function (c) { L.abrirDossie({ dim: "mes", id: +serie[c].mes.replace("-", "") }, true); } });
+  return p;
 }
 function periodo() {
   var m = L.C.fatMes; if (!m.length) return "sem dados";

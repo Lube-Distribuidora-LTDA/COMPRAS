@@ -28,7 +28,7 @@ var FMT = {
 var EXPORT = { moeda: "moeda", moedaInt: "moeda", inteiro: "inteiro", pct: "percentual", num: "inteiro", num2: "moeda", data: "data", texto: "texto" };
 
 L.tabela = function (cfg) {
-  var est = { pag: 0, porPag: cfg.porPagina || 25, ord: cfg.ordem ? { id: cfg.ordem.id, desc: cfg.ordem.desc !== false } : null, busca: "", todas: cfg.todasColunas === true };
+  var est = { pag: 0, porPag: cfg.porPagina || 25, ord: cfg.ordem ? { id: cfg.ordem.id, desc: cfg.ordem.desc !== false } : null, busca: cfg.buscaInicial || "", todas: cfg.todasColunas === true };
   var cols = cfg.colunas;
   var chaveCols = "fis-cols-" + (cfg.arquivo || cfg.titulo || "t");
   try { var salvo = JSON.parse(localStorage.getItem(chaveCols) || "null"); if (salvo) est.colsSel = salvo; } catch (e) {}

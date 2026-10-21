@@ -8,18 +8,22 @@ var L = window.L;
 
 L.secao = function (texto) { return L.h("div", { class: "sec-tit", text: texto }); };
 
-/* miniatura do produto (índice pi de L.P): quadradinho branco com a foto; passando o mouse, abre a foto maior.
-   A foto é a miniatura que o Gestão Comercial guarda no banco (api/img). Produto sem foto fica com um quadradinho
-   cinza, para as linhas não ficarem desalinhadas. */
+/* miniatura do produto: quadradinho branco com a foto; passando o mouse, abre a foto maior.
+   A foto é a miniatura que o Gestão Comercial guarda no banco (api/img, a partir da pasta FOTOS_ION).
+   Produto sem foto fica com um quadradinho cinza, para as linhas não ficarem desalinhadas.
+   L.FOTOS é o conjunto de códigos que têm foto (vem de api/fotos); enquanto ele não chega (null), tenta a foto
+   mesmo assim e cai no quadradinho cinza se der 404. */
 var zoomFoto = null;
 function fecharZoomFoto() { if (zoomFoto) { zoomFoto.remove(); zoomFoto = null; } }
-L.urlFoto = function (pi) { return "api/img?cod=" + encodeURIComponent(L.P.cod[pi]); };
-L.fotoMini = function (pi) {
-  var P = L.P, box = L.h("span", { class: "foto-mini" });
-  if (pi == null || pi < 0 || !P || !P.foto[pi]) { box.classList.add("sem"); box.innerHTML = L.ic("imagem"); box.title = "Sem foto na pasta FOTOS_ION"; return box; }
-  var url = L.urlFoto(pi);
+L.FOTOS = null;
+L.temFoto = function (cod) { return cod != null && +cod > 0 && (!L.FOTOS || L.FOTOS.has(+cod)); };
+L.urlFoto = function (cod) { return "api/img?cod=" + encodeURIComponent(cod); };
+L.fotoMini = function (cod) {
+  var box = L.h("span", { class: "foto-mini" });
+  if (!L.temFoto(cod)) { box.classList.add("sem"); box.innerHTML = L.ic("imagem"); box.title = "Sem foto na pasta FOTOS_ION"; return box; }
+  var url = L.urlFoto(cod);
   var im = L.h("img", { src: url, alt: "", loading: "lazy", decoding: "async" });
-  im.addEventListener("error", function () { box.classList.add("sem"); box.innerHTML = L.ic("imagem"); box.onmouseenter = null; });
+  im.addEventListener("error", function () { box.classList.add("sem"); box.innerHTML = L.ic("imagem"); box.title = "Sem foto na pasta FOTOS_ION"; box.onmouseenter = null; });
   box.appendChild(im);
   box.onmouseenter = function () {
     fecharZoomFoto();

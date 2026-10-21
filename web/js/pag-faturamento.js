@@ -15,7 +15,7 @@ var L = window.L;
 L.registrarPagina({
   id: "performance", grupo: "Resultado", menu: "Performance compras", icone: "barras",
   titulo: "Resultado por comprador e fornecedor", olho: "Página 06 · Performance compras",
-  filtros: [], mais: [], render: renderPerformance,
+  filtros: ["comprador", "fornecedor"], mais: [], render: renderPerformance,
 });
 L.registrarPagina({
   id: "metricas", grupo: "Resultado", menu: "Métricas", icone: "linha",
@@ -47,9 +47,9 @@ function renderPerformance(raiz) {
   raiz.appendChild(cabecalho);
 
   var vDe = function (x) { return use12 ? x.v12 : x.venda; }, lDe = function (x) { return use12 ? x.l12 : x.lucro; };
-  var totalVenda = L.soma(F.fatComp, vDe), totalLucro = L.soma(F.fatComp, lDe);
-  var pedidos = L.soma(F.fatComp, "pedidos"), posit = L.soma(F.fatComp, "posit");
-  var melhor = F.fatComp.slice().sort(function (a, b) { return (use12 ? b.margem12 : b.margem) - (use12 ? a.margem12 : a.margem); })[0];
+  var totalVenda = L.soma(L.linhas("fatComp"), vDe), totalLucro = L.soma(L.linhas("fatComp"), lDe);
+  var pedidos = L.soma(L.linhas("fatComp"), "pedidos"), posit = L.soma(L.linhas("fatComp"), "posit");
+  var melhor = L.linhas("fatComp").slice().sort(function (a, b) { return (use12 ? b.margem12 : b.margem) - (use12 ? a.margem12 : a.margem); })[0];
   var colV = use12 ? "v12" : "venda", colL = use12 ? "l12" : "lucro", colM = use12 ? "margem12" : "margem";
   var ir = function (col) { return [function (f, opt) { L.defOpt(opt, "performance", "corte", "comprador"); }, { ordem: [col, -1] }]; };
 
@@ -107,7 +107,7 @@ function renderPerformance(raiz) {
   }
   var linhas = linhasCorte(corte);
   var t = L.tabela({
-    titulo: C.tit, arquivo: "compras-performance-" + corte, aba: C.tit, porPagina: 25, linhas: linhas, colunas: cols,
+    titulo: C.tit, buscaInicial: L.buscaTabela(), arquivo: "compras-performance-" + corte, aba: C.tit, porPagina: 25, linhas: linhas, colunas: cols,
     ordem: L.ordemTabela({ id: temJanela12 ? (corte === "comprador" || corte === "fornecedor" ? "v12" : "venda") : "venda", desc: true }),
     buscaDica: "Buscar por nome…", buscaTexto: function (x) { return x.nome || L.nomeComprador(x.comp); },
     filtrosTexto: function () { return L.descricaoFiltros([["Ranking por", C.rot.toLowerCase()]]); },
@@ -125,14 +125,14 @@ function renderPerformance(raiz) {
 
 function linhasCorte(corte) {
   var F = L.C;
-  if (corte === "comprador") return F.fatComp.map(function (c) { return Object.assign({ k: L.compAtivo(c.comp) }, c); });
-  var fonte = corte === "fornecedor" ? F.fatForn : corte === "departamento" ? F.fatDepto : F.fatSup;
+  if (corte === "comprador") return L.linhas("fatComp").map(function (c) { return Object.assign({ k: L.compAtivo(c.comp) }, c); });
+  var fonte = corte === "fornecedor" ? L.linhas("fatForn") : corte === "departamento" ? F.fatDepto : F.fatSup;
   return fonte.map(function (f) { return { k: f.cod, nome: corte === "fornecedor" ? L.nomeFornec(f.cod) : L.titulo(f.nome), venda: f.venda, lucro: f.lucro, v12: f.v12, margem: f.venda ? f.lucro / f.venda : null }; });
 }
 function rankingItens(corte, use12) {
   var F = L.C;
-  var l = corte === "comprador" ? F.fatComp.map(function (c) { return { k: L.compAtivo(c.comp), rot: L.nomeDe("comprador", L.compAtivo(c.comp)), valor: use12 ? c.v12 : c.venda, lucro: use12 ? c.l12 : c.lucro }; })
-    : corte === "fornecedor" ? F.fatForn.map(function (f) { return { k: f.cod, rot: L.nomeFornec(f.cod), valor: use12 ? f.v12 : f.venda, lucro: use12 ? null : f.lucro }; })
+  var l = corte === "comprador" ? L.linhas("fatComp").map(function (c) { return { k: L.compAtivo(c.comp), rot: L.nomeDe("comprador", L.compAtivo(c.comp)), valor: use12 ? c.v12 : c.venda, lucro: use12 ? c.l12 : c.lucro }; })
+    : corte === "fornecedor" ? L.linhas("fatForn").map(function (f) { return { k: f.cod, rot: L.nomeFornec(f.cod), valor: use12 ? f.v12 : f.venda, lucro: use12 ? null : f.lucro }; })
     : corte === "departamento" ? F.fatDepto.map(function (d) { return { k: d.cod, rot: L.titulo(d.nome), valor: use12 ? d.v12 : d.venda, lucro: use12 ? null : d.lucro }; })
     : F.fatSup.map(function (s) { return { k: s.cod, rot: L.titulo(s.nome), valor: use12 ? s.v12 : s.venda, lucro: use12 ? null : s.lucro }; });
   return l.filter(function (i) { return i.valor > 0; }).sort(function (a, b) { return b.valor - a.valor; });
@@ -223,7 +223,7 @@ function renderMetricas(raiz) {
     var dimV = visao === "departamento" ? { dim: "depto", fonte: dep, tit: "Departamentos" } : visao === "estado" ? { dim: "uf", fonte: ufs, tit: "Estados" } : { dim: "secao", fonte: F.fatSec.map(function (s) { return { k: s.cod, rot: L.titulo(s.nome), venda: s.venda, lucro: s.lucro }; }), tit: "Seções" };
     var linhasD = dimV.fonte.map(function (x) { return { k: x.k, nome: x.rot, venda: x.venda, lucro: x.lucro, margem: x.venda ? x.lucro / x.venda : null }; });
     t = L.tabela({
-      titulo: dimV.tit, arquivo: "compras-metricas-" + visao, aba: dimV.tit, porPagina: 25, linhas: linhasD, ordem: L.ordemTabela({ id: "venda", desc: true }),
+      titulo: dimV.tit, buscaInicial: L.buscaTabela(), arquivo: "compras-metricas-" + visao, aba: dimV.tit, porPagina: 25, linhas: linhasD, ordem: L.ordemTabela({ id: "venda", desc: true }),
       buscaDica: "Buscar por nome…", buscaTexto: function (x) { return x.nome; }, filtrosTexto: function () { return L.descricaoFiltros([["Planilha", dimV.tit.toLowerCase()]]); },
       colunas: [{ id: "nome", titulo: dimV.tit.replace(/s$/, ""), tipo: "texto", valor: function (x) { return x.nome; } }, { id: "venda", titulo: "Venda", tipo: "moedaInt", valor: function (x) { return x.venda; }, exportarTipo: "moeda", barra: true, corBarra: "rgba(95,126,245,.2)" }, cm("lucro", "Lucro", function (x) { return x.lucro; }), corM],
       totais: function (res) { var l = res.todas || res.linhas, v = L.soma(l, "venda"), lu = L.soma(l, "lucro"); return [{ rot: dimV.tit, valor: L.fInt(l.length), pri: true }, { rot: "Venda", valor: L.fR2(v) }, { rot: "Lucro", valor: L.fR2(lu) }, { rot: "Margem", valor: L.fPct(L.pct(lu, v), 1) }]; },

@@ -121,6 +121,7 @@ function renderEstoqueVenda(raiz) {
     buscaDica: "Buscar produto por código, nome ou fornecedor…", buscaTexto: function (r) { return r.codprod + " " + r.desc + " " + L.nomeFornec(r.forn); },
     filtrosTexto: function () { return L.descricaoFiltros(); },
     totais: function (res) { var l = res.todas || res.linhas; return [{ rot: "Produtos", valor: L.fInt(l.length), pri: true }, { rot: "Venda 9 sem.", valor: L.fInt(L.soma(l, "vendaTot")) + " un" }, { rot: "Itens com sugestão", valor: L.fInt(l.filter(function (r) { return r.sug > 0; }).length) }, { rot: "Valor sugerido", valor: L.fR2(L.soma(l, function (r) { return r.sug > 0 ? r.valorSug : 0; })) }, { rot: "Disponível", valor: L.fInt(L.soma(l, "disp")) + " un" }]; },
+    foto: function (r) { return r.codprod; }, fotoColuna: "desc",
     aoClicar: function (r, ev) { L.clique("produto", r.codprod, ev); }, vazio: "Nenhum produto com os filtros atuais.",
   });
   raiz.appendChild(L.painelTabela("Detalhe por produto", "ordenado por valor sugerido · clique na linha para abrir o relatório do produto · colunas de cada semana em “Todas”", t));
@@ -186,6 +187,7 @@ function renderSugestao(raiz) {
       { id: "valor", titulo: "Valor", tipo: "moedaInt", valor: function (p) { return p.valor; }, exportarTipo: "moeda", barra: true, corBarra: "rgba(167,139,250,.2)" },
     ],
     totais: function (res) { var l = res.todas || res.linhas; return [{ rot: "Linhas", valor: L.fInt(l.length), pri: true }, { rot: "Volume 3 meses", valor: L.fInt(L.soma(l, "volume")) + " un" }, { rot: "Sugestão", valor: L.fInt(L.soma(l, "sug")) + " un" }, { rot: "Valor", valor: L.fR2(L.soma(l, "valor")) }]; },
+    foto: function (p) { return p.codprod; }, fotoColuna: "desc",
     aoClicar: function (p, ev) { L.clique("produto", p.codprod, ev); }, vazio: "Nenhum produto com os filtros atuais.",
   });
   raiz.appendChild(L.painelTabela(ehF ? "Detalhe por fornecedor" : "Detalhe por produto", ehF ? "sugestão consolidada por fornecedor · estoque das filiais 1, 2, 7 e 8 · clique na linha para abrir o relatório" : "sugestão por produto e filial, baseada nos 3 meses fechados anteriores · clique na linha para abrir o relatório", t));
@@ -234,6 +236,7 @@ function renderExcesso(raiz) {
       { id: "valor", titulo: "Capital parado", tipo: "moedaInt", valor: function (e) { return e.valor; }, exportarTipo: "moeda", barra: true, corBarra: "rgba(255,179,64,.2)", classe: "atn" },
     ],
     totais: function (res) { var l = res.todas || res.linhas; return [{ rot: "Produtos", valor: L.fInt(l.length), pri: true }, { rot: "Disponível", valor: L.fInt(L.soma(l, "disp")) + " un" }, { rot: "Excedente", valor: L.fInt(L.soma(l, function (e) { return Math.abs(e.sug); })) + " un" }, { rot: "Capital parado", valor: L.fR2(L.soma(l, "valor")) }]; },
+    foto: function (e) { return e.codprod; }, fotoColuna: "desc",
     aoClicar: function (e, ev) { L.clique("produto", e.codprod, ev); }, vazio: "Nenhum produto com os filtros atuais.",
   });
   raiz.appendChild(L.painelTabela("Detalhe por produto", "base completa: " + L.fInt(L.C.excesso.length) + " produtos com excesso · clique na linha para abrir o relatório do produto", t));

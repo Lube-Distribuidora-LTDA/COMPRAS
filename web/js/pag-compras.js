@@ -42,6 +42,7 @@ L.tabelaRuptura = function (linhas, cfg) {
       l.forEach(function (r) { if (r.ruptura) rup++; if (!r.cobertura) exc++; av += r.avaria || 0; });
       return [{ rot: "Itens", valor: L.fInt(l.length), pri: true }, { rot: "Em ruptura", valor: L.fInt(rup) }, { rot: "Em excesso", valor: L.fInt(exc) }, { rot: "Avaria", valor: L.fR2(av) }];
     },
+    foto: function (r) { return r.codprod; }, fotoColuna: "desc",
     aoClicar: function (r, ev) { L.clique("produto", r.codprod, ev); },
     vazio: "Nenhum produto com os filtros atuais.",
   }, cfg || {}));
