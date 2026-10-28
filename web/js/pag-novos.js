@@ -17,6 +17,32 @@ L.registrarPagina({
   render: render,
 });
 
+/* Lista viva: ao abrir a tela e a cada 5 minutos com ela aberta, relê api/novos (o agente de fotos do Trade
+   roda a cada 5 minutos). Só redesenha se algo mudou e se ninguém está digitando na busca. */
+var RELER_MS = 5 * 60 * 1000, lendo = false;
+function reler(forcar) {
+  if (lendo || L.estado.pagina !== "novos" || document.hidden) return;
+  if (!forcar && L.NOVOS_LIDOS_EM && Date.now() - L.NOVOS_LIDOS_EM < 60 * 1000) return;
+  lendo = true;
+  L.atualizarNovos().then(function (mudou) {
+    lendo = false;
+    var hora = L.$("novos-lidos"); if (hora) hora.textContent = textoLeitura();
+    if (!mudou || L.estado.pagina !== "novos") return;
+    if (mudou.ganharam) L.toast(mudou.ganharam === 1 ? "1 produto ganhou foto e saiu da lista" : mudou.ganharam + " produtos ganharam foto e saíram da lista", "ok");
+    var foco = document.activeElement;
+    if (foco && /INPUT|TEXTAREA/.test(foco.tagName) && L.$("conteudo").contains(foco)) { L.NOVOS_LIDOS_EM = 0; return; }   // tenta de novo na próxima volta
+    L.emitir("filtros");
+  });
+}
+setInterval(function () { reler(true); }, RELER_MS);
+document.addEventListener("visibilitychange", function () { if (!document.hidden) reler(false); });
+function textoLeitura() {
+  var p = [];
+  if (L.FOTOS_EM) p.push("pasta de fotos lida às " + L.fDataHora(L.FOTOS_EM).slice(-5));
+  if (L.NOVOS_LIDOS_EM) p.push("conferido aqui às " + new Date(L.NOVOS_LIDOS_EM).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
+  return p.length ? p.join(" · ") + " · atualiza sozinho a cada 5 minutos" : "atualiza sozinho a cada 5 minutos";
+}
+
 var MOSTRAR = [["pend", "Sem foto (pendentes)"], ["foto", "Já com foto"], ["todos", "Todos os cadastrados"]];
 function mostrar(valor) { return function (f, opt) { L.defOpt(opt, "novos", "mostrar", valor); }; }
 function junto(a, b) { return function (f, opt) { a(f, opt); if (b) b(f, opt); }; }
@@ -31,7 +57,10 @@ function render(raiz) {
   var alterados = pend.filter(function (r) { return r.alterado; });
   var ordDias = ["dias", -1];
 
-  raiz.appendChild(L.barraVisao("Mostrar", L.segOpt("novos", "mostrar", MOSTRAR, "pend")));
+  setTimeout(function () { reler(false); }, 0);
+  var bv = L.barraVisao("Mostrar", L.segOpt("novos", "mostrar", MOSTRAR, "pend"));
+  bv.appendChild(L.h("span", { id: "novos-lidos", class: "novos-lidos", text: textoLeitura() }));
+  raiz.appendChild(bv);
   raiz.appendChild(L.kpis(
     L.kpiIr({ icone: "imagem", rot: "Sem foto", valor: pend.length, fmt: L.fInt, classe: "heroi", leg: L.h("span", { text: "saem daqui quando a foto entra na pasta FOTOS_ION" }), ir: [mostrar("pend"), { ordem: ordDias }] }),
     L.kpiIr({ icone: "estrela", rot: "Cadastrados em 30 dias", valor: base.length, fmt: L.fInt, leg: L.h("span", { text: "produtos de revenda novos no WinThor" }), ir: [mostrar("todos"), { ordem: ["cad", -1] }] }),
@@ -106,8 +135,9 @@ function render(raiz) {
 }
 
 function notaRodape(raiz) {
-  raiz.appendChild(L.nota("Produtos de revenda cadastrados no WinThor nos últimos 30 dias (data de cadastro do produto). A foto é conferida pelo nome do arquivo na pasta FOTOS_ION (código do produto), na lista que a carga do Trade lê várias vezes ao dia" +
-    (L.FOTOS_EM ? " — última leitura da pasta: " + L.fDataHora(L.FOTOS_EM) : "") + ". Quando a foto entra na pasta, o produto sai da lista de pendentes na leitura seguinte."));
+  raiz.appendChild(L.nota("Produtos de revenda cadastrados no WinThor nos últimos 30 dias (data de cadastro do produto); a lista de cadastros vem com as cargas do Compras (07:50, 11:50, 17:50 e 23:50)" +
+    (L.CADASTROS_EM ? ", a última às " + L.fDataHora(L.CADASTROS_EM) : "") + ". A foto é conferida pelo nome do arquivo na pasta FOTOS_ION (código do produto) pelo agente de fotos do Trade, que lê a pasta a cada 5 minutos das 6h às 20h" +
+    (L.FOTOS_EM ? " — última leitura: " + L.fDataHora(L.FOTOS_EM) : "") + ". Esta tela confere de novo a cada 5 minutos enquanto está aberta: quando a foto entra na pasta, o produto sai da lista de pendentes sozinho."));
 }
 
 })();

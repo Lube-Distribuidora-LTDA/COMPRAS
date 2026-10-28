@@ -62,9 +62,10 @@ function idbGravar(obj) {
     tx.oncomplete = function () { ok(true); }; tx.onerror = function () { ok(false); };
   }); }).catch(function () { return false; });
 }
-/* fotosEm entra na versão: a foto que chega na pasta FOTOS_ION (carga do Trade) tira o produto da tela
-   Produtos novos mesmo sem carga nova do Compras */
-function versaoDe(J) { return String(J.geradoEm || "") + "|" + String((J.cargas && J.cargas.faturamento) || "") + "|" + String(J.fotosEm || ""); }
+/* a foto dos produtos novos NÃO entra na versão: o agente de fotos do Trade roda a cada 5 minutos e isso
+   faria o pacote inteiro ser baixado de novo o tempo todo. A tela Produtos novos lê a sua lista à parte
+   (api/novos, L.atualizarNovos) */
+function versaoDe(J) { return String(J.geradoEm || "") + "|" + String((J.cargas && J.cargas.faturamento) || ""); }
 
 /* baixa o pacote; o pooler do banco pode ter uma falha passageira, então tenta mais duas vezes
    antes de mostrar erro a quem está olhando */
@@ -185,16 +186,6 @@ function preparar(J, versao) {
   C.fatMesDepto = (FAT.mesdepto || []).map(function (r) { return { mes: r[0], cod: r[1], venda: r[2], lucro: r[3] }; });
   C.fatSup = (FAT.superv || []).map(function (r) { return { cod: r[0], nome: r[1], venda: r[2], lucro: r[3], v12: r[4] }; });
 
-  /* produtos cadastrados nos últimos 30 dias; foto = o arquivo já está na pasta FOTOS_ION (lista do Trade).
-     Os dias contam do cadastro até hoje, em dias de calendário. */
-  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  var diasAte = function (iso) { if (!iso) return null; var d = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); return Math.max(0, Math.round((hoje - d) / 864e5)); };
-  L.FOTOS_EM = D.fotosEm || null;
-  C.novos = (D.novos || []).map(function (r) {
-    return { codprod: r[0], desc: r[1], emb: r[2] || "", forn: r[3], comp: r[4], cadastro: r[5], alteracao: r[6], por: r[7] || "", ativo: r[8] !== "F",
-      foto: !!r[9], fotoEm: r[10], dias: diasAte(r[5]), alterado: !!(r[6] && r[5] && r[6].slice(0, 10) > r[5]) };
-  });
-
   /* ---- cadastro único de produto, juntando o que cada consulta sabe dele (relatório do produto) */
   var PM = L.PM = new Map();
   function pm(cod, desc, comp, forn, ativo) {
@@ -207,12 +198,50 @@ function preparar(J, versao) {
   C.excesso.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, true).exc = r; });
   C.sugp.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, true).sugp.push(r); });
   C.avp.forEach(function (r) { var x = PM.get(r.codprod); if (x) x.avaria += r.valor || 0; });
-  C.novos.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, r.ativo).novo = r; });
+  L.pm = pm;
+  prepararNovos(D.novos, D.fotosEm, null);
 
   L.cache.clear();
   construirRegistro();
   return J;
 }
+
+/* ------------------------------ produtos novos (lista viva) ------------------------------ */
+/* Produtos cadastrados nos últimos 30 dias; foto = o arquivo já está na pasta FOTOS_ION, segundo o agente
+   de fotos do Trade (a cada 5 minutos). Os dias contam do cadastro até hoje, em dias de calendário.
+   Chega primeiro no pacote do painel e depois é renovada por api/novos, sem baixar o pacote de novo. */
+function prepararNovos(lista, fotosEm, cadastrosEm) {
+  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  var diasAte = function (iso) { if (!iso) return null; var d = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); return Math.max(0, Math.round((hoje - d) / 864e5)); };
+  L.FOTOS_EM = fotosEm || L.FOTOS_EM || null;
+  if (cadastrosEm) L.CADASTROS_EM = cadastrosEm;
+  L.C.novos = (lista || []).map(function (r) {
+    return { codprod: r[0], desc: r[1], emb: r[2] || "", forn: r[3], comp: r[4], cadastro: r[5], alteracao: r[6], por: r[7] || "", ativo: r[8] !== "F",
+      foto: !!r[9], fotoEm: r[10], dias: diasAte(r[5]), alterado: !!(r[6] && r[5] && r[6].slice(0, 10) > r[5]) };
+  });
+  L.C.novos.forEach(function (r) {
+    L.pm(r.codprod, r.desc, r.comp, r.forn, r.ativo).novo = r;
+    if (r.foto && L.FOTOS) L.FOTOS.add(r.codprod);   // a miniatura passa a ser pedida assim que a foto chega
+  });
+}
+
+/* Relê a lista dos produtos novos (api/novos). Devolve true se algo mudou: produto que ganhou foto,
+   cadastro novo ou que saiu da janela de 30 dias. */
+L.atualizarNovos = function () {
+  return fetch("api/novos", { cache: "no-store", headers: { Accept: "application/json" } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !Array.isArray(j.novos)) return false;
+    var assinatura = function (l) { return l.map(function (r) { return r.codprod + ":" + (r.foto ? 1 : 0); }).join(","); };
+    var antes = assinatura(L.C.novos || []), semFotoAntes = (L.C.novos || []).filter(function (r) { return !r.foto; }).map(function (r) { return r.codprod; });
+    prepararNovos(j.novos, j.fotosEm, j.cadastrosEm);
+    L.NOVOS_LIDOS_EM = Date.now();
+    if (assinatura(L.C.novos) === antes) return false;
+    var ganharam = semFotoAntes.filter(function (c) { return L.C.novos.some(function (r) { return r.codprod === c && r.foto; }); }).length;
+    L.cache.clear();
+    if (L.DIM && L.DIM.produto) L.DIM.produto.cache = null;
+    if (L.DIM && L.DIM.fornecedor) L.DIM.fornecedor.cache = null;
+    return { ganharam: ganharam };
+  }).catch(function () { return false; });
+};
 
 /* ------------------------------ registro de dimensões ------------------------------ */
 /* Cada dimensão sabe: listar as opções (código + nome), dar o nome de um código e, para uma

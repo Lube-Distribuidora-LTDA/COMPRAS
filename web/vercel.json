@@ -12,6 +12,9 @@
     },
     "api/fotos.js": {
       "maxDuration": 15
+    },
+    "api/novos.js": {
+      "maxDuration": 15
     }
   },
   "headers": [
