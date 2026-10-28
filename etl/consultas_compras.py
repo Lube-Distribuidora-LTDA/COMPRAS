@@ -715,6 +715,24 @@ HAVING ROUND( SUM((P1.QTGIRODIA*30) - {_DISP_1278}) * MAX(NVL(PCTABPR.PTABELA4,0
 # bater com o Power BI na validacao.
 
 
+# PRODUTOS NOVOS (pedido do Julio, 2026-10-28): produtos de revenda cadastrados
+# nos ultimos 30 dias. A foto NAO e conferida aqui: quem lista a pasta FOTOS_ION
+# e a carga do Trade (trade.produto_imagem). O cruzamento e feito na leitura, em
+# compras.painel_dados() — quando a foto entra na pasta, o produto sai da lista
+# do painel na proxima carga do Trade, sem depender desta consulta.
+SQL_PRODUTO_NOVO = """
+SELECT P.CODPROD, P.DESCRICAO, P.EMBALAGEM, P.UNIDADE, P.CODFORNEC, F.CODCOMPRADOR,
+       P.DTCADASTRO, P.DTULTALTER, P.CODFUNCCADASTRO, E.NOME AS CADASTRADO_POR,
+       DECODE(P.OBS2,'FL','FORALINHA','ATIVO') AS STATUS
+  FROM PCPRODUT P, PCFORNEC F, PCEMPR E
+ WHERE P.CODFORNEC = F.CODFORNEC(+)
+   AND P.CODFUNCCADASTRO = E.MATRICULA(+)
+   AND P.DTEXCLUSAO IS NULL
+   AND P.REVENDA = 'S'
+   AND P.DTCADASTRO >= TRUNC(SYSDATE) - 30
+"""
+
+
 # ===========================================================================
 # CATALOGO
 # ===========================================================================
@@ -891,6 +909,22 @@ CONSULTAS: list[Consulta] = [
         # Margem maior: o filtro depende do ESTOQUE DE HOJE, entao o numero de
         # linhas oscila sozinho de um dia para o outro.
         tolerancia_pct=0.15,
+    ),
+    Consulta(
+        nome="produto_novo",
+        descricao="Produtos de revenda cadastrados nos ultimos 30 dias (a foto vem do Trade)",
+        pagina="PRODUTOS NOVOS",
+        sql=SQL_PRODUTO_NOVO,
+        destino="compras.fato_produto_novo",
+        colunas=("codprod", "descricao", "embalagem", "unidade", "codfornec", "codcomprador",
+                 "dtcadastro", "dtultalter", "codfunccadastro", "cadastrado_por", "status"),
+        mapear=lambda r: (r["codprod"], texto(r["descricao"]), texto(r["embalagem"]),
+                          texto(r["unidade"]), inteiro(r["codfornec"]),
+                          inteiro(r["codcomprador"]), r["dtcadastro"], r["dtultalter"],
+                          inteiro(r["codfunccadastro"]), texto(r["cadastrado_por"]),
+                          texto(r["status"])),
+        # Sem referencia fixa: depende de quantos produtos foram cadastrados no mes.
+        linhas_esperadas=None,
     ),
 
     # ---------------- pesada (roda 1x por dia) ----------------

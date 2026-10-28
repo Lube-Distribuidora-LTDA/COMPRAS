@@ -228,6 +228,10 @@ function resumoProduto(ent, raiz) {
   linha("Pendente de recebimento", ev && ev.pendente ? L.esc(L.fInt(ev.pendente)) + " un" : "—");
   linha("Comprador", L.esc(L.nomeComprador(p.comp)));
   linha("Fornecedor", L.esc(L.nomeFornec(p.forn)));
+  if (p.novo) {
+    linha("Cadastrado em", L.esc(L.fData(p.novo.cadastro)) + (p.novo.por ? " · " + L.esc(L.titulo(p.novo.por)) : ""));
+    linha("Foto na pasta FOTOS_ION", p.novo.foto ? L.tag("Na pasta", "ok") : L.tag("Sem foto", "perigo") + " há " + L.esc(L.fInt(p.novo.dias)) + " dias");
+  }
   pCob.corpo.appendChild(lista);
   g.appendChild(pSem); g.appendChild(pCob);
   raiz.appendChild(g);

@@ -14,6 +14,7 @@
  *   verba     verba, avaria e vencimentos por fornecedor principal (Saldo verba)
  *   avp       avaria por produto
  *   fatMes / fatComp / fatForn / fatDepto / fatSec / fatUf / fatSup   faturamento do ano
+ *   novos     produtos cadastrados nos últimos 30 dias, com a marca de foto na pasta FOTOS_ION
  * Todo filtro guarda CÓDIGOS (comprador, fornecedor, produto, mês...), nunca índices:
  * um link copiado continua valendo depois de uma carga nova.
  * ========================================================================== */
@@ -61,7 +62,9 @@ function idbGravar(obj) {
     tx.oncomplete = function () { ok(true); }; tx.onerror = function () { ok(false); };
   }); }).catch(function () { return false; });
 }
-function versaoDe(J) { return String(J.geradoEm || "") + "|" + String((J.cargas && J.cargas.faturamento) || ""); }
+/* fotosEm entra na versão: a foto que chega na pasta FOTOS_ION (carga do Trade) tira o produto da tela
+   Produtos novos mesmo sem carga nova do Compras */
+function versaoDe(J) { return String(J.geradoEm || "") + "|" + String((J.cargas && J.cargas.faturamento) || "") + "|" + String(J.fotosEm || ""); }
 
 /* baixa o pacote; o pooler do banco pode ter uma falha passageira, então tenta mais duas vezes
    antes de mostrar erro a quem está olhando */
@@ -182,6 +185,16 @@ function preparar(J, versao) {
   C.fatMesDepto = (FAT.mesdepto || []).map(function (r) { return { mes: r[0], cod: r[1], venda: r[2], lucro: r[3] }; });
   C.fatSup = (FAT.superv || []).map(function (r) { return { cod: r[0], nome: r[1], venda: r[2], lucro: r[3], v12: r[4] }; });
 
+  /* produtos cadastrados nos últimos 30 dias; foto = o arquivo já está na pasta FOTOS_ION (lista do Trade).
+     Os dias contam do cadastro até hoje, em dias de calendário. */
+  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  var diasAte = function (iso) { if (!iso) return null; var d = new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)); return Math.max(0, Math.round((hoje - d) / 864e5)); };
+  L.FOTOS_EM = D.fotosEm || null;
+  C.novos = (D.novos || []).map(function (r) {
+    return { codprod: r[0], desc: r[1], emb: r[2] || "", forn: r[3], comp: r[4], cadastro: r[5], alteracao: r[6], por: r[7] || "", ativo: r[8] !== "F",
+      foto: !!r[9], fotoEm: r[10], dias: diasAte(r[5]), alterado: !!(r[6] && r[5] && r[6].slice(0, 10) > r[5]) };
+  });
+
   /* ---- cadastro único de produto, juntando o que cada consulta sabe dele (relatório do produto) */
   var PM = L.PM = new Map();
   function pm(cod, desc, comp, forn, ativo) {
@@ -194,6 +207,7 @@ function preparar(J, versao) {
   C.excesso.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, true).exc = r; });
   C.sugp.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, true).sugp.push(r); });
   C.avp.forEach(function (r) { var x = PM.get(r.codprod); if (x) x.avaria += r.valor || 0; });
+  C.novos.forEach(function (r) { pm(r.codprod, r.desc, r.comp, r.forn, r.ativo).novo = r; });
 
   L.cache.clear();
   construirRegistro();
@@ -230,7 +244,7 @@ function construirRegistro() {
   def("fornecedor", "Fornecedor", "caixa", {
     todos: function () {
       var cod = new Set();
-      ["ruptura", "ev", "excesso", "avp", "sugp", "sugf", "verba", "fatForn"].forEach(function (n) { C[n].forEach(function (r) { cod.add(r.forn == null ? 0 : r.forn); }); });
+      ["ruptura", "ev", "excesso", "avp", "sugp", "sugf", "verba", "fatForn", "novos"].forEach(function (n) { C[n].forEach(function (r) { cod.add(r.forn == null ? 0 : r.forn); }); });
       var o = [];
       cod.forEach(function (c) { o.push({ id: c, t: c ? L.nomeFornec(c) : "Sem fornecedor", s: c ? "cód. " + c : "" }); });
       return o.sort(function (a, b) { return a.t.localeCompare(b.t, "pt-BR"); });
@@ -256,6 +270,15 @@ function construirRegistro() {
   binaria("vencida", "Verba vencida", "relogio", function (r) { return r.vencidas === undefined ? undefined : r.vencidas > 0; }, "Com verba vencida", "Sem verba vencida");
   binaria("aVencer", "Verba a vencer", "calendario", function (r) { return r.avencer === undefined ? undefined : r.avencer > 0; }, "Com verba a vencer", "Sem verba a vencer");
   binaria("comSaldo", "Saldo de verba", "dinheiro", function (r) { return r.verba === undefined || r.entrada === undefined ? undefined : r.verba > 0; }, "Com saldo (maior que zero)", "Sem saldo");
+  binaria("alterado", "Alteração no cadastro", "prancheta", function (r) { return r.alterado; }, "Alterado depois do cadastro", "Sem alteração depois do cadastro");
+
+  /* há quanto tempo o produto novo foi cadastrado (para quem ainda está sem foto, é o atraso da foto) */
+  L.FAIXAS_DIAS = [{ id: 0, nome: "Até 7 dias", max: 7 }, { id: 1, nome: "8 a 15 dias", max: 15 }, { id: 2, nome: "16 a 30 dias", max: 1e9 }];
+  L.faixaDias = function (d) { for (var i = 0; i < L.FAIXAS_DIAS.length; i++) if (d <= L.FAIXAS_DIAS[i].max) return i; return 2; };
+  def("diasCad", "Tempo desde o cadastro", "relogio", {
+    todos: function () { return L.FAIXAS_DIAS.map(function (f) { return { id: f.id, t: f.nome }; }); },
+    nome: function (c) { return L.FAIXAS_DIAS[+c] ? L.FAIXAS_DIAS[+c].nome : "—"; },
+    de: function (r) { return r.cadastro === undefined ? undefined : L.faixaDias(r.dias || 0); } });
 
   /* "vendeu na semana N": uma linha pode ter vendido em várias semanas, então o código é uma LISTA */
   def("semana", "Semana com venda", "calendario", {
